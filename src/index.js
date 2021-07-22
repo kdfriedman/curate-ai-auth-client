@@ -5,7 +5,7 @@ import AppRouter from './routes/AppRouter';
 import initFirebaseService from './services/firebase/firebase';
 
 // initalize firebase library with config object
-const firebase = initFirebaseService();
+initFirebaseService();
 
 ReactDOM.render(
   <React.StrictMode>
