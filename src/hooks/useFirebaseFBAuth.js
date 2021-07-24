@@ -14,7 +14,6 @@ export const useFirebaseFBAuth = (isFbLoginAction) => {
 
   useEffect(() => {
     if (isFbLoginAction) {
-      console.log('inside custom hook - useEffect conditional');
       retrieveFacebookAuthResponse();
     }
   }, [isFbLoginAction]);
