@@ -1,42 +1,67 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useReducer } from 'react';
 import { useFirebaseFBAuth } from '../hooks/useFirebaseFBAuth';
-import axios from 'axios';
+import fetchData from '../services/fetch/fetch';
+import AcctSelector from '../components/AcctSelector';
 
 const HomePage = () => {
-  // setup local state to handle if fb auth interaction is triggered
-  const [isFacebookLoginAction, updateFacebookLoginAction] = useState(false);
-  // setup login btn disabled state
-  const [isBtnClicked, setIsBtnClicked] = useState(false);
-  // setup user business list state
-  const [userBusinessList, setUserBusinessList] = useState(null);
-  // setup async work update ready state
-  const [asyncDataReady, updateAsyncReadyState] = useState(false);
-  //setup hasUserBusinessId state
-  const [hasUserBusinessId, updateUserBusinessIdState] = useState(false);
-  // setup state for business id state
-  const [userBusinessId, setUserBusinessId] = useState(null);
-  // setup business ad acct list state
-  const [businessAdAcctList, setBusinessAdAcctList] = useState(null);
-  // setup business system user id
-  const [businessSystemUserId, setBusinessSystemUserId] = useState(null);
-  // update business asset id
-  const [businessAssetId, setBuinessAssetId] = useState(null);
+  // setup useReducer callback function
+  const reducer = (state, action) => {
+    const { type, payload } = action;
+    return { ...state, [type]: payload };
+  };
+
+  // setup initial field object for reducer function
+  const initialState = {
+    hasErrors: null,
+    isFacebookLoginAction: false,
+    isBtnClicked: false,
+    userBusinessList: null,
+    asyncDataReady: false,
+    hasUserBusinessId: false,
+    userBusinessId: null,
+    sysUserAccessToken: null,
+    businessAdAcctList: null,
+    businessSystemUserId: null,
+    businessAssetId: null,
+  };
+
+  // setup reducer hook
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  // destructure state object into individual state properties
+  const {
+    hasErrors,
+    isFacebookLoginAction,
+    isBtnClicked,
+    userBusinessList,
+    asyncDataReady,
+    hasUserBusinessId,
+    userBusinessId,
+    sysUserAccessToken,
+    businessAdAcctList,
+    businessSystemUserId,
+    businessAssetId,
+  } = state;
+
+  // generic error handler for fb specific api response errors
+  const catchErrors = (error) => {
+    dispatch({
+      type: 'hasErrors',
+      payload: {
+        errMessage: error?.response?.data?.error?.message,
+        errUserMsg: error?.response?.data?.error?.error_user_msg,
+      },
+    });
+    return console.error({
+      errMessage: error?.response?.data?.error?.message,
+      errUserMsg: error?.response?.data?.error?.error_user_msg,
+    });
+  };
 
   // custom hook - firebase facebook auth
   const { facebookAuthData } = useFirebaseFBAuth(isFacebookLoginAction);
   const hasFacebookAuthData =
     facebookAuthData && Object.keys(facebookAuthData).length > 0;
-
-  // data fetcher util function using axios library
-  const fetchData = async (params) => {
-    try {
-      const data = await axios.request(params);
-      return [data, null];
-    } catch (error) {
-      console.error(error);
-      return [null, error];
-    }
-  };
 
   /******* 
   1st useEffect hook - handle facebook login, 
@@ -48,36 +73,44 @@ const HomePage = () => {
       // fetch account user data
       const [userData, userError] = await fetchData({
         method: 'GET',
-        url: `https://graph.facebook.com/v11.0/me?fields=id&access_token=${facebookAuthData.accessToken}`,
+        url: `https://graph.facebook.com/v11.0/me?fields=id&access_token=${facebookAuthData?.accessToken}`,
         params: {},
         data: {},
         headers: {},
       });
-      if (userError) return;
-      const userId = userData.data.id;
+      if (userError) {
+        catchErrors(userError);
+      }
+      const userId = userData?.data?.id;
 
       // fetch user business list
       const [userBusinessList, userBusinessError] = await fetchData({
         method: 'GET',
-        url: `https://graph.facebook.com/v11.0/${userId}/businesses?&access_token=${facebookAuthData.accessToken}`,
+        url: `https://graph.facebook.com/v11.0/${userId}/businesses?&access_token=${facebookAuthData?.accessToken}`,
         params: {},
         data: {},
         headers: {},
       });
       if (userBusinessError) {
-        return console.error({
-          errMessage: userBusinessError.response.data.error.message,
-          errUserMsg: userBusinessError.response.data.error.error_user_msg,
-        });
+        catchErrors(userBusinessError);
       }
       // reset facebook login action state to false, preventing future login attempts
-      updateFacebookLoginAction(false);
+      dispatch({
+        type: 'isFacebookLoginAction',
+        payload: false,
+      });
 
       if (userBusinessList && userBusinessList?.data?.data.length > 0) {
         // update local state with user business list data
-        setUserBusinessList(userBusinessList.data.data);
+        dispatch({
+          type: 'userBusinessList',
+          payload: userBusinessList?.data?.data,
+        });
         // update local state with async completion update
-        updateAsyncReadyState(true);
+        dispatch({
+          type: 'asyncDataReady',
+          payload: true,
+        });
       } else {
         console.error(
           `Error: userBusinessList has a falsy value - ${userBusinessList}`
@@ -99,17 +132,13 @@ const HomePage = () => {
       // fetch account user data
       const [clientBusinessData, clientBusinessError] = await fetchData({
         method: 'POST',
-        url: `https://graph.facebook.com/v11.0/419312452044680/managed_businesses?existing_client_business_id=${userBusinessId}&access_token=${facebookAuthData.accessToken}`,
+        url: `https://graph.facebook.com/v11.0/419312452044680/managed_businesses?existing_client_business_id=${userBusinessId}&access_token=${facebookAuthData?.accessToken}`,
         params: {},
         data: {},
         headers: {},
       });
       if (clientBusinessError) {
-        return console.error({
-          errMessage: clientBusinessError?.response?.data?.error?.message,
-          errUserMsg:
-            clientBusinessError?.response?.data?.error?.error_user_msg,
-        });
+        catchErrors(clientBusinessError);
       }
       const clientBusinessAcctId = clientBusinessData?.data?.id;
       if (!clientBusinessAcctId) return console.error({ clientBusinessAcctId });
@@ -123,10 +152,7 @@ const HomePage = () => {
         headers: {},
       });
       if (sysUserError) {
-        return console.error({
-          errMessage: sysUserError?.response?.data?.error?.message,
-          errUserMsg: sysUserError?.response?.data?.error?.error_user_msg,
-        });
+        catchErrors(sysUserError);
       }
       // system user access token
       const sysUserAccessToken = sysUserData?.data?.access_token;
@@ -141,41 +167,54 @@ const HomePage = () => {
         headers: {},
       });
       if (sysUserIdError) {
-        return console.error({
-          errMessage: sysUserIdError?.response?.data?.error?.message,
-          errUserMsg: sysUserIdError?.response?.data?.error?.error_user_msg,
-        });
+        catchErrors(sysUserIdError);
       }
       const sysUserId = sysUserIdData?.data?.id;
       if (!sysUserId) return console.error({ sysUserId });
 
       const [adAcctAssetList, adAcctAssetListError] = await fetchData({
         method: 'GET',
-        url: `https://graph.facebook.com/v11.0/${clientBusinessAcctId}/owned_ad_accounts?access_token=${facebookAuthData.accessToken}&fields=name`,
+        url: `https://graph.facebook.com/v11.0/${clientBusinessAcctId}/owned_ad_accounts?access_token=${facebookAuthData?.accessToken}&fields=name`,
         params: {},
         data: {},
         headers: {},
       });
       if (adAcctAssetListError) {
-        return console.error({
-          errMessage: adAcctAssetListError?.response?.data?.error?.message,
-          errUserMsg:
-            adAcctAssetListError?.response?.data?.error?.error_user_msg,
-        });
+        catchErrors(adAcctAssetListError);
       }
 
-      // reset facebook login btn click state
-      setIsBtnClicked(false);
-      // reset async ready state to false to signify completion of 2nd useEffect
-      updateAsyncReadyState(false);
       // reset user business id state, preventing further fb business asset look up requests
-      updateUserBusinessIdState(false);
+      dispatch({
+        type: 'hasUserBusinessId',
+        payload: false,
+      });
+      // reset facebook login btn click state
+      dispatch({
+        type: 'isBtnClicked',
+        payload: false,
+      });
+      // reset async ready state to false to signify completion of 2nd useEffect
+      dispatch({
+        type: 'asyncDataReady',
+        payload: false,
+      });
+      // update state with system user access token for later storage
+      dispatch({
+        type: 'sysUserAccessToken',
+        payload: sysUserAccessToken,
+      });
 
       if (adAcctAssetList && adAcctAssetList?.data?.data.length > 0) {
         // update local state with user business list data
-        setBusinessAdAcctList(adAcctAssetList.data.data);
+        dispatch({
+          type: 'businessAdAcctList',
+          payload: adAcctAssetList?.data?.data,
+        });
         // set business system user id
-        setBusinessSystemUserId(sysUserId);
+        dispatch({
+          type: 'businessSystemUserId',
+          payload: sysUserId,
+        });
       } else {
         console.error(
           `Error: userBusinessList has a falsy value - ${adAcctAssetList}`
@@ -203,36 +242,51 @@ const HomePage = () => {
           headers: {},
         });
       if (sysUserAssetAssignmentDataError) {
-        return console.error({
-          errMessage:
-            sysUserAssetAssignmentDataError?.response?.data?.error?.message,
-          errUserMsg:
-            sysUserAssetAssignmentDataError?.response?.data?.error
-              ?.error_user_msg,
-        });
+        catchErrors(sysUserAssetAssignmentDataError);
       }
-      console.log(sysUserAssetAssignmentData);
+
+      // TODO: update firestore with system user access token
+
+      // reset business asset it to prevent 3rd useEffect from firing
+      dispatch({
+        type: 'businessAssetId',
+        payload: null,
+      });
     };
     if (businessAssetId) {
       handleAsyncWork();
     }
-  }, [businessAssetId, facebookAuthData, businessSystemUserId]);
+  }, [
+    businessAssetId,
+    facebookAuthData,
+    businessSystemUserId,
+    sysUserAccessToken,
+  ]);
 
   // handle user business list select element event
   const handleSelectUserBusinessList = (e) => {
     // get select element value and update user business id state with chosen value
-    if (e.target.value && e.target.value !== '') {
-      setUserBusinessId(e.target.value);
+    if (e.target?.value && e.target?.value !== '') {
+      dispatch({
+        type: 'userBusinessId',
+        payload: e.target?.value,
+      });
     }
-    // update async work trigger state to reredner component and call useEffect async work
-    updateUserBusinessIdState(true);
+    // update user business id trigger state to reredner component and call useEffect async work
+    dispatch({
+      type: 'hasUserBusinessId',
+      payload: true,
+    });
   };
 
   // handle business ad account select element event
   const handleSelectBusinessAdAcct = (e) => {
     // get select element value and update user business id state with chosen value
-    if (e.target.value && e.target.value !== '') {
-      setBuinessAssetId(e.target.value);
+    if (e.target?.value && e.target?.value !== '') {
+      dispatch({
+        type: 'businessAssetId',
+        payload: e.target?.value,
+      });
     }
   };
 
@@ -262,49 +316,58 @@ const HomePage = () => {
           <button
             id="facebookLogin"
             onClick={(e) => {
-              updateFacebookLoginAction(true);
-              setIsBtnClicked(true);
+              dispatch({
+                type: 'isFacebookLoginAction',
+                payload: true,
+              });
+              dispatch({
+                type: 'isBtnClicked',
+                payload: true,
+              });
             }}
           >
             Facebook Login
           </button>
         )}
+        {/* setup user business account selector */}
         {isBtnClicked && asyncDataReady && (
-          <>
-            <label htmlFor="business list">
-              Choose your facebook business account:
-            </label>
-            <select onChange={handleSelectUserBusinessList}>
-              <option value="">--Please select an option--</option>
-              {userBusinessList.map((userBusiness) => {
-                return (
-                  <option key={userBusiness.id} value={userBusiness.id}>
-                    {userBusiness.name}
-                  </option>
-                );
-              })}
-            </select>
-          </>
+          <AcctSelector
+            acctList={userBusinessList}
+            onChangeHandler={handleSelectUserBusinessList}
+            labelText="Choose your facebook business account:"
+          />
         )}
+
+        {/* setup business ad account selector */}
         {businessAdAcctList &&
           businessAdAcctList.length > 0 &&
           businessSystemUserId && (
-            <>
-              <label htmlFor="ad account list">
-                Choose your facebook business ad account:
-              </label>
-              <select onChange={handleSelectBusinessAdAcct}>
-                <option value="">--Please select an option--</option>
-                {businessAdAcctList.map((businessAdAcct) => {
-                  return (
-                    <option key={businessAdAcct.id} value={businessAdAcct.id}>
-                      {businessAdAcct.name}
-                    </option>
-                  );
-                })}
-              </select>
-            </>
+            <AcctSelector
+              acctList={businessAdAcctList}
+              onChangeHandler={handleSelectBusinessAdAcct}
+              labelText="Choose your facebook business ad account:"
+            />
           )}
+        {hasErrors && (
+          <>
+            <p style={{ color: '#c5221f' }}>
+              Oops, we've encountered an error. Please try again by refreshing
+              the page. If the issue persists,{' '}
+              <a
+                href="mailto:
+                ryanwelling@gmail.com"
+              >
+                please let us know
+              </a>
+            </p>
+            <p style={{ color: '#c5221f' }}>
+              Error:
+              {hasErrors.errMessage
+                ? hasErrors.errMessage
+                : hasErrors.errUserMsg}
+            </p>
+          </>
+        )}
       </main>
     </>
   );
