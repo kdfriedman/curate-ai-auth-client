@@ -2,6 +2,7 @@ import { useEffect, useReducer } from 'react';
 import { useFirebaseFBAuth } from '../hooks/useFirebaseFBAuth';
 import fetchData from '../services/fetch/fetch';
 import AcctSelector from '../components/AcctSelector';
+import addRecordToFirestore from '../services/firebase/data/firestore';
 
 const HomePage = () => {
   // setup useReducer callback function
@@ -246,6 +247,11 @@ const HomePage = () => {
       }
 
       // TODO: update firestore with system user access token
+      addRecordToFirestore({
+        uid: facebookAuthData.user.uid,
+        email: facebookAuthData.user.email,
+        sysUserAccessToken,
+      });
 
       // reset business asset it to prevent 3rd useEffect from firing
       dispatch({
@@ -354,8 +360,12 @@ const HomePage = () => {
               Oops, we've encountered an error. Please try again by refreshing
               the page. If the issue persists,{' '}
               <a
-                href="mailto:
-                ryanwelling@gmail.com"
+                href={`mailto:
+                ryanwelling@gmail.com?cc=kev.d.friedman@gmail.com&subject=CurateApp.AI%20Integration%20Error&body=Error: ${
+                  hasErrors.errMessage
+                    ? hasErrors.errMessage
+                    : hasErrors.errUserMsg
+                }`}
               >
                 please let us know
               </a>
