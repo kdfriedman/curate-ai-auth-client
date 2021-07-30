@@ -1,6 +1,5 @@
 import firebase from 'firebase/app';
-import 'firebase/auth';
-
+import { app } from '../firebase';
 // instantiate new Facebook provider
 const provider = new firebase.auth.FacebookAuthProvider();
 // add business_manager scope to access user's business manager data
@@ -11,7 +10,7 @@ provider.addScope(
 const authenticateWithFacebook = async () => {
   try {
     // call facebook login sdk and pass in provider
-    const result = await firebase.auth().signInWithPopup(provider);
+    const result = await app.auth().signInWithPopup(provider);
     // facebook credential
     const credential = result.credential;
     // The signed-in user info.

@@ -1,5 +1,7 @@
 import firebase from 'firebase/app';
-import 'firebase/firestore';
+import { db } from '../firebase';
+
+// used to generate firebase managed timestamp for new records
 const { serverTimestamp } = firebase.firestore.FieldValue;
 
 const addRecordToFirestore = async (payload) => {
@@ -8,15 +10,16 @@ const addRecordToFirestore = async (payload) => {
   if (!uid ?? !email ?? !sysUserAccessToken) {
     return console.error({ uid, email, sysUserAccessToken });
   }
-  // initialize database via firebase object
-  const db = firebase.firestore();
 
   try {
     const record = await db.collection('clients').doc(uid).get();
-    if (record.exists)
-      return console.warn(
+
+    if (record.exists) {
+      console.warn(
         'The record cannot be added because the user id already exists'
       );
+      return 'duplicate record';
+    }
   } catch (error) {
     console.error('Error getting document: ', error);
   }
@@ -28,7 +31,7 @@ const addRecordToFirestore = async (payload) => {
       sysUserAccessToken,
       createdAt: serverTimestamp(),
     });
-    console.log('Document written with ID: ', uid);
+    return 'Document written with ID: ' + uid;
   } catch (error) {
     console.error('Error adding document: ', error);
   }

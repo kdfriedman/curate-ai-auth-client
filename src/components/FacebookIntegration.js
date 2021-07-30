@@ -1,10 +1,10 @@
 import { useEffect, useReducer } from 'react';
 import { useFirebaseFBAuth } from '../hooks/useFirebaseFBAuth';
 import fetchData from '../services/fetch/fetch';
-import AcctSelector from '../components/AcctSelector';
+import AcctSelector from './AcctSelector';
 import addRecordToFirestore from '../services/firebase/data/firestore';
 
-const HomePage = () => {
+const FacebookAppIntegration = () => {
   // setup useReducer callback function
   const reducer = (state, action) => {
     const { type, payload } = action;
@@ -14,6 +14,7 @@ const HomePage = () => {
   // setup initial field object for reducer function
   const initialState = {
     hasErrors: null,
+    hasFirestoreUpdate: null,
     isFacebookLoginAction: false,
     isBtnClicked: false,
     userBusinessList: null,
@@ -32,6 +33,7 @@ const HomePage = () => {
   // destructure state object into individual state properties
   const {
     hasErrors,
+    hasFirestoreUpdate,
     isFacebookLoginAction,
     isBtnClicked,
     userBusinessList,
@@ -234,20 +236,19 @@ const HomePage = () => {
     // async wrapper function to allow multiple requests
     const handleAsyncWork = async () => {
       // assign assets to system user on behalf of client business manager acct
-      const [sysUserAssetAssignmentData, sysUserAssetAssignmentDataError] =
-        await fetchData({
-          method: 'POST',
-          url: `https://graph.facebook.com/v11.0/${businessAssetId}/assigned_users?user=${businessSystemUserId}&tasks=MANAGE&access_token=${facebookAuthData.accessToken}`,
-          params: {},
-          data: {},
-          headers: {},
-        });
+      const [, sysUserAssetAssignmentDataError] = await fetchData({
+        method: 'POST',
+        url: `https://graph.facebook.com/v11.0/${businessAssetId}/assigned_users?user=${businessSystemUserId}&tasks=MANAGE&access_token=${facebookAuthData.accessToken}`,
+        params: {},
+        data: {},
+        headers: {},
+      });
       if (sysUserAssetAssignmentDataError) {
         catchErrors(sysUserAssetAssignmentDataError);
       }
 
-      // TODO: update firestore with system user access token
-      addRecordToFirestore({
+      // update firestore with system user access token, auth uid, and email
+      const firestoreUpdate = await addRecordToFirestore({
         uid: facebookAuthData.user.uid,
         email: facebookAuthData.user.email,
         sysUserAccessToken,
@@ -257,6 +258,17 @@ const HomePage = () => {
       dispatch({
         type: 'businessAssetId',
         payload: null,
+      });
+
+      dispatch({
+        type: 'businessSystemUserId',
+        payload: null,
+      });
+
+      // dispatch message to show that firestore record as been written and integration is complete
+      dispatch({
+        type: 'hasFirestoreUpdate',
+        payload: firestoreUpdate,
       });
     };
     if (businessAssetId) {
@@ -298,89 +310,73 @@ const HomePage = () => {
 
   return (
     <>
-      <main
-        className="home-container"
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <header
-          style={{
-            margin: '1.5rem',
-            color: 'black',
-            fontWeight: 700,
-            fontSize: '2rem',
-            display: 'flex',
+      {!hasFirestoreUpdate && !isBtnClicked && !businessSystemUserId && (
+        <button
+          id="facebookLogin"
+          onClick={(e) => {
+            dispatch({
+              type: 'isFacebookLoginAction',
+              payload: true,
+            });
+            dispatch({
+              type: 'isBtnClicked',
+              payload: true,
+            });
           }}
         >
-          CurateApp.AI facebook login
-        </header>
-        {!isBtnClicked && !businessSystemUserId && (
-          <button
-            id="facebookLogin"
-            onClick={(e) => {
-              dispatch({
-                type: 'isFacebookLoginAction',
-                payload: true,
-              });
-              dispatch({
-                type: 'isBtnClicked',
-                payload: true,
-              });
-            }}
-          >
-            Facebook Login
-          </button>
-        )}
-        {/* setup user business account selector */}
-        {isBtnClicked && asyncDataReady && (
+          Facebook Login
+        </button>
+      )}
+      {/* setup user business account selector */}
+      {isBtnClicked && asyncDataReady && (
+        <AcctSelector
+          acctList={userBusinessList}
+          onChangeHandler={handleSelectUserBusinessList}
+          labelText="Choose your facebook business account:"
+        />
+      )}
+
+      {/* setup business ad account selector */}
+      {businessAdAcctList &&
+        businessAdAcctList.length > 0 &&
+        businessSystemUserId && (
           <AcctSelector
-            acctList={userBusinessList}
-            onChangeHandler={handleSelectUserBusinessList}
-            labelText="Choose your facebook business account:"
+            acctList={businessAdAcctList}
+            onChangeHandler={handleSelectBusinessAdAcct}
+            labelText="Choose your facebook business ad account:"
           />
         )}
+      {hasFirestoreUpdate && !hasFirestoreUpdate.includes('duplicate') && (
+        <p>{`You've successfully integrated your Facebook Ad Account with CurateApp.AI. Please visit your CurateAI account page for more details`}</p>
+      )}
 
-        {/* setup business ad account selector */}
-        {businessAdAcctList &&
-          businessAdAcctList.length > 0 &&
-          businessSystemUserId && (
-            <AcctSelector
-              acctList={businessAdAcctList}
-              onChangeHandler={handleSelectBusinessAdAcct}
-              labelText="Choose your facebook business ad account:"
-            />
-          )}
-        {hasErrors && (
-          <>
-            <p style={{ color: '#c5221f' }}>
-              Oops, we've encountered an error. Please try again by refreshing
-              the page. If the issue persists,{' '}
-              <a
-                href={`mailto:
+      {hasFirestoreUpdate && hasFirestoreUpdate.includes('duplicate') && (
+        <p>{`The integration has already been activated. Please visit your CurateAI account page to view more details`}</p>
+      )}
+      {hasErrors && (
+        <>
+          <p style={{ color: '#c5221f' }}>
+            Oops, we've encountered an error. Please try again by refreshing the
+            page. If the issue persists,{' '}
+            <a
+              href={`mailto:
                 ryanwelling@gmail.com?cc=kev.d.friedman@gmail.com&subject=CurateApp.AI%20Integration%20Error&body=Error: ${
                   hasErrors.errMessage
                     ? hasErrors.errMessage
                     : hasErrors.errUserMsg
                 }`}
-              >
-                please let us know
-              </a>
-            </p>
-            <p style={{ color: '#c5221f' }}>
-              Error:
-              {hasErrors.errMessage
-                ? hasErrors.errMessage
-                : hasErrors.errUserMsg}
-            </p>
-          </>
-        )}
-      </main>
+            >
+              please let us know
+            </a>
+          </p>
+          <p style={{ color: '#c5221f' }}>
+            Error:
+            {hasErrors.errMessage ? hasErrors.errMessage : hasErrors.errUserMsg}
+          </p>
+        </>
+      )}
     </>
   );
 };
 
-export default HomePage;
+export default FacebookAppIntegration;

@@ -4,8 +4,8 @@ const NotFoundPage = () => {
   return (
     <>
       <div>404: Not found</div>
-      <NavLink to="/">
-        <button>Back home</button>
+      <NavLink to="/login">
+        <button>Back to login</button>
       </NavLink>
     </>
   );
