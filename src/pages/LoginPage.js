@@ -36,7 +36,7 @@ export const LoginPage = () => {
 
   // error map to render dynamic errors
   const errorMap = new Map();
-  errorMap.set('auth/user-not-found', 'Oops, your email was not found');
+  errorMap.set('auth/user-not-found', 'Invalid email, please try again');
   errorMap.set('auth/wrong-password', 'Invalid password, please try again');
 
   useEffect(() => {
@@ -58,19 +58,22 @@ export const LoginPage = () => {
 
         // redirect to dashboard page only if component is mounted
         if (isMounted) {
+          // update loading state back to false
+          setLoading(false);
+          // update route to dashboard
           history.push('/');
         }
       } catch (error) {
         // Handle Errors here
         const errorCode = error.code;
-        console.log(errorCode);
+        console.error(errorCode);
         setError(errorCode);
 
+        // update loading state back to false
+        setLoading(false);
         // reset form
         resetForm();
       }
-      // update loading state back to false
-      setLoading(false);
     };
     if (
       values &&
@@ -80,6 +83,7 @@ export const LoginPage = () => {
     ) {
       handleAsyncLogin();
     }
+    // clean up function to signify when component is unmounted
     return () => {
       isMounted = false;
     };
@@ -115,8 +119,6 @@ export const LoginPage = () => {
         <Flex>
           <svg
             style={{ width: '15rem', height: 'auto' }}
-            width="320"
-            height="185.34639618779255"
             viewBox="0 0 320 185.34639618779255"
             className="login__logo"
           >

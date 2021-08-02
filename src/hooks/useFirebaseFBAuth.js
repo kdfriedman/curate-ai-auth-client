@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import authenticateWithFacebook from '../services/firebase/auth/facebook-auth';
+import authenticateWithFacebook from '../services/firebase/auth/facebook';
 
 export const useFirebaseFBAuth = (isFbLoginAction) => {
   const [facebookAuthData, updateFacebookAuthData] = useState({});

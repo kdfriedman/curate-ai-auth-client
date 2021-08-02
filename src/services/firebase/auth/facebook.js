@@ -1,7 +1,8 @@
 import firebase from 'firebase/app';
 import { app } from '../firebase';
+
 // instantiate new Facebook provider
-const provider = new firebase.auth.FacebookAuthProvider();
+export const provider = new firebase.auth.FacebookAuthProvider();
 // add business_manager scope to access user's business manager data
 provider.addScope(
   'business_management, public_profile, ads_read,read_insights,ads_management'

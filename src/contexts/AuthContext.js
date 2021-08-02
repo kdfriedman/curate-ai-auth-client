@@ -11,6 +11,10 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState();
   const [loading, setLoading] = useState(true);
 
+  const linkToProvider = (provider) => {
+    return auth.currentUser.linkWithPopup(provider);
+  };
+
   const login = (email, password) => {
     return auth.signInWithEmailAndPassword(email, password);
   };
@@ -39,6 +43,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     resetPassword,
+    linkToProvider,
   };
 
   return (
