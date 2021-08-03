@@ -4,7 +4,9 @@ import fetchData from '../services/fetch/fetch';
 import AcctSelector from './AcctSelector';
 import addRecordToFirestore from '../services/firebase/data/firestore';
 
-const FacebookAppIntegration = () => {
+const FacebookAppIntegration = ({ facebookAuthData }) => {
+  console.log('facebookAuthData', facebookAuthData);
+
   // setup useReducer callback function
   const reducer = (state, action) => {
     const { type, payload } = action;
@@ -18,7 +20,7 @@ const FacebookAppIntegration = () => {
     isFacebookLoginAction: false,
     isBtnClicked: false,
     userBusinessList: null,
-    asyncDataReady: false,
+    hasBusinessListResponse: false,
     hasUserBusinessId: false,
     userBusinessId: null,
     sysUserAccessToken: null,
@@ -34,10 +36,8 @@ const FacebookAppIntegration = () => {
   const {
     hasErrors,
     hasFirestoreUpdate,
-    isFacebookLoginAction,
-    isBtnClicked,
     userBusinessList,
-    asyncDataReady,
+    hasBusinessListResponse,
     hasUserBusinessId,
     userBusinessId,
     sysUserAccessToken,
@@ -62,7 +62,7 @@ const FacebookAppIntegration = () => {
   };
 
   // custom hook - firebase facebook auth
-  const { facebookAuthData } = useFirebaseFBAuth(isFacebookLoginAction);
+  // const { facebookAuthData } = useFirebaseFBAuth(isFacebookLoginAction);
   const hasFacebookAuthData =
     facebookAuthData && Object.keys(facebookAuthData).length > 0;
 
@@ -98,10 +98,10 @@ const FacebookAppIntegration = () => {
         catchErrors(userBusinessError);
       }
       // reset facebook login action state to false, preventing future login attempts
-      dispatch({
-        type: 'isFacebookLoginAction',
-        payload: false,
-      });
+      // dispatch({
+      //   type: 'isFacebookLoginAction',
+      //   payload: false,
+      // });
 
       if (userBusinessList && userBusinessList?.data?.data.length > 0) {
         // update local state with user business list data
@@ -111,7 +111,7 @@ const FacebookAppIntegration = () => {
         });
         // update local state with async completion update
         dispatch({
-          type: 'asyncDataReady',
+          type: 'hasBusinessListResponse',
           payload: true,
         });
       } else {
@@ -198,7 +198,7 @@ const FacebookAppIntegration = () => {
       });
       // reset async ready state to false to signify completion of 2nd useEffect
       dispatch({
-        type: 'asyncDataReady',
+        type: 'hasBusinessListResponse',
         payload: false,
       });
       // update state with system user access token for later storage
@@ -310,25 +310,8 @@ const FacebookAppIntegration = () => {
 
   return (
     <>
-      {!hasFirestoreUpdate && !isBtnClicked && !businessSystemUserId && (
-        <button
-          id="facebookLogin"
-          onClick={(e) => {
-            dispatch({
-              type: 'isFacebookLoginAction',
-              payload: true,
-            });
-            dispatch({
-              type: 'isBtnClicked',
-              payload: true,
-            });
-          }}
-        >
-          Facebook Login
-        </button>
-      )}
       {/* setup user business account selector */}
-      {isBtnClicked && asyncDataReady && (
+      {hasBusinessListResponse && (
         <AcctSelector
           acctList={userBusinessList}
           onChangeHandler={handleSelectUserBusinessList}

@@ -39,8 +39,7 @@ code {
   font-size: 18px;
 }
 
-/* bootstrap inspired form */
-
+/* Bootstrap inspired form */
 form.login__form {
   width: 330px;
 }
@@ -82,6 +81,7 @@ form.login__form {
 .form-control::placeholder {
   font-size: 16px;
 }
+/* End Bootstrap inspired form */
 
 /* login show password checkbox */
 .login__show-password span {
@@ -112,4 +112,62 @@ svg.header__nav-hamburger-menu {
 .header__nav-profile-menu-item {
   font-weight: 600;
   font-size: 16px;
+}
+
+/* dashboard component integration widget card container */
+.dashboard__integrations-container {
+  display: grid;
+  margin: 1rem;
+  padding: 1rem;
+  grid-gap: 10px;
+  grid-template-columns: 10rem 5rem;
+  height: 20rem;
+}
+
+/* dashboard component integration widget (card) */
+.dashboard__integration-widget {
+  background: #fff;
+  box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 15%);
+  border-radius: 10px;
+  height: 11.5rem;
+  flex-direction: column;
+}
+
+/* dashboard component dashboard card */
+.dashboard__integration-dashboard {
+  background: #fff;
+  box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 15%);
+  border-radius: 10px;
+}
+
+/* dashboard component descriptive title for each integration card */
+.dashboard__integration-info {
+  font-weight: 800;
+  font-size: 14px;
+  color: rgb(26, 32, 44);
+  padding: 10px;
+  margin: 0.5rem 1rem;
+  text-align: center;
+}
+
+/* dashboard component integration status container */
+.dashboard__integration-status-container {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+/* dashboard component integration status text */
+.dashboard__integration-status-text {
+  font-weight: 800;
+  font-size: 12px;
+  color: rgb(26, 32, 44);
+  padding: 10px;
+}
+
+/* dashboard component integration fb login icon */
+svg.dashboard__fb-login-btn-icon {
+  width: 25px;
+  height: 25px;
+  min-width: 25px;
 }
