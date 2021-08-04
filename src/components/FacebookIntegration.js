@@ -1,11 +1,12 @@
 import { useEffect, useReducer } from 'react';
-import { useFirebaseFBAuth } from '../hooks/useFirebaseFBAuth';
 import fetchData from '../services/fetch/fetch';
 import AcctSelector from './AcctSelector';
-import addRecordToFirestore from '../services/firebase/data/firestore';
+import firestoreHandlers from '../services/firebase/data/firestore';
+import { Progress, Text, Link } from '@chakra-ui/react';
 
 const FacebookAppIntegration = ({ facebookAuthData }) => {
-  console.log('facebookAuthData', facebookAuthData);
+  // destructure firestore handlers
+  const { addRecordToFirestore } = firestoreHandlers;
 
   // setup useReducer callback function
   const reducer = (state, action) => {
@@ -15,12 +16,13 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
 
   // setup initial field object for reducer function
   const initialState = {
+    isLoading: false,
     hasErrors: null,
     hasFirestoreUpdate: null,
     isFacebookLoginAction: false,
     isBtnClicked: false,
     userBusinessList: null,
-    hasBusinessListResponse: false,
+    hasUserBusinessList: false,
     hasUserBusinessId: false,
     userBusinessId: null,
     sysUserAccessToken: null,
@@ -34,10 +36,11 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
 
   // destructure state object into individual state properties
   const {
+    isLoading,
     hasErrors,
     hasFirestoreUpdate,
     userBusinessList,
-    hasBusinessListResponse,
+    hasUserBusinessList,
     hasUserBusinessId,
     userBusinessId,
     sysUserAccessToken,
@@ -97,11 +100,6 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
       if (userBusinessError) {
         catchErrors(userBusinessError);
       }
-      // reset facebook login action state to false, preventing future login attempts
-      // dispatch({
-      //   type: 'isFacebookLoginAction',
-      //   payload: false,
-      // });
 
       if (userBusinessList && userBusinessList?.data?.data.length > 0) {
         // update local state with user business list data
@@ -111,7 +109,7 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
         });
         // update local state with async completion update
         dispatch({
-          type: 'hasBusinessListResponse',
+          type: 'hasUserBusinessList',
           payload: true,
         });
       } else {
@@ -198,7 +196,7 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
       });
       // reset async ready state to false to signify completion of 2nd useEffect
       dispatch({
-        type: 'hasBusinessListResponse',
+        type: 'hasUserBusinessList',
         payload: false,
       });
       // update state with system user access token for later storage
@@ -217,6 +215,12 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
         dispatch({
           type: 'businessSystemUserId',
           payload: sysUserId,
+        });
+
+        // reset loading state
+        dispatch({
+          type: 'isLoading',
+          payload: false,
         });
       } else {
         console.error(
@@ -270,6 +274,12 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
         type: 'hasFirestoreUpdate',
         payload: firestoreUpdate,
       });
+
+      // set isLoading to true to render spinner
+      dispatch({
+        type: 'isLoading',
+        payload: false,
+      });
     };
     if (businessAssetId) {
       handleAsyncWork();
@@ -284,34 +294,59 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
   // handle user business list select element event
   const handleSelectUserBusinessList = (e) => {
     // get select element value and update user business id state with chosen value
-    if (e.target?.value && e.target?.value !== '') {
+    if (e.target?.value) {
       dispatch({
         type: 'userBusinessId',
         payload: e.target?.value,
       });
+
+      // update user business id trigger state to re-render component and call useEffect
+      dispatch({
+        type: 'hasUserBusinessId',
+        payload: true,
+      });
+
+      // set isLoading to true to render spinner
+      dispatch({
+        type: 'isLoading',
+        payload: true,
+      });
     }
-    // update user business id trigger state to reredner component and call useEffect async work
-    dispatch({
-      type: 'hasUserBusinessId',
-      payload: true,
-    });
   };
 
   // handle business ad account select element event
   const handleSelectBusinessAdAcct = (e) => {
     // get select element value and update user business id state with chosen value
-    if (e.target?.value && e.target?.value !== '') {
+    if (e.target?.value) {
       dispatch({
         type: 'businessAssetId',
         payload: e.target?.value,
+      });
+
+      // set isLoading to true to render spinner
+      dispatch({
+        type: 'isLoading',
+        payload: true,
       });
     }
   };
 
   return (
     <>
+      {/* setup spinner for fetching external data */}
+      {isLoading && (
+        <Progress
+          colorScheme="brand"
+          size="xs"
+          className="loading__spinner"
+          margin="1rem 0 0 2rem"
+          width="20rem"
+          isIndeterminate
+        />
+      )}
+
       {/* setup user business account selector */}
-      {hasBusinessListResponse && (
+      {!isLoading && hasUserBusinessList && (
         <AcctSelector
           acctList={userBusinessList}
           onChangeHandler={handleSelectUserBusinessList}
@@ -320,7 +355,8 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
       )}
 
       {/* setup business ad account selector */}
-      {businessAdAcctList &&
+      {!isLoading &&
+        businessAdAcctList &&
         businessAdAcctList.length > 0 &&
         businessSystemUserId && (
           <AcctSelector
@@ -336,26 +372,30 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
       {hasFirestoreUpdate && hasFirestoreUpdate.includes('duplicate') && (
         <p>{`The integration has already been activated. Please visit your CurateAI account page to view more details`}</p>
       )}
+
       {hasErrors && (
         <>
-          <p style={{ color: '#c5221f' }}>
+          <Text margin="1rem 0 0 2rem" color="#c5221f">
             Oops, we've encountered an error. Please try again by refreshing the
             page. If the issue persists,{' '}
-            <a
-              href={`mailto:
-                ryanwelling@gmail.com?cc=kev.d.friedman@gmail.com&subject=CurateApp.AI%20Integration%20Error&body=Error: ${
-                  hasErrors.errMessage
-                    ? hasErrors.errMessage
-                    : hasErrors.errUserMsg
-                }`}
+            <Link
+              href={`mailto:ryanwelling@gmail.com?cc=kev.d.friedman@gmail.com&subject=CurateApp.AI%20Integration%20Error&body=Error: ${
+                hasErrors?.errMessage
+                  ? hasErrors?.errMessage
+                  : hasErrors?.errUserMsg
+              }`}
             >
-              please let us know
-            </a>
-          </p>
-          <p style={{ color: '#c5221f' }}>
+              <span style={{ textDecoration: 'underline' }}>
+                please let us know
+              </span>
+            </Link>
+          </Text>
+          <Text margin="1rem 0 0 2rem" color="#c5221f">
             Error:
-            {hasErrors.errMessage ? hasErrors.errMessage : hasErrors.errUserMsg}
-          </p>
+            {hasErrors?.errMessage
+              ? hasErrors?.errMessage
+              : hasErrors?.errUserMsg}
+          </Text>
         </>
       )}
     </>

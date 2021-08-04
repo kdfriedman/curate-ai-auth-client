@@ -4,6 +4,18 @@ import { db } from '../firebase';
 // used to generate firebase managed timestamp for new records
 const { serverTimestamp } = firebase.firestore.FieldValue;
 
+const readRecordFromFirestore = async (uid) => {
+  // check if uid is falsy
+  if (!uid) return console.error({ uid });
+  try {
+    const record = await db.collection('clients').doc(uid).get();
+    return [record, null];
+  } catch (error) {
+    console.error('Error getting document: ', error);
+    return [null, error];
+  }
+};
+
 const addRecordToFirestore = async (payload) => {
   const { uid, email, sysUserAccessToken } = payload;
   // validate that arguments are not falsy
@@ -37,4 +49,9 @@ const addRecordToFirestore = async (payload) => {
   }
 };
 
-export default addRecordToFirestore;
+const firestoreHandlers = {
+  addRecordToFirestore,
+  readRecordFromFirestore,
+};
+
+export default firestoreHandlers;

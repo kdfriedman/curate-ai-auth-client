@@ -1,18 +1,52 @@
-import { useEffect, useState, useRef } from 'react';
-import { Flex, Heading, Button, Box, Text } from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
+import { Flex, Button, Box, Text } from '@chakra-ui/react';
 import { useAuth } from '../contexts/AuthContext';
 import FacebookAppIntegration from '../components/FacebookIntegration';
 import { provider } from '../services/firebase/auth/facebook';
+import firestoreHandlers from '../services/firebase/data/firestore';
 import { Header } from '../components/Header';
 import { FaFacebook } from 'react-icons/fa';
 
 export const DashboardPage = () => {
+  const [hasFirestoreIntegrationRecord, setFirestoreIntegrationRecord] =
+    useState(null);
   const [facebookAuth, setFacebookAuth] = useState({});
-  console.log('facebookAuth', facebookAuth);
   const [isFacebookIntegrationClick, setFacebookIntegrationClick] =
     useState(false);
-  const { linkToProvider } = useAuth();
+  const { linkToProvider, currentUser } = useAuth();
 
+  const { readRecordFromFirestore } = firestoreHandlers;
+
+  // read data from firebase to set integration state
+  useEffect(() => {
+    let isMounted = true;
+    const readFirestoreRecord = async () => {
+      // read record from firestore to validate if integration exists
+      const [record, error] = await readRecordFromFirestore(currentUser.uid);
+
+      // log out any errors from firestore fetch
+      if (error)
+        return console.error('Error: failed to read record from firestore');
+
+      // if record exists, update state with firestore integration record
+      if (record && record?.exists && isMounted) {
+        const { email } = record?.data();
+        // update firestore integration record state
+        setFirestoreIntegrationRecord({ email, hasFacebookIntegration: true });
+
+        // TODO: create isLoading state and render when page fetchs firestore data
+      }
+    };
+
+    // call firestore read wrapper function to initiate firestore read handler
+    readFirestoreRecord();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser, readRecordFromFirestore]);
+
+  // link credential with facebook authentication provider
   useEffect(() => {
     let isMounted = true;
     const linkAuthProviders = async () => {
@@ -75,7 +109,9 @@ export const DashboardPage = () => {
                 h="10px"
                 w="10px"
                 borderRadius="50%"
-                backgroundColor="#dc3545"
+                backgroundColor={
+                  !hasFirestoreIntegrationRecord ? '#dc3545' : '#35b653'
+                }
               />
               <Text
                 display="flex"
@@ -83,30 +119,32 @@ export const DashboardPage = () => {
                 className="dashboard__integration-status-text"
                 color="#6c757d"
               >
-                Status: Inactive
+                Status: {!hasFirestoreIntegrationRecord ? 'Inactive' : 'Active'}
               </Text>
             </Flex>
-            <Button
-              onClick={() => setFacebookIntegrationClick(true)}
-              _hover={{
-                opacity: '.8',
-                textDecoration: 'none',
-              }}
-              color="#fff"
-              height="40px"
-              backgroundColor="#1877f2"
-              marginTop="7px"
-              width="14rem"
-              alignSelf="center"
-            >
-              <FaFacebook className="dashboard__fb-login-btn-icon" />{' '}
-              <span
-                style={{ margin: '0 0 0 10px', fontWeight: '800' }}
-                className="dashboard__fb-login-btn-text"
+            {!hasFirestoreIntegrationRecord && (
+              <Button
+                onClick={() => setFacebookIntegrationClick(true)}
+                _hover={{
+                  opacity: '.8',
+                  textDecoration: 'none',
+                }}
+                color="#fff"
+                height="40px"
+                backgroundColor="#1877f2"
+                marginTop="7px"
+                width="14rem"
+                alignSelf="center"
               >
-                Log In With Facebook
-              </span>
-            </Button>
+                <FaFacebook className="dashboard__fb-login-btn-icon" />{' '}
+                <span
+                  style={{ margin: '0 0 0 10px', fontWeight: '800' }}
+                  className="dashboard__fb-login-btn-text"
+                >
+                  Log In With Facebook
+                </span>
+              </Button>
+            )}
           </Box>
 
           <Box
@@ -139,25 +177,53 @@ export const DashboardPage = () => {
               >
                 Facebook
               </Box>
-              <Box
-                className="dashboard__integration-dashboard-tip"
-                fontSize="13px"
-                fontWeight="500"
-                color="rgb(26, 32, 44)"
-                padding=".5rem 0 0 2rem"
-              >
-                <span
-                  style={{
-                    fontSize: '13px',
-                    fontWeight: '800',
-                    color: 'rgb(26, 32, 44)',
-                  }}
+              {}
+              {!hasFirestoreIntegrationRecord &&
+                Object.keys(facebookAuth).length === 0 && (
+                  <Box
+                    className="dashboard__integration-dashboard-tip"
+                    fontSize="13px"
+                    fontWeight="500"
+                    color="rgb(26, 32, 44)"
+                    padding=".5rem 0 0 2rem"
+                  >
+                    <span
+                      style={{
+                        fontSize: '13px',
+                        fontWeight: '800',
+                        color: 'rgb(26, 32, 44)',
+                      }}
+                    >
+                      Tip:{' '}
+                    </span>
+                    Get started now by integrating your Facebook account.
+                  </Box>
+                )}
+              {hasFirestoreIntegrationRecord && (
+                <Box
+                  fontWeight="800"
+                  fontSize="14px"
+                  color="rgb(26, 32, 44)"
+                  padding=".5rem 0 0 2rem"
                 >
-                  Tip:{' '}
-                </span>
-                Get started now by integrating your Facebook account.
-              </Box>
-              <FacebookAppIntegration facebookAuthData={facebookAuth} />
+                  <Text>
+                    Facebook Business Account User:{' '}
+                    <span style={{ fontWeight: '500' }}>
+                      {hasFirestoreIntegrationRecord.email}
+                    </span>
+                  </Text>
+                  <Text>
+                    System User created:{' '}
+                    <span style={{ fontWeight: '500' }}>
+                      {`${hasFirestoreIntegrationRecord.hasFacebookIntegration}`}
+                    </span>
+                  </Text>
+                </Box>
+              )}
+              {!hasFirestoreIntegrationRecord &&
+                Object.keys(facebookAuth).length > 0 && (
+                  <FacebookAppIntegration facebookAuthData={facebookAuth} />
+                )}
             </Flex>
           </Box>
         </section>

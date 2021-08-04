@@ -52,7 +52,7 @@ export const Header = () => {
               <DrawerBody display="flex" flexDir="column">
                 <Link
                   className="header__nav-menu-link"
-                  href="https://curateapp.ai"
+                  href="http://curateapp.ai"
                   isExternal
                   display="flex"
                   flexDir="column"
@@ -61,7 +61,7 @@ export const Header = () => {
                 </Link>
                 <Link
                   className="header__nav-menu-link"
-                  href="https://curateapp.ai"
+                  href="http://curateapp.ai"
                   isExternal
                   display="flex"
                   flexDir="column"
@@ -69,7 +69,7 @@ export const Header = () => {
                   About
                 </Link>
                 <Link
-                  href="https://curateapp.ai"
+                  href="http://curateapp.ai"
                   isExternal
                   className="header__nav-menu-link"
                 >
@@ -77,7 +77,7 @@ export const Header = () => {
                 </Link>
                 <Link
                   className="header__nav-menu-link"
-                  href="https://curateapp.ai"
+                  href="http://curateapp.ai"
                   isExternal
                 >
                   Questions
