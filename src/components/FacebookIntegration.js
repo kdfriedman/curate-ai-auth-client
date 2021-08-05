@@ -9,7 +9,7 @@ const FacebookAppIntegration = ({
   setFirestoreIntegrationRecord,
 }) => {
   // destructure firestore handlers
-  const { addRecordToFirestore } = firestoreHandlers;
+  const { addRecordToFirestore, readRecordFromFirestore } = firestoreHandlers;
 
   // setup useReducer callback function
   const reducer = (state, action) => {
@@ -145,10 +145,20 @@ const FacebookAppIntegration = ({
       const clientBusinessAcctId = clientBusinessData?.data?.id;
       if (!clientBusinessAcctId) return console.error({ clientBusinessAcctId });
 
+      // read record from firestore to retrieve curateai sys user token
+      const [record, error] = await readRecordFromFirestore(
+        'oixaOBWftYMd2kZjD2Yx',
+        'curateai'
+      );
+      if (error || !record?.exists) {
+        return console.error('Error: CurateAi system user token not fetchable');
+      }
+      const { curateAiSysUserAccessToken } = record?.data();
+
       // fetch system user token and create sys user in client's business acct
       const [sysUserData, sysUserError] = await fetchData({
         method: 'POST',
-        url: `https://graph.facebook.com/v11.0/${clientBusinessAcctId}/access_token?scope=ads_read,read_insights&app_id=1198476710574497&access_token=EAARCAhqaZBaEBAAfHb6CQwfTkxZAtBQCrRwUqoA71ds5h4EMOkFdrPsr31FIILF77ZCYLywwpwchoG18VNQXeZCH73j7ZBHh7dPZBUdj7WOJyCHZAI2rwnIrnfmBgLUdD2SKFLrDDgSLtp1qqWl1txFXSH2xMRDaDFCd7x5B8B19s84Rn9ioSVY83s0TUvvW7dww6nZCPtz8AQZDZD`,
+        url: `https://graph.facebook.com/v11.0/${clientBusinessAcctId}/access_token?scope=ads_read,read_insights&app_id=1198476710574497&access_token=${curateAiSysUserAccessToken}`,
         params: {},
         data: {},
         headers: {},

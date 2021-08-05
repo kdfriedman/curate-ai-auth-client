@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Flex, Button, Box, Text, CircularProgress } from '@chakra-ui/react';
+import {
+  Flex,
+  Button,
+  Box,
+  Text,
+  CircularProgress,
+  useMediaQuery,
+} from '@chakra-ui/react';
 import { useAuth } from '../contexts/AuthContext';
 import FacebookAppIntegration from '../components/FacebookIntegration';
 import { provider } from '../services/firebase/auth/facebook';
@@ -8,6 +15,8 @@ import { Header } from '../components/Header';
 import { FaFacebook } from 'react-icons/fa';
 
 export const DashboardPage = () => {
+  const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
+
   const [isLoading, setLoading] = useState(false);
   const [hasFirestoreIntegrationRecord, setFirestoreIntegrationRecord] =
     useState(null);
@@ -25,7 +34,10 @@ export const DashboardPage = () => {
       setLoading(true);
 
       // read record from firestore to validate if integration exists
-      const [record, error] = await readRecordFromFirestore(currentUser.uid);
+      const [record, error] = await readRecordFromFirestore(
+        currentUser.uid,
+        'clients'
+      );
 
       // log out any errors from firestore fetch
       if (error)
@@ -118,7 +130,10 @@ export const DashboardPage = () => {
         <Box className="dashboard__container">
           <section className="dashboard__integrations-container">
             <Box
-              gridColumn="1 / span 2"
+              gridColumn={
+                isEqualToOrLessThan800[0] ? '1 / span 3' : '1 / span 2'
+              }
+              gridRow={isEqualToOrLessThan800[0] ? 2 : ''}
               id="facebookIntegrationWidget"
               className="dashboard__integration-widget"
               display="flex"
@@ -172,9 +187,10 @@ export const DashboardPage = () => {
             </Box>
 
             <Box
-              gridColumn="3"
-              gridRow="1 / span 3"
+              gridColumn={isEqualToOrLessThan800[0] ? '1 / span 3' : '3'}
+              gridRow={isEqualToOrLessThan800[0] ? '1' : '1 / span 3'}
               className="dashboard__integration-dashboard"
+              minHeight="20rem"
             >
               <Flex
                 boxShadow="0 0.125rem 0.25rem rgb(0 0 0 / 8%)"
@@ -191,10 +207,11 @@ export const DashboardPage = () => {
               <Flex
                 flexDirection="column"
                 className="dashboard__integration-dashboard-body"
+                padding={isEqualToOrLessThan800[0] ? '2rem' : ''}
               >
                 <Box
                   className="dashboard__integration-dashboard-vendor"
-                  padding="2rem 0 0 2rem"
+                  padding={isEqualToOrLessThan800[0] ? '' : '2rem 0 0 2rem'}
                   fontSize="16px"
                   color="#6c757d"
                   fontWeight="800"
@@ -209,7 +226,9 @@ export const DashboardPage = () => {
                       fontSize="13px"
                       fontWeight="500"
                       color="rgb(26, 32, 44)"
-                      padding=".5rem 0 0 2rem"
+                      padding={
+                        isEqualToOrLessThan800[0] ? '' : '.5rem 0 0 2rem'
+                      }
                     >
                       <span
                         style={{

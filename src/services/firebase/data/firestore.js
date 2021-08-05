@@ -4,11 +4,11 @@ import { db } from '../firebase';
 // used to generate firebase managed timestamp for new records
 const { serverTimestamp } = firebase.firestore.FieldValue;
 
-const readRecordFromFirestore = async (uid) => {
+const readRecordFromFirestore = async (uid, collection) => {
   // check if uid is falsy
   if (!uid) return console.error({ uid });
   try {
-    const record = await db.collection('clients').doc(uid).get();
+    const record = await db.collection(collection).doc(uid).get();
     return [record, null];
   } catch (error) {
     console.error('Error getting document: ', error);
