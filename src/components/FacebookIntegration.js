@@ -4,7 +4,10 @@ import AcctSelector from './AcctSelector';
 import firestoreHandlers from '../services/firebase/data/firestore';
 import { Progress, Text, Link } from '@chakra-ui/react';
 
-const FacebookAppIntegration = ({ facebookAuthData }) => {
+const FacebookAppIntegration = ({
+  facebookAuthData,
+  setFirestoreIntegrationRecord,
+}) => {
   // destructure firestore handlers
   const { addRecordToFirestore } = firestoreHandlers;
 
@@ -18,7 +21,6 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
   const initialState = {
     isLoading: false,
     hasErrors: null,
-    hasFirestoreUpdate: null,
     isFacebookLoginAction: false,
     isBtnClicked: false,
     userBusinessList: null,
@@ -38,7 +40,6 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
   const {
     isLoading,
     hasErrors,
-    hasFirestoreUpdate,
     userBusinessList,
     hasUserBusinessList,
     hasUserBusinessId,
@@ -252,7 +253,7 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
       }
 
       // update firestore with system user access token, auth uid, and email
-      const firestoreUpdate = await addRecordToFirestore({
+      await addRecordToFirestore({
         uid: facebookAuthData.user.uid,
         email: facebookAuthData.user.email,
         sysUserAccessToken,
@@ -269,16 +270,16 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
         payload: null,
       });
 
-      // dispatch message to show that firestore record as been written and integration is complete
-      dispatch({
-        type: 'hasFirestoreUpdate',
-        payload: firestoreUpdate,
-      });
-
-      // set isLoading to true to render spinner
+      // set isLoading to true to render progress
       dispatch({
         type: 'isLoading',
         payload: false,
+      });
+
+      // update parent state with firestore new record data
+      setFirestoreIntegrationRecord({
+        email: facebookAuthData.user.email,
+        hasFacebookIntegration: true,
       });
     };
     if (businessAssetId) {
@@ -289,6 +290,8 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
     facebookAuthData,
     businessSystemUserId,
     sysUserAccessToken,
+    addRecordToFirestore,
+    setFirestoreIntegrationRecord,
   ]);
 
   // handle user business list select element event
@@ -338,7 +341,7 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
         <Progress
           colorScheme="brand"
           size="xs"
-          className="loading__spinner"
+          className="loading__progress"
           margin="1rem 0 0 2rem"
           width="20rem"
           isIndeterminate
@@ -365,19 +368,11 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
             labelText="Choose your facebook business ad account:"
           />
         )}
-      {hasFirestoreUpdate && !hasFirestoreUpdate.includes('duplicate') && (
-        <p>{`You've successfully integrated your Facebook Ad Account with CurateApp.AI. Please visit your CurateAI account page for more details`}</p>
-      )}
-
-      {hasFirestoreUpdate && hasFirestoreUpdate.includes('duplicate') && (
-        <p>{`The integration has already been activated. Please visit your CurateAI account page to view more details`}</p>
-      )}
 
       {hasErrors && (
         <>
           <Text margin="1rem 0 0 2rem" color="#c5221f">
-            Oops, we've encountered an error. Please try again by refreshing the
-            page. If the issue persists,{' '}
+            Oops, we've encountered an error. Please contact our{' '}
             <Link
               href={`mailto:ryanwelling@gmail.com?cc=kev.d.friedman@gmail.com&subject=CurateApp.AI%20Integration%20Error&body=Error: ${
                 hasErrors?.errMessage
@@ -386,7 +381,7 @@ const FacebookAppIntegration = ({ facebookAuthData }) => {
               }`}
             >
               <span style={{ textDecoration: 'underline' }}>
-                please let us know
+                tech team for assistance.
               </span>
             </Link>
           </Text>
