@@ -242,7 +242,12 @@ const FacebookAppIntegration = ({
     if (hasUserBusinessId) {
       handleAsyncWork();
     }
-  }, [hasUserBusinessId, userBusinessId, facebookAuthData]);
+  }, [
+    readRecordFromFirestore,
+    hasUserBusinessId,
+    userBusinessId,
+    facebookAuthData,
+  ]);
 
   /******* 
   3rd useEffect hook - add assets to sys user within client's business acct 

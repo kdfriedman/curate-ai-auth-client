@@ -4,6 +4,7 @@ import {
   Button,
   Box,
   Text,
+  Link,
   CircularProgress,
   useMediaQuery,
 } from '@chakra-ui/react';
@@ -16,7 +17,7 @@ import { FaFacebook } from 'react-icons/fa';
 
 export const DashboardPage = () => {
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
-
+  const [hasError, setError] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const [hasFirestoreIntegrationRecord, setFirestoreIntegrationRecord] =
     useState(null);
@@ -25,6 +26,30 @@ export const DashboardPage = () => {
     useState(false);
   const { linkToProvider, currentUser } = useAuth();
   const { readRecordFromFirestore } = firestoreHandlers;
+
+  const errorMap = new Map();
+  errorMap.set('auth/provider-already-linked', () => {
+    return (
+      <Text
+        fontSize="13px"
+        color="#c5221f"
+        fontWeight="500"
+        className="error__provider-already-linked"
+        padding={isEqualToOrLessThan800[0] ? '1rem 0 0 0' : '1rem 2rem 0 2rem'}
+      >
+        Error: Users can only integrate with one Facebook business account.{' '}
+        <br />
+        <br /> If you need to integrate with a separate account or have any
+        other questions, please reach out to{' '}
+        <Link
+          textDecoration="underline"
+          href="mailto:ryanwelling@gmail.com?cc=kev.d.friedman@gmail.com&amp;subject=CurateAI%20Technical%20Support"
+        >
+          our tech team.
+        </Link>
+      </Text>
+    );
+  });
 
   // read data from firebase to set integration state
   useEffect(() => {
@@ -97,6 +122,10 @@ export const DashboardPage = () => {
         const credential = error.credential;
         // log errors
         console.error({ errorCode, errorMessage, email, credential });
+        // reset loading state
+        setLoading(false);
+        // set error state
+        setError(errorCode);
       }
     };
 
@@ -218,7 +247,6 @@ export const DashboardPage = () => {
                 >
                   Facebook
                 </Box>
-                {}
                 {!hasFirestoreIntegrationRecord &&
                   Object.keys(facebookAuth).length === 0 && (
                     <Box
@@ -242,12 +270,19 @@ export const DashboardPage = () => {
                       Get started now by integrating your Facebook account.
                     </Box>
                   )}
+                {!hasFirestoreIntegrationRecord && hasError && (
+                  <>{errorMap.get(hasError)()}</>
+                )}
                 {hasFirestoreIntegrationRecord && (
                   <Box
                     fontWeight="800"
                     fontSize="14px"
                     color="rgb(26, 32, 44)"
-                    padding=".5rem 0 0 2rem"
+                    padding={
+                      isEqualToOrLessThan800[0]
+                        ? '.5rem 0 0 0'
+                        : '.5rem 0 0 2rem'
+                    }
                   >
                     <Text>
                       Facebook Business Account User:{' '}
