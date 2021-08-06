@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { LoginPage } from '../pages/LoginPage';
 import { DashboardPage } from '../pages/DashboardPage';
+import { PasswordResetPage } from '../pages/PasswordResetPage';
 import { PrivateRoute } from '../pages/PrivateRoute.js';
 import NotFoundPage from '../pages/NotFoundPage';
 import { AuthProvider } from '../contexts/AuthContext';
@@ -14,6 +15,8 @@ const AppRouter = () => (
         <PrivateRoute exact path="/" component={DashboardPage} />
         {/* Login route*/}
         <Route path="/login" component={LoginPage} />
+        {/* Login route*/}
+        <Route path="/password-reset" component={PasswordResetPage} />
         {/* 404 page*/}
         <Route component={NotFoundPage} />
       </Switch>

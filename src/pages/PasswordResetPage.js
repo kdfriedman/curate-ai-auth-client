@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { NavLink, useHistory } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   FormControl,
@@ -14,37 +13,34 @@ import {
   Alert,
   AlertIcon,
   CloseButton,
-  Checkbox,
 } from '@chakra-ui/react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
+import { NavLink } from 'react-router-dom';
 
-export const LoginPage = () => {
-  const [inputType, setInputType] = useState('password');
-  const { login } = useAuth();
+export const PasswordResetPage = () => {
+  const { resetPassword } = useAuth();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const history = useHistory();
+  const [passwordResetStatus, updatePasswordResetStatus] = useState(null);
   const [values, setValues] = useState();
   const [actions, setActions] = useState();
 
   // form validation schema
   const LoginSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Required'),
-    password: Yup.string().required('Required'),
   });
 
   // error map to render dynamic errors
   const errorMap = new Map();
   errorMap.set('auth/user-not-found', 'Invalid email, please try again');
-  errorMap.set('auth/wrong-password', 'Invalid password, please try again');
 
   useEffect(() => {
     // set mounted state
     let isMounted = true;
 
-    const handleAsyncLogin = async () => {
-      const { email, password } = values;
+    const initResetPassword = async () => {
+      const { email } = values;
       const { resetForm } = actions;
 
       try {
@@ -54,14 +50,14 @@ export const LoginPage = () => {
         setLoading(true);
 
         // login user
-        await login(email, password);
+        await resetPassword(email);
 
         // redirect to dashboard page only if component is mounted
         if (isMounted) {
+          // update passwordResetStatus state
+          updatePasswordResetStatus(true);
           // update loading state back to false
           setLoading(false);
-          // update route to dashboard
-          history.push('/');
         }
       } catch (error) {
         // Handle Errors here
@@ -81,19 +77,13 @@ export const LoginPage = () => {
       Object.keys(values).length > 0 &&
       Object.keys(actions).length > 0
     ) {
-      handleAsyncLogin();
+      initResetPassword();
     }
     // clean up function to signify when component is unmounted
     return () => {
       isMounted = false;
     };
-  }, [values, actions, history, login]);
-
-  // password show/hide
-  const handleInputTypeChange = () => {
-    if (inputType === 'text') setInputType('password');
-    if (inputType === 'password') setInputType('text');
-  };
+  }, [values, actions, resetPassword]);
 
   const handleSubmit = async (values, actions) => {
     // update state with form submit values (email + password)
@@ -114,13 +104,13 @@ export const LoginPage = () => {
         margin="1rem"
         flexDir="column"
         alignItems="center"
-        className="login__container"
+        className="password-reset__container"
       >
         <Flex>
           <svg
             style={{ width: '15rem', height: 'auto' }}
             viewBox="0 0 320 185.34639618779255"
-            className="login__logo"
+            className="password-reset__logo"
           >
             <g
               featurekey="symbolFeature-0"
@@ -143,115 +133,107 @@ export const LoginPage = () => {
             </g>
           </svg>
         </Flex>
-        <Heading fontWeight="400" margin="1rem 0" as="h3" size="lg">
-          Please sign in
-        </Heading>
-        <Flex flexDirection="column" className="login__form-container">
-          {error && (
-            <Alert margin="1rem 0" status="error">
-              <AlertIcon />
-              {errorMap.get(error)}
-              <CloseButton
-                onClick={handleCloseBtnClick}
-                position="absolute"
-                right="8px"
-                top="8px"
-              />
-            </Alert>
-          )}
-          <Formik
-            initialValues={{
-              email: '',
-              password: '',
-            }}
-            validationSchema={LoginSchema}
-            onSubmit={handleSubmit}
+        {passwordResetStatus && (
+          <Flex
+            margin="2rem 2rem"
+            textAlign="center"
+            className="password-reset__success-msg-container"
           >
-            {({ errors, touched }) => (
-              <Form className="login__form" width="330px">
-                <FormControl
-                  className="form-floating"
-                  isInvalid={errors.email && touched.email}
-                >
-                  <FormLabel fontSize="16px" htmlFor="email">
-                    Email
-                  </FormLabel>
-                  <Field
-                    className="form-control"
-                    name="email"
-                    type="email"
-                    placeholder="name@example.com"
-                  />
-                  <FormErrorMessage>{errors.email}</FormErrorMessage>
-                </FormControl>
-                <FormControl
-                  className="form-floating"
-                  isInvalid={errors.password && touched.password}
-                >
-                  <FormLabel
-                    fontSize="16px"
-                    marginTop="10px"
-                    htmlFor="password"
-                  >
-                    Password
-                  </FormLabel>
-                  <Field
-                    className="form-control"
-                    name="password"
-                    type={inputType}
-                    placeholder="Password"
-                  />
-                  <Checkbox
-                    onChange={handleInputTypeChange}
-                    colorScheme="brand"
-                    className="login__show-password"
-                    fontSize="14px"
-                    margin="10px 0 1rem 0"
-                  >
-                    Show password
-                  </Checkbox>
-                  <FormErrorMessage>{errors.password}</FormErrorMessage>
-                </FormControl>
-                <Button
-                  disabled={loading}
-                  _hover={{
-                    opacity: '.8',
-                  }}
-                  _focus={{
-                    outline: 0,
-                    boxShadow: 'none',
-                  }}
-                  mt={4}
-                  color="#fff"
-                  backgroundColor="#635bff"
-                  type="submit"
-                  fontSize="16px"
-                >
-                  Sign In
-                </Button>
-                <Flex
-                  className="login__password-reset"
-                  margin=".5rem 0"
-                  color="#635bff"
-                  fontSize="14px"
-                >
-                  <Link as={NavLink} to="/password-reset">
-                    Forgot password?
-                  </Link>
-                </Flex>
-                <Box
-                  backgroundColor="#d9d9d9"
-                  height="1px"
-                  margin="2rem 0"
-                  width="100%"
-                ></Box>
-              </Form>
+            <Box className="password-reset__success-msg">
+              <Text fontSize="16px">
+                Success! Your password has been reset. <br />
+                <Link fontWeight="500" as={NavLink} to="/login" color="#635bff">
+                  Please log in
+                </Link>
+              </Text>
+            </Box>
+          </Flex>
+        )}
+        {!passwordResetStatus && (
+          <Heading
+            textAlign="center"
+            fontWeight="400"
+            margin="2rem 1rem"
+            as="h5"
+            size="sm"
+          >
+            Please enter your email to reset your password.
+          </Heading>
+        )}
+        {!passwordResetStatus && (
+          <Flex
+            flexDirection="column"
+            className="password-reset__form-container"
+          >
+            {error && (
+              <Alert margin="1rem 0" status="error">
+                <AlertIcon />
+                {errorMap.get(error)}
+                <CloseButton
+                  onClick={handleCloseBtnClick}
+                  position="absolute"
+                  right="8px"
+                  top="8px"
+                />
+              </Alert>
             )}
-          </Formik>
-        </Flex>
+            <Formik
+              initialValues={{
+                email: '',
+                password: '',
+              }}
+              validationSchema={LoginSchema}
+              onSubmit={handleSubmit}
+            >
+              {({ errors, touched }) => (
+                <Form className="password-reset__form" width="330px">
+                  <FormControl
+                    className="form-floating"
+                    isInvalid={errors.email && touched.email}
+                  >
+                    <FormLabel fontSize="16px" htmlFor="email">
+                      Email
+                    </FormLabel>
+                    <Field
+                      className="form-control"
+                      name="email"
+                      type="email"
+                      placeholder="name@example.com"
+                    />
+                    <FormErrorMessage>{errors.email}</FormErrorMessage>
+                  </FormControl>
+                  <Button
+                    disabled={loading}
+                    _hover={{
+                      opacity: '.8',
+                    }}
+                    _focus={{
+                      outline: 0,
+                      boxShadow: 'none',
+                    }}
+                    mt={4}
+                    color="#fff"
+                    backgroundColor="#635bff"
+                    type="submit"
+                    fontSize="16px"
+                  >
+                    Reset Password
+                  </Button>
+
+                  <Box
+                    backgroundColor="#d9d9d9"
+                    height="1px"
+                    margin="2rem 0"
+                    width="100%"
+                  ></Box>
+                </Form>
+              )}
+            </Formik>
+          </Flex>
+        )}
 
         <Flex>
-          <Box className="login__contact-sales">
+          <Box className="password-reset__contact-sales">
             <Text fontSize="14px" whiteSpace="nowrap">
               Interested in using CurateAI?{' '}
               <Link
@@ -266,7 +248,7 @@ export const LoginPage = () => {
         </Flex>
         <Flex
           margin="1.5rem"
-          className="login__copy-right"
+          className="password-reset__copy-right"
           color="#6c757d"
           fontWeight="500"
         >
@@ -276,3 +258,5 @@ export const LoginPage = () => {
     </>
   );
 };
+
+export default PasswordResetPage;

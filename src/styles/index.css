@@ -44,6 +44,10 @@ code {
 form.login__form {
   width: 330px;
 }
+
+form.password-reset__form {
+  width: 330px;
+}
 .form-control {
   display: block;
   width: 100%;

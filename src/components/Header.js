@@ -1,3 +1,4 @@
+import { useHistory } from 'react-router-dom';
 import {
   Avatar,
   Flex,
@@ -14,10 +15,40 @@ import {
   MenuList,
   MenuItem,
 } from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
 import { HiOutlineMenuAlt1 } from 'react-icons/hi';
+import { useAuth } from '../contexts/AuthContext';
 
 export const Header = () => {
+  // destructure logout auth handler from context
+  const { logout } = useAuth();
+  // grab history instance from react-router-dom
+  const history = useHistory();
+  // set state for log out events
+  const [hasLogoutEvent, setLogoutEvent] = useState(false);
+  // use custom hook from Chakra to handle drawer component actions
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const logoutUser = async () => {
+      // call firebase logout service from authContext
+      await logout();
+      if (isMounted) {
+        // update route to login when user logs out
+        history.push('/login');
+      }
+    };
+
+    if (hasLogoutEvent) {
+      // call logoutUser wrapper function
+      logoutUser();
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [logout, hasLogoutEvent, history]);
 
   return (
     <header>
@@ -121,7 +152,11 @@ export const Header = () => {
               <MenuItem className="header__nav-profile-menu-item">
                 Settings
               </MenuItem>
-              <MenuItem className="header__nav-profile-menu-item">
+              {/* trigger logout event onClick */}
+              <MenuItem
+                onClick={() => setLogoutEvent(true)}
+                className="header__nav-profile-menu-item"
+              >
                 Logout
               </MenuItem>
             </MenuList>
