@@ -13,10 +13,10 @@ import {
   Alert,
   AlertIcon,
   CloseButton,
+  CircularProgress,
 } from '@chakra-ui/react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import { NavLink } from 'react-router-dom';
 
 export const PasswordResetPage = () => {
   const { resetPassword } = useAuth();
@@ -133,7 +133,18 @@ export const PasswordResetPage = () => {
             </g>
           </svg>
         </Flex>
-        {passwordResetStatus && (
+        {loading && (
+          <CircularProgress
+            className="loading__spinner"
+            minHeight="100vh"
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            isIndeterminate
+            color="#635bff"
+          />
+        )}
+        {passwordResetStatus && !loading && (
           <Flex
             margin="2rem 2rem"
             textAlign="center"
@@ -141,15 +152,13 @@ export const PasswordResetPage = () => {
           >
             <Box className="password-reset__success-msg">
               <Text fontSize="16px">
-                Success! Your password has been reset. <br />
-                <Link fontWeight="500" as={NavLink} to="/login" color="#635bff">
-                  Please log in
-                </Link>
+                We've just sent you a password reset email. <br /> Please check
+                your inbox on instructions to reset your password.
               </Text>
             </Box>
           </Flex>
         )}
-        {!passwordResetStatus && (
+        {!passwordResetStatus && !loading && (
           <Heading
             textAlign="center"
             fontWeight="400"
@@ -160,7 +169,7 @@ export const PasswordResetPage = () => {
             Please enter your email to reset your password.
           </Heading>
         )}
-        {!passwordResetStatus && (
+        {!passwordResetStatus && !loading && (
           <Flex
             flexDirection="column"
             className="password-reset__form-container"
