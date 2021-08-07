@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   FormControl,
@@ -15,33 +15,37 @@ import {
   AlertIcon,
   CloseButton,
   CircularProgress,
+  Checkbox,
 } from '@chakra-ui/react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 
-export const PasswordResetPage = () => {
-  const { resetPassword } = useAuth();
+export const NewPasswordPage = () => {
+  const { verifyPasswordResetRequest, confirmPasswordResetRequest } = useAuth();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [inputType, setInputType] = useState('password');
   const [passwordResetStatus, updatePasswordResetStatus] = useState(null);
   const [values, setValues] = useState();
   const [actions, setActions] = useState();
+  const location = useLocation();
 
   // form validation schema
-  const ResetPasswordSchema = Yup.object().shape({
-    email: Yup.string().email('Invalid email').required('Required'),
+  const NewPasswordSchema = Yup.object().shape({
+    password: Yup.string().required('Required'),
   });
 
   // error map to render dynamic errors
   const errorMap = new Map();
-  errorMap.set('auth/user-not-found', 'Invalid email, please try again');
+  errorMap.set('oop code missing', 'Missing oob code query param.');
+  errorMap.set('auth/expired-action-code', 'Expired password action code');
 
   useEffect(() => {
     // set mounted state
     let isMounted = true;
 
     const initResetPassword = async () => {
-      const { email } = values;
+      const { password } = values;
       const { resetForm } = actions;
 
       try {
@@ -50,8 +54,16 @@ export const PasswordResetPage = () => {
         // set loading state
         setLoading(true);
 
-        // login user
-        await resetPassword(email);
+        // get current url reference
+        const queryParams = new URLSearchParams(location.search);
+        if (!queryParams.has('oobCode')) {
+          throw new Error('oobCode are not present in parameters');
+        }
+
+        // verify password reset request
+        await verifyPasswordResetRequest(queryParams.get('oobCode'));
+        // confirm password reset request
+        await confirmPasswordResetRequest(queryParams.get('oobCode'), password);
 
         // redirect to dashboard page only if component is mounted
         if (isMounted) {
@@ -61,15 +73,25 @@ export const PasswordResetPage = () => {
           setLoading(false);
         }
       } catch (error) {
-        // Handle Errors here
-        const errorCode = error.code;
-        console.error(errorCode);
-        setError(errorCode);
-
-        // update loading state back to false
-        setLoading(false);
-        // reset form
-        resetForm();
+        // check if error is generic
+        if (!error?.code && isMounted) {
+          console.error(error);
+          // update error state
+          setError('oop code missing');
+          // update loading state back to false
+          setLoading(false);
+          // reset form
+          return resetForm();
+        }
+        if (isMounted) {
+          // Handle Errors here
+          const errorCode = error?.code;
+          console.error(errorCode);
+          // update error state
+          setError(errorCode);
+          // update loading state back to false
+          setLoading(false);
+        }
       }
     };
     if (
@@ -84,7 +106,13 @@ export const PasswordResetPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [values, actions, resetPassword]);
+  }, [
+    values,
+    actions,
+    verifyPasswordResetRequest,
+    confirmPasswordResetRequest,
+    location,
+  ]);
 
   const handleSubmit = async (values, actions) => {
     // update state with form submit values (email + password)
@@ -96,6 +124,12 @@ export const PasswordResetPage = () => {
   // handle close error click
   const handleCloseBtnClick = () => {
     setError(null);
+  };
+
+  // password show/hide
+  const handleInputTypeChange = () => {
+    if (inputType === 'text') setInputType('password');
+    if (inputType === 'password') setInputType('text');
   };
 
   return (
@@ -155,8 +189,10 @@ export const PasswordResetPage = () => {
           >
             <Box className="password-reset__success-msg">
               <Text fontSize="16px">
-                We've just sent you a password reset email. <br /> Please check
-                your inbox on instructions to reset your password.
+                We've just reset your password. <br />
+                <Link as={NavLink} to="/login">
+                  Please log in.
+                </Link>
               </Text>
             </Box>
           </Flex>
@@ -169,7 +205,7 @@ export const PasswordResetPage = () => {
             as="h5"
             size="sm"
           >
-            Please enter your email to reset your password.
+            Please choose a new password.
           </Heading>
         )}
         {!passwordResetStatus && !loading && (
@@ -191,27 +227,40 @@ export const PasswordResetPage = () => {
             )}
             <Formik
               initialValues={{
-                email: '',
+                password: '',
               }}
-              validationSchema={ResetPasswordSchema}
+              validationSchema={NewPasswordSchema}
               onSubmit={handleSubmit}
             >
               {({ errors, touched }) => (
                 <Form className="password-reset__form" width="330px">
                   <FormControl
                     className="form-floating"
-                    isInvalid={errors.email && touched.email}
+                    isInvalid={errors.password && touched.password}
                   >
-                    <FormLabel fontSize="16px" htmlFor="email">
-                      Email
+                    <FormLabel
+                      fontSize="16px"
+                      marginTop="10px"
+                      htmlFor="password"
+                    >
+                      Password
                     </FormLabel>
                     <Field
                       className="form-control"
-                      name="email"
-                      type="email"
-                      placeholder="name@example.com"
+                      name="password"
+                      type={inputType}
+                      placeholder="Password"
                     />
-                    <FormErrorMessage>{errors.email}</FormErrorMessage>
+                    <Checkbox
+                      onChange={handleInputTypeChange}
+                      colorScheme="brand"
+                      className="login__show-password"
+                      fontSize="14px"
+                      margin="10px 0 1rem 0"
+                    >
+                      Show password
+                    </Checkbox>
+                    <FormErrorMessage>{errors.password}</FormErrorMessage>
                   </FormControl>
                   <Button
                     disabled={loading}
@@ -228,7 +277,7 @@ export const PasswordResetPage = () => {
                     type="submit"
                     fontSize="16px"
                   >
-                    Reset Password
+                    Choose Password
                   </Button>
 
                   <Box
@@ -270,4 +319,4 @@ export const PasswordResetPage = () => {
   );
 };
 
-export default PasswordResetPage;
+export default NewPasswordPage;

@@ -27,6 +27,14 @@ export const AuthProvider = ({ children }) => {
     return auth.sendPasswordResetEmail(email);
   };
 
+  const verifyPasswordResetRequest = (code) => {
+    return auth.verifyPasswordResetCode(code);
+  };
+
+  const confirmPasswordResetRequest = (code, newPassword) => {
+    return auth.confirmPasswordReset(code, newPassword);
+  };
+
   useEffect(() => {
     // listen for auth changes
     // returns function which can be used to unsubscribe to auth changes on component unmount
@@ -44,6 +52,8 @@ export const AuthProvider = ({ children }) => {
     logout,
     resetPassword,
     linkToProvider,
+    verifyPasswordResetRequest,
+    confirmPasswordResetRequest,
   };
 
   return (
