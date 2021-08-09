@@ -9,7 +9,8 @@ const FacebookAppIntegration = ({
   setFirestoreIntegrationRecord,
 }) => {
   // destructure firestore handlers
-  const { addRecordToFirestore, readRecordFromFirestore } = firestoreHandlers;
+  const { addRecordToFirestore, readCurateAIRecordFromFirestore } =
+    firestoreHandlers;
 
   // setup useReducer callback function
   const reducer = (state, action) => {
@@ -146,7 +147,7 @@ const FacebookAppIntegration = ({
       if (!clientBusinessAcctId) return console.error({ clientBusinessAcctId });
 
       // read record from firestore to retrieve curateai sys user token
-      const [record, error] = await readRecordFromFirestore(
+      const [record, error] = await readCurateAIRecordFromFirestore(
         'oixaOBWftYMd2kZjD2Yx',
         'curateai'
       );
@@ -243,7 +244,7 @@ const FacebookAppIntegration = ({
       handleAsyncWork();
     }
   }, [
-    readRecordFromFirestore,
+    readCurateAIRecordFromFirestore,
     hasUserBusinessId,
     userBusinessId,
     facebookAuthData,
@@ -253,6 +254,9 @@ const FacebookAppIntegration = ({
   3rd useEffect hook - add assets to sys user within client's business acct 
   *******/
   useEffect(() => {
+    // set component isMounted state to prevent memory leak on state updates to parent
+    let isMounted = true;
+
     // async wrapper function to allow multiple requests
     const handleAsyncWork = async () => {
       // assign assets to system user on behalf of client business manager acct
@@ -267,12 +271,39 @@ const FacebookAppIntegration = ({
         catchErrors(sysUserAssetAssignmentDataError);
       }
 
-      // update firestore with system user access token, auth uid, and email
-      await addRecordToFirestore({
+      // filter facebook business acct name from user business list chosen user selected id
+      const fbBusinessAcctName = userBusinessList.filter((businessObject) => {
+        return businessObject.id === userBusinessId;
+      });
+
+      // create payload object for facebook integration
+      const facebookFirebasePayload = {
         uid: facebookAuthData.user.uid,
         email: facebookAuthData.user.email,
         sysUserAccessToken,
-      });
+        fbBusinessAcctName: fbBusinessAcctName[0].name,
+        fbBusinessAcctId: userBusinessId,
+        fbAdAccountId: businessAssetId,
+      };
+
+      // update firestore with system user access token, auth uid, and email
+      await addRecordToFirestore(
+        facebookAuthData.user.uid,
+        ['clients', 'integrations', 'facebookBusinessAccounts'],
+        ['facebook', 'facebookBusinessAccountName'],
+        facebookFirebasePayload
+      );
+
+      if (isMounted) {
+        // update parent component with firestore new record data
+        setFirestoreIntegrationRecord({
+          email: facebookAuthData.user.email,
+          hasFacebookIntegration: true,
+          fbBusinessAcctName: fbBusinessAcctName[0].name,
+          fbBusinessAcctId: userBusinessId,
+          fbAdAccountId: businessAssetId,
+        });
+      }
 
       // reset business asset it to prevent 3rd useEffect from firing
       dispatch({
@@ -290,16 +321,14 @@ const FacebookAppIntegration = ({
         type: 'isLoading',
         payload: false,
       });
-
-      // update parent state with firestore new record data
-      setFirestoreIntegrationRecord({
-        email: facebookAuthData.user.email,
-        hasFacebookIntegration: true,
-      });
     };
     if (businessAssetId) {
       handleAsyncWork();
     }
+    // clean up function to signify when component is unmounted
+    return () => {
+      isMounted = false;
+    };
   }, [
     businessAssetId,
     facebookAuthData,
@@ -307,6 +336,8 @@ const FacebookAppIntegration = ({
     sysUserAccessToken,
     addRecordToFirestore,
     setFirestoreIntegrationRecord,
+    userBusinessId,
+    userBusinessList,
   ]);
 
   // handle user business list select element event

@@ -134,6 +134,7 @@ svg.header__nav-hamburger-menu {
     grid-gap: 10px;
     grid-template-rows: 1fr 1fr;
     justify-content: center;
+    height: 100%;
   }
 }
 

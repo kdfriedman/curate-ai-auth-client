@@ -25,7 +25,7 @@ export const DashboardPage = () => {
   const [isFacebookIntegrationClick, setFacebookIntegrationClick] =
     useState(false);
   const { linkToProvider, currentUser } = useAuth();
-  const { readRecordFromFirestore } = firestoreHandlers;
+  const { readUserRecordFromFirestore } = firestoreHandlers;
 
   const errorMap = new Map();
   errorMap.set('auth/provider-already-linked', () => {
@@ -50,6 +50,27 @@ export const DashboardPage = () => {
       </Text>
     );
   });
+  errorMap.set('failed to read record from firestore', () => {
+    return (
+      <Text
+        fontSize="13px"
+        color="#c5221f"
+        fontWeight="500"
+        className="error__provider-already-linked"
+        padding={isEqualToOrLessThan800[0] ? '1rem 0 0 0' : '1rem 2rem 0 2rem'}
+      >
+        Error: Failed to read record from database. <br />
+        <br /> Please reach out to{' '}
+        <Link
+          textDecoration="underline"
+          href="mailto:ryanwelling@gmail.com?cc=kev.d.friedman@gmail.com&amp;subject=CurateAI%20Technical%20Support"
+        >
+          our tech team.
+        </Link>
+        for further assistance.
+      </Text>
+    );
+  });
 
   // read data from firebase to set integration state
   useEffect(() => {
@@ -58,21 +79,35 @@ export const DashboardPage = () => {
       // set loading state
       setLoading(true);
 
-      // read record from firestore to validate if integration exists
-      const [record, error] = await readRecordFromFirestore(
+      // ****** FACEBOOK record ******
+      // read facebook record from firestore to validate if integration exists
+      const [record, error] = await readUserRecordFromFirestore(
         currentUser.uid,
-        'clients'
+        ['clients', 'integrations', 'facebookBusinessAccounts'],
+        ['facebook', 'facebookBusinessAccountName']
       );
 
       // log out any errors from firestore fetch
-      if (error)
+      if (error && isMounted) {
+        // reset loading state
+        setLoading(false);
+        // set error state
+        setError('failed to read record from firestore');
         return console.error('Error: failed to read record from firestore');
+      }
 
       // if record exists, update state with firestore integration record
       if (record && record?.exists && isMounted) {
-        const { email } = record?.data();
+        const { email, fbBusinessAcctName, fbBusinessAcctId, fbAdAccountId } =
+          record?.data();
         // update firestore integration record state
-        setFirestoreIntegrationRecord({ email, hasFacebookIntegration: true });
+        setFirestoreIntegrationRecord({
+          email,
+          fbBusinessAcctName,
+          fbBusinessAcctId,
+          fbAdAccountId,
+          hasFacebookIntegration: true,
+        });
         // reset loading state
         setLoading(false);
       }
@@ -86,7 +121,7 @@ export const DashboardPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [currentUser, readRecordFromFirestore]);
+  }, [currentUser, readUserRecordFromFirestore]);
 
   // link credential with facebook authentication provider
   useEffect(() => {
@@ -285,9 +320,29 @@ export const DashboardPage = () => {
                     }
                   >
                     <Text>
+                      Facebook Business Account Name:{' '}
+                      <span style={{ fontWeight: '500' }}>
+                        {hasFirestoreIntegrationRecord.fbBusinessAcctName ??
+                          'N/A'}
+                      </span>
+                    </Text>
+                    <Text>
                       Facebook Business Account User:{' '}
                       <span style={{ fontWeight: '500' }}>
-                        {hasFirestoreIntegrationRecord.email}
+                        {hasFirestoreIntegrationRecord.email ?? 'N/A'}
+                      </span>
+                    </Text>
+                    <Text>
+                      Facebook Business Account Id:{' '}
+                      <span style={{ fontWeight: '500' }}>
+                        {hasFirestoreIntegrationRecord.fbBusinessAcctId ??
+                          'N/A'}
+                      </span>
+                    </Text>
+                    <Text>
+                      Facebook Ad Account Id:{' '}
+                      <span style={{ fontWeight: '500' }}>
+                        {hasFirestoreIntegrationRecord.fbAdAccountId ?? 'N/A'}
                       </span>
                     </Text>
                     <Text>

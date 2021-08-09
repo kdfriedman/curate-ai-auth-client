@@ -149,9 +149,6 @@ export const Header = () => {
               <Avatar bg="rgb(173, 181, 189)" />
             </MenuButton>
             <MenuList>
-              <MenuItem className="header__nav-profile-menu-item">
-                Settings
-              </MenuItem>
               {/* trigger logout event onClick */}
               <MenuItem
                 onClick={() => setLogoutEvent(true)}
