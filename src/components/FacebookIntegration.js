@@ -67,7 +67,6 @@ const FacebookAppIntegration = ({
   };
 
   // custom hook - firebase facebook auth
-  // const { facebookAuthData } = useFirebaseFBAuth(isFacebookLoginAction);
   const hasFacebookAuthData =
     facebookAuthData && Object.keys(facebookAuthData).length > 0;
 

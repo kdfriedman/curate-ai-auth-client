@@ -24,9 +24,17 @@ export const DashboardPage = () => {
   const [facebookAuth, setFacebookAuth] = useState({});
   const [isFacebookIntegrationClick, setFacebookIntegrationClick] =
     useState(false);
-  const { linkToProvider, currentUser } = useAuth();
+  const [isFacebookAddMoreAcctsClick, setFacebookAddMoreAcctsClick] =
+    useState(false);
+  const [hasFacebookAddMoreAcctsInit, setFacebookAddMoreAcctsInit] =
+    useState(false);
+  const [providerType, setProviderType] = useState(null);
+
+  const { linkToProvider, currentUser, unlinkProvider } = useAuth();
   const { readUserRecordFromFirestore } = firestoreHandlers;
 
+  // setup error map object to handle specific errors
+  // return function when errorMap object matches query via .get() method
   const errorMap = new Map();
   errorMap.set('auth/provider-already-linked', () => {
     return (
@@ -72,6 +80,7 @@ export const DashboardPage = () => {
     );
   });
 
+  /************************ 1st side effect - read from database ***************************/
   // read data from firebase to set integration state
   useEffect(() => {
     let isMounted = true;
@@ -82,8 +91,11 @@ export const DashboardPage = () => {
       // ****** FACEBOOK record ******
       // read facebook record from firestore to validate if integration exists
       const [record, error] = await readUserRecordFromFirestore(
+        // user id
         currentUser.uid,
+        // collections
         ['clients', 'integrations', 'facebookBusinessAccounts'],
+        // docs
         ['facebook', 'facebookBusinessAccountName']
       );
 
@@ -123,6 +135,7 @@ export const DashboardPage = () => {
     };
   }, [currentUser, readUserRecordFromFirestore]);
 
+  /************************ 2nd side effect - link provider with auth client  ***************************/
   // link credential with facebook authentication provider
   useEffect(() => {
     let isMounted = true;
@@ -174,6 +187,42 @@ export const DashboardPage = () => {
       isMounted = false;
     };
   }, [isFacebookIntegrationClick, linkToProvider]);
+
+  /************************ 3rd side effect - unlink provider to reset process of integration new account ***************************/
+  // work around to allow users to integrate multiple provider accounts under the same user
+  useEffect(() => {
+    let isMounted = true;
+    const unlinkAuthProvider = async (providerType) => {
+      // filter provider object by providerType param
+      const providerObj = currentUser.providerData.filter(
+        (providerObj) => providerObj?.providerId === providerType
+      )[0];
+      if (providerObj) {
+        // unlink provider by providerId
+        await unlinkProvider(currentUser, providerObj?.providerId);
+      }
+      if (isMounted) {
+        // start integration process over again
+        setFacebookIntegrationClick(true);
+        // reset facebook add more accts click state
+        setFacebookAddMoreAcctsClick(false);
+        // trigger add more accts action
+        setFacebookAddMoreAcctsInit(true);
+      }
+    };
+    if (isFacebookAddMoreAcctsClick && hasFirestoreIntegrationRecord) {
+      unlinkAuthProvider(providerType);
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    isFacebookAddMoreAcctsClick,
+    hasFirestoreIntegrationRecord,
+    currentUser,
+    providerType,
+    unlinkProvider,
+  ]);
 
   return (
     <>
@@ -247,6 +296,39 @@ export const DashboardPage = () => {
                     Log In With Facebook
                   </span>
                 </Button>
+              )}
+              {hasFirestoreIntegrationRecord && (
+                <>
+                  <Text
+                    fontWeight="500"
+                    fontSize="13px"
+                    color="rgb(26, 32, 44)"
+                    textAlign="center"
+                    marginTop="1rem"
+                  >
+                    Add a new business account
+                  </Text>
+                  <Button
+                    onClick={() => {
+                      // init side effect to add a new fb business account
+                      setFacebookAddMoreAcctsClick(true);
+                      // set provider type to facebook.com
+                      setProviderType('facebook.com');
+                    }}
+                    _hover={{
+                      opacity: '.8',
+                      textDecoration: 'none',
+                    }}
+                    color="#fff"
+                    height="40px"
+                    backgroundColor="#635bff"
+                    marginTop="7px"
+                    width="10rem"
+                    alignSelf="center"
+                  >
+                    Add Account
+                  </Button>
+                </>
               )}
             </Box>
 
@@ -353,7 +435,18 @@ export const DashboardPage = () => {
                     </Text>
                   </Box>
                 )}
+                {/* invoke FB integration component on first integration action */}
                 {!hasFirestoreIntegrationRecord &&
+                  Object.keys(facebookAuth).length > 0 && (
+                    <FacebookAppIntegration
+                      facebookAuthData={facebookAuth}
+                      setFirestoreIntegrationRecord={
+                        setFirestoreIntegrationRecord
+                      }
+                    />
+                  )}
+                {/* specific invocation of FB Integration component for add more accts action*/}
+                {hasFacebookAddMoreAcctsInit &&
                   Object.keys(facebookAuth).length > 0 && (
                     <FacebookAppIntegration
                       facebookAuthData={facebookAuth}
