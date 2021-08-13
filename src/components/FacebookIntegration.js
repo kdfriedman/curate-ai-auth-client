@@ -53,10 +53,26 @@ const FacebookAppIntegration = ({
 
   // generic error handler for fb specific api response errors
   const catchErrors = (error) => {
+    // custom errors
+    if (error?.isCustom) {
+      dispatch({
+        type: 'hasErrors',
+        payload: {
+          errMsg: error?.errMsg,
+          errUserMsg: error?.errUserMsg,
+        },
+      });
+      return console.error({
+        isCustom: error?.isCustom,
+        errMsg: error?.errMsg,
+        errUserMsg: error?.errUserMsg,
+      });
+    }
+    // fb vendor specific errors
     dispatch({
       type: 'hasErrors',
       payload: {
-        errMessage: error?.response?.data?.error?.message,
+        errMsg: error?.response?.data?.error?.message,
         errUserMsg: error?.response?.data?.error?.error_user_msg,
       },
     });
@@ -115,9 +131,12 @@ const FacebookAppIntegration = ({
           payload: true,
         });
       } else {
-        console.error(
-          `Error: userBusinessList has a falsy value - ${userBusinessList}`
-        );
+        catchErrors({
+          isCustom: true,
+          errMsg:
+            'User must be logged into facebook with an account that has one or more associated facebook business accounts.',
+          errUserMsg: 'Error: userBusinessList is empty array',
+        });
       }
     };
     if (hasFacebookAuthData) {
@@ -236,7 +255,8 @@ const FacebookAppIntegration = ({
         });
       } else {
         console.error(
-          `Error: userBusinessList has a falsy value - ${adAcctAssetList}`
+          'Error: adAcctAssetList has a falsy value:',
+          adAcctAssetList
         );
       }
     };
@@ -417,13 +437,11 @@ const FacebookAppIntegration = ({
 
       {hasErrors && (
         <>
-          <Text margin="1rem 0 0 2rem" color="#c5221f">
+          <Text margin="1rem 2rem 0 2rem" color="#c5221f">
             Oops, we've encountered an error. Please contact our{' '}
             <Link
               href={`mailto:ryanwelling@gmail.com?cc=kev.d.friedman@gmail.com&subject=CurateApp.AI%20Integration%20Error&body=Error: ${
-                hasErrors?.errMessage
-                  ? hasErrors?.errMessage
-                  : hasErrors?.errUserMsg
+                hasErrors?.errMsg ? hasErrors?.errMsg : hasErrors?.errUserMsg
               }`}
             >
               <span style={{ textDecoration: 'underline' }}>
@@ -431,11 +449,9 @@ const FacebookAppIntegration = ({
               </span>
             </Link>
           </Text>
-          <Text margin="1rem 0 0 2rem" color="#c5221f">
-            Error:
-            {hasErrors?.errMessage
-              ? hasErrors?.errMessage
-              : hasErrors?.errUserMsg}
+          <Text margin="1rem 2rem 0 2rem" color="#c5221f">
+            Error:{' '}
+            {hasErrors?.errMsg ? hasErrors?.errMsg : hasErrors?.errUserMsg}
           </Text>
         </>
       )}
