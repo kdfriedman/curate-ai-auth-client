@@ -154,7 +154,12 @@ const FacebookAppIntegration = ({
     if (hasFacebookAuthData) {
       handleAsyncWork();
     }
-  }, [hasFacebookAuthData, facebookAuthData]);
+  }, [
+    hasFacebookAuthData,
+    facebookAuthData,
+    setIntegrationError,
+    setProviderType,
+  ]);
 
   /******* 
   2nd useEffect hook - connect partner business with client business, 
