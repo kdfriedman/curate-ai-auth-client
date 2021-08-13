@@ -24,8 +24,7 @@ export const DashboardPage = () => {
   const [facebookAuth, setFacebookAuth] = useState({});
   const [isFacebookIntegrationClick, setFacebookIntegrationClick] =
     useState(false);
-  const [isFacebookAddMoreAcctsClick, setFacebookAddMoreAcctsClick] =
-    useState(false);
+  const [isAddMoreAcctsClick, setAddMoreAcctsClick] = useState(false);
   const [hasFacebookAddMoreAcctsInit, setFacebookAddMoreAcctsInit] =
     useState(false);
   const [providerType, setProviderType] = useState(null);
@@ -94,9 +93,9 @@ export const DashboardPage = () => {
         // user id
         currentUser.uid,
         // collections
-        ['clients', 'integrations', 'facebookBusinessAccounts'],
+        ['clients', 'integrations'],
         // docs
-        ['facebook', 'facebookBusinessAccountName']
+        ['facebook']
       );
 
       // log out any errors from firestore fetch
@@ -110,15 +109,10 @@ export const DashboardPage = () => {
 
       // if record exists, update state with firestore integration record
       if (record && record?.exists && isMounted) {
-        const { email, fbBusinessAcctName, fbBusinessAcctId, fbAdAccountId } =
-          record?.data();
+        const { facebookBusinessAccts } = record?.data();
         // update firestore integration record state
         setFirestoreIntegrationRecord({
-          email,
-          fbBusinessAcctName,
-          fbBusinessAcctId,
-          fbAdAccountId,
-          hasFacebookIntegration: true,
+          facebookBusinessAccts,
         });
         // reset loading state
         setLoading(false);
@@ -205,19 +199,19 @@ export const DashboardPage = () => {
         // start integration process over again
         setFacebookIntegrationClick(true);
         // reset facebook add more accts click state
-        setFacebookAddMoreAcctsClick(false);
+        setAddMoreAcctsClick(false);
         // trigger add more accts action
         setFacebookAddMoreAcctsInit(true);
       }
     };
-    if (isFacebookAddMoreAcctsClick && hasFirestoreIntegrationRecord) {
+    if (isAddMoreAcctsClick && hasFirestoreIntegrationRecord) {
       unlinkAuthProvider(providerType);
     }
     return () => {
       isMounted = false;
     };
   }, [
-    isFacebookAddMoreAcctsClick,
+    isAddMoreAcctsClick,
     hasFirestoreIntegrationRecord,
     currentUser,
     providerType,
@@ -311,7 +305,7 @@ export const DashboardPage = () => {
                   <Button
                     onClick={() => {
                       // init side effect to add a new fb business account
-                      setFacebookAddMoreAcctsClick(true);
+                      setAddMoreAcctsClick(true);
                       // set provider type to facebook.com
                       setProviderType('facebook.com');
                     }}
@@ -387,53 +381,42 @@ export const DashboardPage = () => {
                       Get started now by integrating your Facebook account.
                     </Box>
                   )}
+
                 {!hasFirestoreIntegrationRecord && hasError && (
                   <>{errorMap.get(hasError)()}</>
                 )}
+
                 {hasFirestoreIntegrationRecord && (
-                  <Box
-                    fontWeight="800"
-                    fontSize="14px"
-                    color="rgb(26, 32, 44)"
-                    padding={
-                      isEqualToOrLessThan800[0]
-                        ? '.5rem 0 0 0'
-                        : '.5rem 0 0 2rem'
-                    }
-                  >
-                    <Text>
-                      Facebook Business Account Name:{' '}
-                      <span style={{ fontWeight: '500' }}>
-                        {hasFirestoreIntegrationRecord.fbBusinessAcctName ??
-                          'N/A'}
-                      </span>
-                    </Text>
-                    <Text>
-                      Facebook Business Account User:{' '}
-                      <span style={{ fontWeight: '500' }}>
-                        {hasFirestoreIntegrationRecord.email ?? 'N/A'}
-                      </span>
-                    </Text>
-                    <Text>
-                      Facebook Business Account Id:{' '}
-                      <span style={{ fontWeight: '500' }}>
-                        {hasFirestoreIntegrationRecord.fbBusinessAcctId ??
-                          'N/A'}
-                      </span>
-                    </Text>
-                    <Text>
-                      Facebook Ad Account Id:{' '}
-                      <span style={{ fontWeight: '500' }}>
-                        {hasFirestoreIntegrationRecord.fbAdAccountId ?? 'N/A'}
-                      </span>
-                    </Text>
-                    <Text>
-                      System User created:{' '}
-                      <span style={{ fontWeight: '500' }}>
-                        {`${hasFirestoreIntegrationRecord.hasFacebookIntegration}`}
-                      </span>
-                    </Text>
-                  </Box>
+                  <>
+                    {console.log(hasFirestoreIntegrationRecord)}
+                    {hasFirestoreIntegrationRecord.facebookBusinessAccts.map(
+                      (firestoreRecord) => {
+                        return (
+                          <Box
+                            key={firestoreRecord.id}
+                            fontWeight="800"
+                            fontSize="14px"
+                            color="rgb(26, 32, 44)"
+                            padding={
+                              isEqualToOrLessThan800[0]
+                                ? '.5rem 0 0 0'
+                                : '.5rem 0 0 2rem'
+                            }
+                          >
+                            <Text key={firestoreRecord.id}>
+                              Facebook Business Account Name:{' '}
+                              <span
+                                key={firestoreRecord.id}
+                                style={{ fontWeight: '500' }}
+                              >
+                                {firestoreRecord.fbBusinessAcctName ?? 'N/A'}
+                              </span>
+                            </Text>
+                          </Box>
+                        );
+                      }
+                    )}
+                  </>
                 )}
                 {/* invoke FB integration component on first integration action */}
                 {!hasFirestoreIntegrationRecord &&

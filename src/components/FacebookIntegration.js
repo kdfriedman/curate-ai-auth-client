@@ -3,6 +3,7 @@ import fetchData from '../services/fetch/fetch';
 import AcctSelector from './AcctSelector';
 import firestoreHandlers from '../services/firebase/data/firestore';
 import { Progress, Text, Link } from '@chakra-ui/react';
+import { v4 as uuidv4 } from 'uuid';
 
 const FacebookAppIntegration = ({
   facebookAuthData,
@@ -280,27 +281,26 @@ const FacebookAppIntegration = ({
         uid: facebookAuthData.user.uid,
         email: facebookAuthData.user.email,
         sysUserAccessToken,
-        fbBusinessAcctName: fbBusinessAcctName[0].name,
-        fbBusinessAcctId: userBusinessId,
-        fbAdAccountId: businessAssetId,
+        businessAcctName: fbBusinessAcctName[0].name,
+        businessAcctId: userBusinessId,
+        adAccountId: businessAssetId,
+        id: uuidv4(),
+        createdAt: new Date().toISOString(),
       };
 
       // update firestore with system user access token, auth uid, and email
       await addRecordToFirestore(
         facebookAuthData.user.uid,
-        ['clients', 'integrations', 'facebookBusinessAccounts'],
-        ['facebook', 'facebookBusinessAccountName'],
-        facebookFirebasePayload
+        ['clients', 'integrations'],
+        ['facebook'],
+        facebookFirebasePayload,
+        'facebookBusinessAccts'
       );
 
       if (isMounted) {
         // update parent component with firestore new record data
         setFirestoreIntegrationRecord({
-          email: facebookAuthData.user.email,
-          hasFacebookIntegration: true,
-          fbBusinessAcctName: fbBusinessAcctName[0].name,
-          fbBusinessAcctId: userBusinessId,
-          fbAdAccountId: businessAssetId,
+          facebookBusinessAccts: [facebookFirebasePayload],
         });
       }
 
