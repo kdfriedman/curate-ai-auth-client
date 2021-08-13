@@ -7,6 +7,8 @@ import { Progress, Text, Link } from '@chakra-ui/react';
 const FacebookAppIntegration = ({
   facebookAuthData,
   setFirestoreIntegrationRecord,
+  setIntegrationError,
+  setProviderType,
 }) => {
   // destructure firestore handlers
   const { addRecordToFirestore, readCurateAIRecordFromFirestore } =
@@ -92,6 +94,7 @@ const FacebookAppIntegration = ({
   fetch user business accts list 
   *******/
   useEffect(() => {
+    let isMounted = true;
     // async wrapper function to allow multiple requests
     const handleAsyncWork = async () => {
       // fetch account user data
@@ -137,7 +140,16 @@ const FacebookAppIntegration = ({
             'User must be logged into facebook with an account that has one or more associated facebook business accounts.',
           errUserMsg: 'Error: userBusinessList is empty array',
         });
+        if (isMounted) {
+          setIntegrationError(
+            'User must be logged into facebook with an account that has one or more associated facebook business accounts.'
+          );
+          setProviderType('facebook.com');
+        }
       }
+      return () => {
+        isMounted = false;
+      };
     };
     if (hasFacebookAuthData) {
       handleAsyncWork();

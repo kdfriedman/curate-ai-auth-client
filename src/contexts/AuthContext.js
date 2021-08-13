@@ -15,6 +15,10 @@ export const AuthProvider = ({ children }) => {
     return auth.currentUser.linkWithPopup(provider);
   };
 
+  const unlinkProvider = (user, providerId) => {
+    return user.unlink(providerId);
+  };
+
   const login = (email, password) => {
     return auth.signInWithEmailAndPassword(email, password);
   };
@@ -52,6 +56,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     resetPassword,
     linkToProvider,
+    unlinkProvider,
     verifyPasswordResetRequest,
     confirmPasswordResetRequest,
   };

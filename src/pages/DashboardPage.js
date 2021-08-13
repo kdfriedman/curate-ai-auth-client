@@ -17,14 +17,16 @@ import { FaFacebook } from 'react-icons/fa';
 
 export const DashboardPage = () => {
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
-  const [hasError, setError] = useState(null);
+  const [hasError, setError] = useState(false);
+  const [hasIntegrationError, setIntegrationError] = useState(null);
+  const [providerType, setProviderType] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const [hasFirestoreIntegrationRecord, setFirestoreIntegrationRecord] =
     useState(null);
   const [facebookAuth, setFacebookAuth] = useState({});
   const [isFacebookIntegrationClick, setFacebookIntegrationClick] =
     useState(false);
-  const { linkToProvider, currentUser } = useAuth();
+  const { linkToProvider, unlinkProvider, currentUser } = useAuth();
   const { readUserRecordFromFirestore } = firestoreHandlers;
 
   const errorMap = new Map();
@@ -130,6 +132,7 @@ export const DashboardPage = () => {
     const linkAuthProviders = async () => {
       // set loading state
       setLoading(true);
+
       try {
         // link facebook provider which will promt fb dialog login module
         const result = await linkToProvider(provider);
@@ -151,21 +154,23 @@ export const DashboardPage = () => {
         // Handle Errors here.
         const errorCode = error.code;
         const errorMessage = error.message;
-        // The email of the user's account used.
-        const email = error.email;
-        // The AuthCredential type that was used.
-        const credential = error.credential;
         // log errors
-        console.error({ errorCode, errorMessage, email, credential });
+        console.error({ errorCode, errorMessage });
         // reset loading state
         setLoading(false);
+        // reset facebook integration click event state
+        setFacebookIntegrationClick(false);
         // set error state
         setError(errorCode);
       }
     };
 
     // check if integration action is fb login click
-    if (isFacebookIntegrationClick) {
+    if (
+      isFacebookIntegrationClick &&
+      !hasFirestoreIntegrationRecord &&
+      !hasError
+    ) {
       linkAuthProviders();
     }
 
@@ -173,7 +178,52 @@ export const DashboardPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [isFacebookIntegrationClick, linkToProvider]);
+  }, [
+    isFacebookIntegrationClick,
+    linkToProvider,
+    hasError,
+    hasFirestoreIntegrationRecord,
+    currentUser,
+  ]);
+
+  // unlink auth provider when integration error occurs
+  useEffect(() => {
+    let isMounted = true;
+    const unlinkAuthProvider = async () => {
+      // if linked provider error occurs, unlink provider first before handling error further
+      try {
+        // filter provider object by providerType param
+        const providerObj = currentUser.providerData.filter(
+          (providerObj) => providerObj?.providerId === providerType
+        )[0];
+        // unlink provider by providerId
+        await unlinkProvider(currentUser, providerObj?.providerId);
+        console.log(`${providerType} unlinked`);
+
+        if (isMounted) {
+          // reset integration error
+          setIntegrationError(null);
+          // reset provider type
+          setProviderType(null);
+        }
+      } catch (err) {
+        if (isMounted) {
+          // reset integration error
+          setIntegrationError(null);
+          // reset provider type
+          setProviderType(null);
+        }
+        console.error({ errMsg: 'unlinkedProvider has err', err });
+      }
+    };
+
+    if (hasIntegrationError && providerType) {
+      unlinkAuthProvider();
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser, hasIntegrationError, providerType, unlinkProvider]);
 
   return (
     <>
@@ -227,7 +277,10 @@ export const DashboardPage = () => {
               </Flex>
               {!hasFirestoreIntegrationRecord && (
                 <Button
-                  onClick={() => setFacebookIntegrationClick(true)}
+                  onClick={() => {
+                    // set facebook integration click
+                    setFacebookIntegrationClick(true);
+                  }}
                   _hover={{
                     opacity: '.8',
                     textDecoration: 'none',
@@ -360,6 +413,8 @@ export const DashboardPage = () => {
                       setFirestoreIntegrationRecord={
                         setFirestoreIntegrationRecord
                       }
+                      setIntegrationError={setIntegrationError}
+                      setProviderType={setProviderType}
                     />
                   )}
               </Flex>
