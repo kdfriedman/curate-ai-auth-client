@@ -26,11 +26,12 @@ export const DashboardPage = () => {
   const [facebookAuth, setFacebookAuth] = useState({});
   const [isFacebookIntegrationClick, setFacebookIntegrationClick] =
     useState(false);
-  const { linkToProvider, unlinkProvider, currentUser } = useAuth();
+  const { linkToProvider, unlinkProvider, currentUser, getRedirectResult } =
+    useAuth();
   const { readUserRecordFromFirestore } = firestoreHandlers;
 
   const errorMap = new Map();
-  errorMap.set('auth/provider-already-linked', () => {
+  const errorHandler = () => {
     return (
       <Text
         fontSize="13px"
@@ -39,40 +40,20 @@ export const DashboardPage = () => {
         className="error__provider-already-linked"
         padding={isEqualToOrLessThan800[0] ? '1rem 0 0 0' : '1rem 2rem 0 2rem'}
       >
-        Error: Users can only integrate with one Facebook business account.{' '}
-        <br />
-        <br /> If you need to integrate with a separate account or have any
-        other questions, please reach out to{' '}
+        Error: Oops there's been an error. Please reach out to{' '}
         <Link
           textDecoration="underline"
           href="mailto:ryanwelling@gmail.com?cc=kev.d.friedman@gmail.com&amp;subject=CurateAI%20Technical%20Support"
         >
-          our tech team.
-        </Link>
+          our tech team
+        </Link>{' '}
+        for assistance.
       </Text>
     );
-  });
-  errorMap.set('failed to read record from firestore', () => {
-    return (
-      <Text
-        fontSize="13px"
-        color="#c5221f"
-        fontWeight="500"
-        className="error__provider-already-linked"
-        padding={isEqualToOrLessThan800[0] ? '1rem 0 0 0' : '1rem 2rem 0 2rem'}
-      >
-        Error: Failed to read record from database. <br />
-        <br /> Please reach out to{' '}
-        <Link
-          textDecoration="underline"
-          href="mailto:ryanwelling@gmail.com?cc=kev.d.friedman@gmail.com&amp;subject=CurateAI%20Technical%20Support"
-        >
-          our tech team.
-        </Link>
-        for further assistance.
-      </Text>
-    );
-  });
+  };
+  errorMap.set('auth/popup-closed-by-user', errorHandler);
+  errorMap.set('auth/provider-already-linked', errorHandler);
+  errorMap.set('failed to read record from firestore', errorHandler);
 
   // read data from firebase to set integration state
   useEffect(() => {
@@ -127,15 +108,54 @@ export const DashboardPage = () => {
 
   // link credential with facebook authentication provider
   useEffect(() => {
-    let isMounted = true;
-
     const linkAuthProviders = async () => {
       // set loading state
       setLoading(true);
 
       try {
         // link facebook provider which will promt fb dialog login module
-        const result = await linkToProvider(provider);
+        await linkToProvider(provider);
+      } catch (error) {
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // log errors
+        console.error({ errorCode, errorMessage });
+        // reset loading state
+        setLoading(false);
+        // reset facebook integration click event state
+        setFacebookIntegrationClick(false);
+        // set error state
+        setError(errorCode);
+      }
+    };
+
+    // check if integration action is fb login click
+    if (
+      isFacebookIntegrationClick &&
+      !hasFirestoreIntegrationRecord &&
+      !hasError
+    ) {
+      linkAuthProviders();
+    }
+  }, [
+    isFacebookIntegrationClick,
+    linkToProvider,
+    hasError,
+    hasFirestoreIntegrationRecord,
+    currentUser,
+  ]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const getRedirectResultsFromProvider = async () => {
+      // set loading state
+      setLoading(true);
+      try {
+        const result = await getRedirectResult();
+        // check that result exists
+        if (!result?.credential) return;
+
         // facebook credential
         const credential = result.credential;
         // The signed-in user info.
@@ -165,26 +185,13 @@ export const DashboardPage = () => {
       }
     };
 
-    // check if integration action is fb login click
-    if (
-      isFacebookIntegrationClick &&
-      !hasFirestoreIntegrationRecord &&
-      !hasError
-    ) {
-      linkAuthProviders();
-    }
+    // load redirect data from provider's auth
+    getRedirectResultsFromProvider();
 
-    // clean up function to represent unmount of the component
     return () => {
       isMounted = false;
     };
-  }, [
-    isFacebookIntegrationClick,
-    linkToProvider,
-    hasError,
-    hasFirestoreIntegrationRecord,
-    currentUser,
-  ]);
+  }, [getRedirectResult]);
 
   // unlink auth provider when integration error occurs
   useEffect(() => {

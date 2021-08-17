@@ -6,3 +6,4 @@ export const provider = new firebase.auth.FacebookAuthProvider();
 provider.addScope(
   'business_management, public_profile, ads_read, read_insights'
 );
+provider.setCustomParameters({ auth_type: 'reauthenticate' });

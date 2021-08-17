@@ -137,7 +137,7 @@ const FacebookAppIntegration = ({
         catchErrors({
           isCustom: true,
           errMsg:
-            'User must be logged into facebook with an account that has one or more associated facebook business accounts.',
+            'User must be logged into facebook with an account that has one or more associated facebook business accounts. Log into facebook.com to select a different account.',
           errUserMsg: 'Error: userBusinessList is empty array',
         });
         if (isMounted) {
