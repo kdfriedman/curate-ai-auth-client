@@ -151,6 +151,8 @@ export const DashboardPage = () => {
     currentUser,
   ]);
 
+  /************************ 3rd side effect - get redirect results from vendor  ***************************/
+  // receive results from redirected auth login
   useEffect(() => {
     let isMounted = true;
     const getRedirectResultsFromProvider = async () => {
@@ -198,6 +200,7 @@ export const DashboardPage = () => {
     };
   }, [getRedirectResult]);
 
+  /************************ 4th side effect - unlink auth provider  ***************************/
   // unlink auth provider when integration error occurs
   useEffect(() => {
     let isMounted = true;
@@ -462,12 +465,39 @@ export const DashboardPage = () => {
                             }
                           >
                             <Text key={firestoreRecord.id}>
+                              Facebook User Email:{' '}
+                              <span
+                                key={firestoreRecord.id}
+                                style={{ fontWeight: '500' }}
+                              >
+                                {firestoreRecord.email ?? 'N/A'}
+                              </span>
+                            </Text>
+                            <Text key={firestoreRecord.id}>
                               Facebook Business Account Name:{' '}
                               <span
                                 key={firestoreRecord.id}
                                 style={{ fontWeight: '500' }}
                               >
-                                {firestoreRecord.fbBusinessAcctName ?? 'N/A'}
+                                {firestoreRecord.businessAcctName ?? 'N/A'}
+                              </span>
+                            </Text>
+                            <Text key={firestoreRecord.id}>
+                              Facebook Business Account Id:{' '}
+                              <span
+                                key={firestoreRecord.id}
+                                style={{ fontWeight: '500' }}
+                              >
+                                {firestoreRecord.businessAcctId ?? 'N/A'}
+                              </span>
+                            </Text>
+                            <Text key={firestoreRecord.id}>
+                              Facebook Ad Account Id:{' '}
+                              <span
+                                key={firestoreRecord.id}
+                                style={{ fontWeight: '500' }}
+                              >
+                                {firestoreRecord.adAccountId ?? 'N/A'}
                               </span>
                             </Text>
                           </Box>
