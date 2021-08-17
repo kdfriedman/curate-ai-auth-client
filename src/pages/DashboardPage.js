@@ -464,39 +464,29 @@ export const DashboardPage = () => {
                                 : '.5rem 0 0 2rem'
                             }
                           >
-                            <Text key={firestoreRecord.id}>
+                            <Text key={`user-email-${firestoreRecord.id}`}>
                               Facebook User Email:{' '}
-                              <span
-                                key={firestoreRecord.id}
-                                style={{ fontWeight: '500' }}
-                              >
+                              <span style={{ fontWeight: '500' }}>
                                 {firestoreRecord.email ?? 'N/A'}
                               </span>
                             </Text>
-                            <Text key={firestoreRecord.id}>
+                            <Text
+                              key={`business-account-${firestoreRecord.id}`}
+                            >
                               Facebook Business Account Name:{' '}
-                              <span
-                                key={firestoreRecord.id}
-                                style={{ fontWeight: '500' }}
-                              >
+                              <span style={{ fontWeight: '500' }}>
                                 {firestoreRecord.businessAcctName ?? 'N/A'}
                               </span>
                             </Text>
-                            <Text key={firestoreRecord.id}>
+                            <Text key={`business-id-${firestoreRecord.id}`}>
                               Facebook Business Account Id:{' '}
-                              <span
-                                key={firestoreRecord.id}
-                                style={{ fontWeight: '500' }}
-                              >
+                              <span style={{ fontWeight: '500' }}>
                                 {firestoreRecord.businessAcctId ?? 'N/A'}
                               </span>
                             </Text>
-                            <Text key={firestoreRecord.id}>
+                            <Text key={`ad-account-id-${firestoreRecord.id}`}>
                               Facebook Ad Account Id:{' '}
-                              <span
-                                key={firestoreRecord.id}
-                                style={{ fontWeight: '500' }}
-                              >
+                              <span style={{ fontWeight: '500' }}>
                                 {firestoreRecord.adAccountId ?? 'N/A'}
                               </span>
                             </Text>
