@@ -226,7 +226,7 @@ export const DashboardPage = () => {
 
       {(!isLoading || !addMoreFacebookBusinessAccountsLoading) && (
         <Box className="dashboard__container">
-          <section className="dashboard__integrations-container">
+          <section className="dashboard__integration-container">
             <Box
               gridColumn={
                 isEqualToOrLessThan800[0] ? '1 / span 3' : '1 / span 2'
@@ -351,6 +351,25 @@ export const DashboardPage = () => {
                 >
                   Facebook
                 </Box>
+                {/* invoke FB integration component on first integration action */}
+                {!hasIntegrationRecord &&
+                  Object.keys(facebookAuth).length > 0 && (
+                    <FacebookAppIntegration
+                      facebookAuthData={facebookAuth}
+                      setIntegrationRecord={setIntegrationRecord}
+                      setIntegrationError={setIntegrationError}
+                      setProviderType={setProviderType}
+                    />
+                  )}
+                {/* specific invocation of FB Integration component for add more accts action*/}
+                {addMoreFacebookBusinessAccountsAuth &&
+                  Object.keys(addMoreFacebookBusinessAccountsAuth).length >
+                    0 && (
+                    <FacebookAppIntegration
+                      facebookAuthData={addMoreFacebookBusinessAccountsAuth}
+                      setIntegrationRecord={setIntegrationRecord}
+                    />
+                  )}
                 {!hasIntegrationRecord &&
                   Object.keys(facebookAuth).length === 0 && (
                     <Box
@@ -385,66 +404,61 @@ export const DashboardPage = () => {
                     {hasIntegrationRecord.facebookBusinessAccts.map(
                       (record) => {
                         return (
-                          <Box
+                          <Flex
                             key={record.id}
-                            fontWeight="800"
-                            fontSize="14px"
-                            color="rgb(26, 32, 44)"
-                            padding={
-                              isEqualToOrLessThan800[0]
-                                ? '.5rem 0 0 0'
-                                : '.5rem 0 0 2rem'
-                            }
+                            flexDir="row"
+                            className="dashboard__integration-vendor-card-container"
                           >
-                            <Text key={`user-email-${record.id}`}>
-                              User Email:{' '}
-                              <span style={{ fontWeight: '500' }}>
-                                {record.email ?? 'N/A'}
-                              </span>
-                            </Text>
-                            <Text key={`business-account-${record.id}`}>
-                              Business Account Name:{' '}
-                              <span style={{ fontWeight: '500' }}>
-                                {record.businessAcctName ?? 'N/A'}
-                              </span>
-                            </Text>
-                            <Text key={`business-id-${record.id}`}>
-                              Business Account Id:{' '}
-                              <span style={{ fontWeight: '500' }}>
-                                {record.businessAcctId ?? 'N/A'}
-                              </span>
-                            </Text>
-                            <Text key={`ad-account-id-${record.id}`}>
-                              Ad Account Id:{' '}
-                              <span style={{ fontWeight: '500' }}>
-                                {record.adAccountId ?? 'N/A'}
-                              </span>
-                            </Text>
-                          </Box>
+                            <Box
+                              className="dashboard__integration-vendor-card"
+                              key={`vendor-card-${record.id}`}
+                              fontWeight="800"
+                              fontSize="14px"
+                              color="rgb(26, 32, 44)"
+                              minWidth="25rem"
+                              padding={
+                                isEqualToOrLessThan800[0]
+                                  ? '.5rem 0 0 0'
+                                  : '1rem 2rem'
+                              }
+                            >
+                              <Text key={`user-email-${record.id}`}>
+                                User Email:{' '}
+                                <span style={{ fontWeight: '500' }}>
+                                  {record.email ?? 'N/A'}
+                                </span>
+                              </Text>
+                              <Text key={`business-account-${record.id}`}>
+                                Business Account Name:{' '}
+                                <span style={{ fontWeight: '500' }}>
+                                  {record.businessAcctName ?? 'N/A'}
+                                </span>
+                              </Text>
+                              <Text key={`business-id-${record.id}`}>
+                                Business Account Id:{' '}
+                                <span style={{ fontWeight: '500' }}>
+                                  {record.businessAcctId ?? 'N/A'}
+                                </span>
+                              </Text>
+                              <Text key={`ad-account-id-${record.id}`}>
+                                Ad Account Id:{' '}
+                                <span style={{ fontWeight: '500' }}>
+                                  {record.adAccountId ?? 'N/A'}
+                                </span>
+                              </Text>
+                            </Box>
+                            <Button
+                              marginTop=".5rem"
+                              className="dashboard__integration-vendor-card-remove-btn"
+                            >
+                              Remove Account
+                            </Button>
+                          </Flex>
                         );
                       }
                     )}
                   </>
                 )}
-                {/* invoke FB integration component on first integration action */}
-                {!hasIntegrationRecord &&
-                  Object.keys(facebookAuth).length > 0 && (
-                    <FacebookAppIntegration
-                      facebookAuthData={facebookAuth}
-                      setIntegrationRecord={setIntegrationRecord}
-                      setIntegrationError={setIntegrationError}
-                      setProviderType={setProviderType}
-                    />
-                  )}
-                {/* specific invocation of FB Integration component for add more accts action*/}
-                {addMoreFacebookBusinessAccountsAuth &&
-                  Object.keys(addMoreFacebookBusinessAccountsAuth).length >
-                    0 && (
-                    <FacebookAppIntegration
-                      facebookAuthData={addMoreFacebookBusinessAccountsAuth}
-                      setIntegrationRecord={setIntegrationRecord}
-                    />
-                  )}
               </Flex>
             </Box>
           </section>

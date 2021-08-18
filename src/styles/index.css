@@ -120,17 +120,17 @@ svg.header__nav-hamburger-menu {
 }
 
 /* dashboard component integration widget card container */
-.dashboard__integrations-container {
+.dashboard__integration-container {
   display: grid;
   margin: 1rem;
   padding: 1rem;
   grid-gap: 10px;
   grid-template-columns: 10rem 5rem;
-  height: 20rem;
+  min-height: 20rem;
 }
 
 @media (max-width: 800px) {
-  .dashboard__integrations-container {
+  .dashboard__integration-container {
     grid-gap: 10px;
     grid-template-rows: 1fr 1fr;
     justify-content: center;

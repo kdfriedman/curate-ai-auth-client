@@ -12,8 +12,11 @@ const FacebookAppIntegration = ({
   setProviderType,
 }) => {
   // destructure firestore handlers
-  const { addRecordToFirestore, readCurateAIRecordFromFirestore } =
-    firestoreHandlers;
+  const {
+    addRecordToFirestore,
+    readCurateAIRecordFromFirestore,
+    readUserRecordFromFirestore,
+  } = firestoreHandlers;
 
   // setup useReducer callback function
   const reducer = (state, action) => {
@@ -376,9 +379,18 @@ const FacebookAppIntegration = ({
         facebookFirebasePayload,
         'facebookBusinessAccts'
       );
+      // read facebook record from firestore to validate if integration exists
+      const [record, error] = await readUserRecordFromFirestore(
+        // user id
+        facebookAuthData.user.uid,
+        // collections
+        ['clients', 'integrations'],
+        // docs
+        ['facebook']
+      );
 
       if (isMounted) {
-        if (addedFirestoreRecord?.warnMsg) {
+        if (addedFirestoreRecord?.warnMsg ?? error) {
           // reset business asset it to prevent 3rd useEffect from firing
           dispatch({
             type: 'businessAssetId',
@@ -396,31 +408,34 @@ const FacebookAppIntegration = ({
             payload: false,
           });
           return catchErrors({
-            errMsg: addedFirestoreRecord.adAcctInUse,
-            errUserMsg: addedFirestoreRecord.warnMsg,
+            errMsg: addedFirestoreRecord?.adAcctInUse ?? error,
+            errUserMsg: addedFirestoreRecord?.warnMsg ?? error,
             isCustom: true,
           });
         }
-        // update parent component with firestore new record data
-        setIntegrationRecord({
-          facebookBusinessAccts: [facebookFirebasePayload],
-        });
-        // reset business asset it to prevent 3rd useEffect from firing
-        dispatch({
-          type: 'businessAssetId',
-          payload: null,
-        });
+        if (record?.exists) {
+          const { facebookBusinessAccts } = record?.data();
+          // update parent component with firestore new record data
+          setIntegrationRecord({
+            facebookBusinessAccts,
+          });
+          // reset business asset it to prevent 3rd useEffect from firing
+          dispatch({
+            type: 'businessAssetId',
+            payload: null,
+          });
 
-        dispatch({
-          type: 'businessSystemUserId',
-          payload: null,
-        });
+          dispatch({
+            type: 'businessSystemUserId',
+            payload: null,
+          });
 
-        // set isLoading to true to render progress
-        dispatch({
-          type: 'isLoading',
-          payload: false,
-        });
+          // set isLoading to true to render progress
+          dispatch({
+            type: 'isLoading',
+            payload: false,
+          });
+        }
       }
     };
     if (businessAssetId) {
@@ -439,6 +454,7 @@ const FacebookAppIntegration = ({
     setIntegrationRecord,
     userBusinessId,
     userBusinessList,
+    readUserRecordFromFirestore,
   ]);
 
   // handle user business list select element event
@@ -489,7 +505,7 @@ const FacebookAppIntegration = ({
           colorScheme="brand"
           size="xs"
           className="loading__progress"
-          margin="1rem 0 0 2rem"
+          margin="1rem 0 2rem 2rem"
           width="20rem"
           isIndeterminate
         />
