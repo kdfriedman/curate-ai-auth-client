@@ -21,7 +21,10 @@ import { useIntegrationError } from '../hooks/useIntegrationError';
 import { useAddMoreFacebookBusinessAccounts } from '../hooks/useAddMoreFacebookBusinessAccounts';
 
 export const DashboardPage = () => {
+  const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
+  const isEqualToOrLessThan950 = useMediaQuery('(max-width: 950px)');
+
   const [hasError, setError] = useState(false);
   const [hasIntegrationError, setIntegrationError] = useState(null);
   const [providerType, setProviderType] = useState(null);
@@ -324,6 +327,7 @@ export const DashboardPage = () => {
               gridRow={isEqualToOrLessThan800[0] ? '1' : '1 / span 3'}
               className="dashboard__integration-dashboard"
               minHeight="20rem"
+              paddingBottom="2rem"
             >
               <Flex
                 boxShadow="0 0.125rem 0.25rem rgb(0 0 0 / 8%)"
@@ -334,23 +338,31 @@ export const DashboardPage = () => {
                 textTransform="uppercase"
                 letterSpacing=".2em"
                 className="dashboard__integration-dashboard-header"
+                justifyContent={isEqualToOrLessThan800[0] ? 'center' : ''}
               >
                 App Integrations
               </Flex>
               <Flex
                 flexDirection="column"
                 className="dashboard__integration-dashboard-body"
-                padding={isEqualToOrLessThan800[0] ? '2rem' : ''}
               >
                 <Box
                   className="dashboard__integration-dashboard-vendor"
-                  padding={isEqualToOrLessThan800[0] ? '' : '2rem 0 0 2rem'}
+                  padding={
+                    isEqualToOrLessThan800[0]
+                      ? '1rem 1rem 0 1rem'
+                      : '2rem 0 0 2rem'
+                  }
                   fontSize="16px"
                   color="#6c757d"
                   fontWeight="800"
                 >
                   Facebook
                 </Box>
+                {!hasIntegrationRecord &&
+                  (hasError ?? addMoreFacebookBusinessAccountsError) && (
+                    <>{errorMap.get(hasError)()}</>
+                  )}
                 {/* invoke FB integration component on first integration action */}
                 {!hasIntegrationRecord &&
                   Object.keys(facebookAuth).length > 0 && (
@@ -394,11 +406,6 @@ export const DashboardPage = () => {
                     </Box>
                   )}
 
-                {!hasIntegrationRecord &&
-                  (hasError ?? addMoreFacebookBusinessAccountsError) && (
-                    <>{errorMap.get(hasError)()}</>
-                  )}
-
                 {hasIntegrationRecord && (
                   <>
                     {hasIntegrationRecord.facebookBusinessAccts.map(
@@ -406,8 +413,15 @@ export const DashboardPage = () => {
                         return (
                           <Flex
                             key={record.id}
-                            flexDir="row"
+                            flexDir={
+                              isEqualToOrLessThan950[0] ? 'column' : 'row'
+                            }
+                            maxWidth={isEqualToOrLessThan450[0] ? '20rem' : ''}
                             className="dashboard__integration-vendor-card-container"
+                            boxShadow="0 0.5rem 1rem rgb(0 0 0 / 15%)"
+                            margin="1rem"
+                            borderRadius="10px"
+                            border="1px solid #f0f0f0"
                           >
                             <Box
                               className="dashboard__integration-vendor-card"
@@ -415,12 +429,8 @@ export const DashboardPage = () => {
                               fontWeight="800"
                               fontSize="14px"
                               color="rgb(26, 32, 44)"
-                              minWidth="25rem"
-                              padding={
-                                isEqualToOrLessThan800[0]
-                                  ? '.5rem 0 0 0'
-                                  : '1rem 2rem'
-                              }
+                              minWidth={isEqualToOrLessThan450[0] ? 0 : '25rem'}
+                              padding="1rem 2rem"
                             >
                               <Text key={`user-email-${record.id}`}>
                                 User Email:{' '}
@@ -448,8 +458,13 @@ export const DashboardPage = () => {
                               </Text>
                             </Box>
                             <Button
-                              marginTop=".5rem"
+                              alignSelf="center"
                               className="dashboard__integration-vendor-card-remove-btn"
+                              margin={
+                                isEqualToOrLessThan950[0]
+                                  ? '0 1rem 1rem'
+                                  : '1rem'
+                              }
                             >
                               Remove Account
                             </Button>
