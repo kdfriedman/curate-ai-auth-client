@@ -1,9 +1,16 @@
 import firebase from 'firebase/app';
 
 // instantiate new Facebook provider
-export const provider = new firebase.auth.FacebookAuthProvider();
+export const fbProviderRedirect = new firebase.auth.FacebookAuthProvider();
 // add business_manager scope to access user's business manager data
-provider.addScope(
+fbProviderRedirect.addScope(
   'business_management, public_profile, ads_read, read_insights'
 );
-provider.setCustomParameters({ auth_type: 'reauthenticate' });
+fbProviderRedirect.setCustomParameters({ auth_type: 'reauthenticate' });
+
+// instantiate new Facebook provider
+export const fbProviderPopup = new firebase.auth.FacebookAuthProvider();
+// add business_manager scope to access user's business manager data
+fbProviderPopup.addScope(
+  'business_management, public_profile, ads_read, read_insights'
+);

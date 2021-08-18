@@ -11,9 +11,9 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState();
   const [loading, setLoading] = useState(true);
 
-  // const linkToProvider = (provider) => {
-  //   return auth.currentUser.linkWithPopup(provider);
-  // };
+  const linkToProviderWithPopup = (provider) => {
+    return auth.currentUser.linkWithPopup(provider);
+  };
 
   const linkToProvider = (provider) => {
     return auth.currentUser.linkWithRedirect(provider);
@@ -64,6 +64,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     resetPassword,
     linkToProvider,
+    linkToProviderWithPopup,
     getRedirectResult,
     unlinkProvider,
     verifyPasswordResetRequest,

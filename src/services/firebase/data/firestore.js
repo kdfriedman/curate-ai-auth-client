@@ -1,4 +1,4 @@
-import { db } from '../firebase';
+import { db, Firebase } from '../firebase';
 
 const readUserRecordFromFirestore = async (uid, collections, docs) => {
   // check if uid is falsy
@@ -49,7 +49,9 @@ const addRecordToFirestore = async (
   // validate types of params and check for falsy values
   if (!uid) return console.error({ Error: `uid is null or undefined: ${uid}` });
   if (!payloadName)
-    return console.error({ Error: `uid is null or undefined: ${payloadName}` });
+    return console.error({
+      Error: `payloadName is null or undefined: ${payloadName}`,
+    });
   if (!payload ?? Object.entries(payload).length === 0) {
     return console.error({
       Error: `payload is undefined, null, or an empty object: ${payload}`,
@@ -76,26 +78,36 @@ const addRecordToFirestore = async (
     // check for request error
     if (error ?? !record) return console.error({ Error: error });
 
-    // TODO: loop through records and setup conditionals for duplicate writes
-    record?.data()[payloadName].forEach((record) => {
-      console.log(record);
-    });
-    // if record exist and payload id is equal to previous
-    // if (record.exists && payload.adAccountId === payloadName.adAccountId) {
-    //   console.warn(
-    //     'The record cannot be added a because a record from the same provider, uid, or account already exists'
-    //   );
-    //   return 'duplicate record';
-    // }
+    // check if record exists before further processing
+    if (record?.exists) {
+      // setup object to catch duplicate record data
+      const duplicateRecord = {};
 
-    // if (record.exists && !(payload.id === payloadName.id)) {
-
-    // }
+      // loop through all records within vendor array
+      record?.data()[payloadName].forEach((record) => {
+        // if record exist and payload id is equal to previous
+        if (record.adAccountId === payload.adAccountId) {
+          duplicateRecord.warnMsg =
+            'The record cannot be added a because a record using this ad account already exists.';
+          duplicateRecord.adAcctInUse = record.adAccountId;
+        }
+      });
+      if (Object.keys(duplicateRecord).length > 0) return duplicateRecord;
+      // vendor document ref in firestore
+      return await db
+        .collection(collection1)
+        .doc(uid)
+        .collection(collection2)
+        .doc(doc1)
+        .update({
+          [payloadName]: Firebase.firestore.FieldValue.arrayUnion(payload),
+        });
+    }
   } catch (error) {
     console.error('Error getting document: ', error);
   }
 
-  // write record to firestore if record does not exist and arguments are valid
+  // if record does not exist, create new record in firestore
   try {
     await db
       .collection(collection1)

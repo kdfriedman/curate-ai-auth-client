@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const FacebookAppIntegration = ({
   facebookAuthData,
-  setFirestoreIntegrationRecord,
+  setIntegrationRecord,
   setIntegrationError,
   setProviderType,
 }) => {
@@ -56,6 +56,12 @@ const FacebookAppIntegration = ({
 
   // generic error handler for fb specific api response errors
   const catchErrors = (error) => {
+    if (!error) {
+      return dispatch({
+        type: 'hasErrors',
+        payload: null,
+      });
+    }
     // custom errors
     if (error?.isCustom) {
       dispatch({
@@ -95,6 +101,8 @@ const FacebookAppIntegration = ({
   *******/
   useEffect(() => {
     let isMounted = true;
+    // reset any errors
+    catchErrors(null);
     // async wrapper function to allow multiple requests
     const handleAsyncWork = async () => {
       // fetch account user data
@@ -106,7 +114,12 @@ const FacebookAppIntegration = ({
         headers: {},
       });
       if (userError) {
-        catchErrors(userError);
+        // set isLoading to true to render progress
+        dispatch({
+          type: 'isLoading',
+          payload: false,
+        });
+        return catchErrors(userError);
       }
       const userId = userData?.data?.id;
 
@@ -119,7 +132,12 @@ const FacebookAppIntegration = ({
         headers: {},
       });
       if (userBusinessError) {
-        catchErrors(userBusinessError);
+        // set isLoading to true to render progress
+        dispatch({
+          type: 'isLoading',
+          payload: false,
+        });
+        return catchErrors(userBusinessError);
       }
 
       if (userBusinessList && userBusinessList?.data?.data.length > 0) {
@@ -142,7 +160,7 @@ const FacebookAppIntegration = ({
         });
         if (isMounted) {
           setIntegrationError(
-            'User must be logged into facebook with an account that has one or more associated facebook business accounts.'
+            'User must be logged into facebook with an account that has one or more associated facebook business accounts. Log into facebook.com to select a different account.'
           );
           setProviderType('facebook.com');
         }
@@ -177,7 +195,12 @@ const FacebookAppIntegration = ({
         headers: {},
       });
       if (clientBusinessError) {
-        catchErrors(clientBusinessError);
+        // set isLoading to true to render progress
+        dispatch({
+          type: 'isLoading',
+          payload: false,
+        });
+        return catchErrors(clientBusinessError);
       }
       const clientBusinessAcctId = clientBusinessData?.data?.id;
       if (!clientBusinessAcctId) return console.error({ clientBusinessAcctId });
@@ -201,7 +224,12 @@ const FacebookAppIntegration = ({
         headers: {},
       });
       if (sysUserError) {
-        catchErrors(sysUserError);
+        // set isLoading to true to render progress
+        dispatch({
+          type: 'isLoading',
+          payload: false,
+        });
+        return catchErrors(sysUserError);
       }
       // system user access token
       const sysUserAccessToken = sysUserData?.data?.access_token;
@@ -216,7 +244,12 @@ const FacebookAppIntegration = ({
         headers: {},
       });
       if (sysUserIdError) {
-        catchErrors(sysUserIdError);
+        // set isLoading to true to render progress
+        dispatch({
+          type: 'isLoading',
+          payload: false,
+        });
+        return catchErrors(sysUserIdError);
       }
       const sysUserId = sysUserIdData?.data?.id;
       if (!sysUserId) return console.error({ sysUserId });
@@ -229,7 +262,12 @@ const FacebookAppIntegration = ({
         headers: {},
       });
       if (adAcctAssetListError) {
-        catchErrors(adAcctAssetListError);
+        // set isLoading to true to render progress
+        dispatch({
+          type: 'isLoading',
+          payload: false,
+        });
+        return catchErrors(adAcctAssetListError);
       }
 
       // reset user business id state, preventing further fb business asset look up requests
@@ -305,7 +343,12 @@ const FacebookAppIntegration = ({
         headers: {},
       });
       if (sysUserAssetAssignmentDataError) {
-        catchErrors(sysUserAssetAssignmentDataError);
+        // set isLoading to true to render progress
+        dispatch({
+          type: 'isLoading',
+          payload: false,
+        });
+        return catchErrors(sysUserAssetAssignmentDataError);
       }
 
       // filter facebook business acct name from user business list chosen user selected id
@@ -326,7 +369,7 @@ const FacebookAppIntegration = ({
       };
 
       // update firestore with system user access token, auth uid, and email
-      await addRecordToFirestore(
+      const addedFirestoreRecord = await addRecordToFirestore(
         facebookAuthData.user.uid,
         ['clients', 'integrations'],
         ['facebook'],
@@ -335,28 +378,50 @@ const FacebookAppIntegration = ({
       );
 
       if (isMounted) {
+        if (addedFirestoreRecord?.warnMsg) {
+          // reset business asset it to prevent 3rd useEffect from firing
+          dispatch({
+            type: 'businessAssetId',
+            payload: null,
+          });
+
+          dispatch({
+            type: 'businessSystemUserId',
+            payload: null,
+          });
+
+          // set isLoading to true to render progress
+          dispatch({
+            type: 'isLoading',
+            payload: false,
+          });
+          return catchErrors({
+            errMsg: addedFirestoreRecord.adAcctInUse,
+            errUserMsg: addedFirestoreRecord.warnMsg,
+            isCustom: true,
+          });
+        }
         // update parent component with firestore new record data
-        setFirestoreIntegrationRecord({
+        setIntegrationRecord({
           facebookBusinessAccts: [facebookFirebasePayload],
         });
+        // reset business asset it to prevent 3rd useEffect from firing
+        dispatch({
+          type: 'businessAssetId',
+          payload: null,
+        });
+
+        dispatch({
+          type: 'businessSystemUserId',
+          payload: null,
+        });
+
+        // set isLoading to true to render progress
+        dispatch({
+          type: 'isLoading',
+          payload: false,
+        });
       }
-
-      // reset business asset it to prevent 3rd useEffect from firing
-      dispatch({
-        type: 'businessAssetId',
-        payload: null,
-      });
-
-      dispatch({
-        type: 'businessSystemUserId',
-        payload: null,
-      });
-
-      // set isLoading to true to render progress
-      dispatch({
-        type: 'isLoading',
-        payload: false,
-      });
     };
     if (businessAssetId) {
       handleAsyncWork();
@@ -371,7 +436,7 @@ const FacebookAppIntegration = ({
     businessSystemUserId,
     sysUserAccessToken,
     addRecordToFirestore,
-    setFirestoreIntegrationRecord,
+    setIntegrationRecord,
     userBusinessId,
     userBusinessList,
   ]);
@@ -456,9 +521,7 @@ const FacebookAppIntegration = ({
           <Text margin="1rem 2rem 0 2rem" color="#c5221f">
             Oops, we've encountered an error. Please contact our{' '}
             <Link
-              href={`mailto:ryanwelling@gmail.com?cc=kev.d.friedman@gmail.com&subject=CurateApp.AI%20Integration%20Error&body=Error: ${
-                hasErrors?.errMsg ? hasErrors?.errMsg : hasErrors?.errUserMsg
-              }`}
+              href={`mailto:ryanwelling@gmail.com?cc=kev.d.friedman@gmail.com&subject=CurateApp.AI%20Integration%20Error&body=Error: ${hasErrors?.errUserMsg}`}
             >
               <span style={{ textDecoration: 'underline' }}>
                 tech team for assistance.
@@ -466,8 +529,7 @@ const FacebookAppIntegration = ({
             </Link>
           </Text>
           <Text margin="1rem 2rem 0 2rem" color="#c5221f">
-            Error:{' '}
-            {hasErrors?.errMsg ? hasErrors?.errMsg : hasErrors?.errUserMsg}
+            Error: {hasErrors?.errUserMsg}
           </Text>
         </>
       )}
