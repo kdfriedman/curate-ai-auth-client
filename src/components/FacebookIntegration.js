@@ -466,13 +466,13 @@ const FacebookAppIntegration = ({
           });
         }
         if (record?.exists) {
+          // enable parent component integration btn
+          setActiveIntegration(true);
           const { facebookBusinessAccts } = record?.data();
           // update parent component with firestore new record data
           setIntegrationRecord({
             facebookBusinessAccts,
           });
-          // enable parent component integration btn
-          setActiveIntegration(true);
           // reset business asset it to prevent 3rd useEffect from firing
           dispatch({
             type: 'businessAssetId',

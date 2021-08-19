@@ -404,7 +404,7 @@ export const DashboardPage = () => {
                   Object.keys(addMoreFacebookBusinessAccountsAuth).length >
                     0 && (
                     <FacebookAppIntegration
-                      facebookAuthData={facebookAuth}
+                      facebookAuthData={addMoreFacebookBusinessAccountsAuth}
                       setIntegrationRecord={setIntegrationRecord}
                       setIntegrationError={setIntegrationError}
                       setProviderType={setProviderType}
