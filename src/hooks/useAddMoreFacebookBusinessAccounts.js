@@ -17,7 +17,7 @@ export const useAddMoreFacebookBusinessAccounts = () => {
   const { unlinkProvider, currentUser, linkToProviderWithPopup } = useAuth();
 
   const handleAddMoreFacebookBusinessAccounts = useCallback(
-    async (providerType, provider, isMounted) => {
+    async (providerType, provider) => {
       // set loading state
       setAddMoreFacebookBusinessAccountsLoading(true);
       // filter provider object by providerType param

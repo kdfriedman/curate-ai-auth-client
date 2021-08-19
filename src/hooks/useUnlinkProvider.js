@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
-export const useIntegrationError = (setIntegrationError, setProviderType) => {
+export const useUnlinkProvider = (setProviderType) => {
   const { unlinkProvider, currentUser } = useAuth();
-  const handleIntegrationError = useCallback(
-    async (isMounted, providerType) => {
+  const handleUnlinkProvider = useCallback(
+    async (providerType) => {
       // if linked provider error occurs, unlink provider first before handling error further
       try {
         // filter provider object by providerType param
@@ -21,24 +21,15 @@ export const useIntegrationError = (setIntegrationError, setProviderType) => {
         // unlink provider by providerId
         await unlinkProvider(currentUser, providerObj[0]?.providerId);
         console.log(`${providerType} unlinked`);
-
-        if (isMounted) {
-          // reset integration error
-          setIntegrationError(null);
-          // reset provider type
-          setProviderType(null);
-        }
+        // reset provider type
+        setProviderType(null);
       } catch (err) {
-        if (isMounted) {
-          // reset integration error
-          setIntegrationError(null);
-          // reset provider type
-          setProviderType(null);
-        }
+        // reset provider type
+        setProviderType(null);
         console.error({ errMsg: 'unlinkedProvider has err', err });
       }
     },
-    [currentUser, setIntegrationError, setProviderType, unlinkProvider]
+    [currentUser, setProviderType, unlinkProvider]
   );
-  return { handleIntegrationError };
+  return { handleUnlinkProvider };
 };

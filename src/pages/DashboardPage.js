@@ -19,6 +19,8 @@ import { Header } from '../components/Header';
 import { FaFacebook } from 'react-icons/fa';
 import { useIntegrationError } from '../hooks/useIntegrationError';
 import { useAddMoreFacebookBusinessAccounts } from '../hooks/useAddMoreFacebookBusinessAccounts';
+import { useEventListener } from '../hooks/useEventListener';
+import { useUnlinkProvider } from '../hooks/useUnlinkProvider';
 
 export const DashboardPage = () => {
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
@@ -32,8 +34,11 @@ export const DashboardPage = () => {
   const [hasIntegrationRecord, setIntegrationRecord] = useState(null);
   const [facebookAuth, setFacebookAuth] = useState({});
   const [isIntegrationClick, setIntegrationClick] = useState(false);
+  const [hasActiveIntegration, setActiveIntegration] = useState(false);
   const { linkToProvider, currentUser, getRedirectResult } = useAuth();
   const { readUserRecordFromFirestore } = firestoreHandlers;
+  //unlink auth provider handler
+  const { handleUnlinkProvider } = useUnlinkProvider(setProviderType);
   // setup custom hook to handle integration errors
   const { handleIntegrationError } = useIntegrationError(
     setIntegrationError,
@@ -46,6 +51,20 @@ export const DashboardPage = () => {
     addMoreFacebookBusinessAccountsLoading,
     addMoreFacebookBusinessAccountsAuth,
   } = useAddMoreFacebookBusinessAccounts();
+  // set global beforeunload event listener to handle
+  // unloads which would result in linked providers without any records saved
+  useEventListener('beforeunload', (e) => {
+    e.preventDefault();
+    e.returnValue = '';
+    // filter provider object by providerType param
+    const hasFacebookProvider = currentUser.providerData.filter(
+      (providerObj) => providerObj?.providerId === 'facebook.com'
+    );
+    if (hasFacebookProvider.length > 0 && !hasIntegrationRecord) {
+      console.log('is this running?');
+      handleUnlinkProvider('facebook.com');
+    }
+  });
 
   // setup error map object to handle specific errors
   // return function when errorMap object matches query via .get() method
@@ -207,7 +226,7 @@ export const DashboardPage = () => {
     };
   }, [getRedirectResult]);
 
-  // unlink auth provider when integration error occurs
+  // handle any integration errors if they occur
   useEffect(() => {
     let isMounted = true;
     if (isMounted && hasIntegrationError && providerType) {
@@ -269,7 +288,7 @@ export const DashboardPage = () => {
               </Flex>
               {!hasIntegrationRecord && (
                 <Button
-                  disabled={isLoading ? true : false}
+                  disabled={isLoading || hasActiveIntegration ? true : false}
                   onClick={() => {
                     // set facebook integration click
                     setIntegrationClick(true);
@@ -306,7 +325,7 @@ export const DashboardPage = () => {
                     Add a new business account
                   </Text>
                   <Button
-                    disabled={isLoading ? true : false}
+                    disabled={isLoading || hasActiveIntegration ? true : false}
                     onClick={() => {
                       handleAddMoreFacebookBusinessAccounts(
                         'facebook.com',
@@ -379,6 +398,7 @@ export const DashboardPage = () => {
                       setIntegrationRecord={setIntegrationRecord}
                       setIntegrationError={setIntegrationError}
                       setProviderType={setProviderType}
+                      setActiveIntegration={setActiveIntegration}
                     />
                   )}
                 {/* specific invocation of FB Integration component for add more accts action*/}
@@ -386,8 +406,11 @@ export const DashboardPage = () => {
                   Object.keys(addMoreFacebookBusinessAccountsAuth).length >
                     0 && (
                     <FacebookAppIntegration
-                      facebookAuthData={addMoreFacebookBusinessAccountsAuth}
+                      facebookAuthData={facebookAuth}
                       setIntegrationRecord={setIntegrationRecord}
+                      setIntegrationError={setIntegrationError}
+                      setProviderType={setProviderType}
+                      setActiveIntegration={setActiveIntegration}
                     />
                   )}
                 {!hasIntegrationRecord &&
