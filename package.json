@@ -8,7 +8,7 @@
     "@emotion/styled": "^11.3.0",
     "axios": "^0.21.1",
     "firebase": "^8.7.1",
-    "firebase-tools": "^9.16.0",
+    "firebase-tools": "^9.16.5",
     "focus-visible": "^5.2.0",
     "formik": "^2.2.9",
     "framer-motion": "^4.1.17",
