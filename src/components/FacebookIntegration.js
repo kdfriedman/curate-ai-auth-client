@@ -467,7 +467,7 @@ const FacebookAppIntegration = ({
         }
         if (record?.exists) {
           // enable parent component integration btn
-          setActiveIntegration(true);
+          setActiveIntegration(false);
           const { facebookBusinessAccts } = record?.data();
           // update parent component with firestore new record data
           setIntegrationRecord({
