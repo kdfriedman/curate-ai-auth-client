@@ -565,7 +565,7 @@ const FacebookAppIntegration = ({
               ? '1.5rem 1rem 1rem 1rem'
               : '1rem 0 2rem 2rem'
           }
-          width="20rem"
+          width="18rem"
           isIndeterminate
         />
       )}
