@@ -1,4 +1,4 @@
-import { Select, Box } from '@chakra-ui/react';
+import { Select, Box, Flex } from '@chakra-ui/react';
 
 const AcctSelector = ({ acctList, onChangeHandler, labelText }) => {
   return (
@@ -6,6 +6,8 @@ const AcctSelector = ({ acctList, onChangeHandler, labelText }) => {
       <Box margin="1rem 0 2rem;" className="acct-selector__container">
         <label
           style={{
+            display: 'flex',
+            justifyContent: 'flex-start',
             fontSize: '13px',
             fontWeight: '800',
             color: 'rgb(26, 32, 44)',
@@ -15,6 +17,7 @@ const AcctSelector = ({ acctList, onChangeHandler, labelText }) => {
         >
           {labelText}
         </label>
+
         <Select
           className="account-selector__select-list"
           onChange={onChangeHandler}
