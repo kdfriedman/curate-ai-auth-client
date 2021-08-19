@@ -19,7 +19,6 @@ import { Header } from '../components/Header';
 import { FaFacebook } from 'react-icons/fa';
 import { useIntegrationError } from '../hooks/useIntegrationError';
 import { useAddMoreFacebookBusinessAccounts } from '../hooks/useAddMoreFacebookBusinessAccounts';
-import { useEventListener } from '../hooks/useEventListener';
 import { useUnlinkProvider } from '../hooks/useUnlinkProvider';
 
 export const DashboardPage = () => {
@@ -51,18 +50,6 @@ export const DashboardPage = () => {
     addMoreFacebookBusinessAccountsLoading,
     addMoreFacebookBusinessAccountsAuth,
   } = useAddMoreFacebookBusinessAccounts();
-  // set global beforeunload event listener to handle
-  // unloads which would result in linked providers without any records saved
-  useEventListener('beforeunload', (e) => {
-    e.preventDefault();
-    // filter provider object by providerType param
-    const hasFacebookProvider = currentUser.providerData.filter(
-      (providerObj) => providerObj?.providerId === 'facebook.com'
-    );
-    if (hasFacebookProvider.length > 0 && !hasIntegrationRecord) {
-      handleUnlinkProvider('facebook.com');
-    }
-  });
 
   // setup error map object to handle specific errors
   // return function when errorMap object matches query via .get() method
@@ -148,9 +135,20 @@ export const DashboardPage = () => {
 
   // link credential with facebook authentication provider
   useEffect(() => {
+    let isMounted = true;
     const linkAuthProviders = async () => {
       // set loading state
       setLoading(true);
+
+      // filter current user provider object by facebook
+      const hasFacebookProvider = currentUser.providerData.filter(
+        (providerObj) => providerObj?.providerId === 'facebook.com'
+      );
+      // if facebook has been linked previously but no integration record exists,
+      // unlink facebook. Otherwise Firebase will throw error (already linked provider)!
+      if (hasFacebookProvider.length > 0 && !hasIntegrationRecord) {
+        if (isMounted) await handleUnlinkProvider('facebook.com', true);
+      }
 
       try {
         // link facebook provider which will promt fb dialog login module
@@ -161,12 +159,15 @@ export const DashboardPage = () => {
         const errorMessage = error.message;
         // log errors
         console.error({ errorCode, errorMessage });
-        // reset loading state
-        setLoading(false);
-        // reset facebook integration click event state
-        setIntegrationClick(false);
-        // set error state
-        setError(errorCode);
+
+        if (isMounted) {
+          // reset loading state
+          setLoading(false);
+          // reset facebook integration click event state
+          setIntegrationClick(false);
+          // set error state
+          setError(errorCode);
+        }
       }
     };
 
@@ -174,7 +175,17 @@ export const DashboardPage = () => {
     if (isIntegrationClick && !hasError) {
       linkAuthProviders();
     }
-  }, [isIntegrationClick, linkToProvider, hasError, currentUser]);
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    isIntegrationClick,
+    linkToProvider,
+    hasError,
+    currentUser,
+    hasIntegrationRecord,
+    handleUnlinkProvider,
+  ]);
 
   // receive results from redirected auth login
   useEffect(() => {

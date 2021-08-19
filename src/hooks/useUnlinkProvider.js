@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 export const useUnlinkProvider = (setProviderType) => {
   const { unlinkProvider, currentUser } = useAuth();
   const handleUnlinkProvider = useCallback(
-    async (providerType) => {
+    async (providerType, isMounted) => {
       // if linked provider error occurs, unlink provider first before handling error further
       try {
         // filter provider object by providerType param
@@ -21,11 +21,10 @@ export const useUnlinkProvider = (setProviderType) => {
         // unlink provider by providerId
         await unlinkProvider(currentUser, providerObj[0]?.providerId);
         console.log(`${providerType} unlinked`);
-        // reset provider type
-        setProviderType(null);
+
+        if (isMounted) setProviderType(null);
       } catch (err) {
-        // reset provider type
-        setProviderType(null);
+        if (isMounted) setProviderType(null);
         console.error({ errMsg: 'unlinkedProvider has err', err });
       }
     },
