@@ -57,7 +57,13 @@ export const DashboardPage = () => {
         color="#c5221f"
         fontWeight="500"
         className="error__provider-already-linked"
-        padding={isEqualToOrLessThan800[0] ? '1rem 0 0 0' : '1rem 2rem 0 2rem'}
+        padding={
+          isEqualToOrLessThan450
+            ? '1rem 1rem 0rem 1rem'
+            : isEqualToOrLessThan800[0]
+            ? '1rem 0 0 0'
+            : '1rem 2rem 0 2rem'
+        }
       >
         Error: Oops there's been an error. Please reach out to{' '}
         <Link
@@ -227,8 +233,8 @@ export const DashboardPage = () => {
         />
       )}
 
-      {(!isLoading || !addMoreFacebookBusinessAccountsLoading) && (
-        <Box className="dashboard__container">
+      {!isLoading && !addMoreFacebookBusinessAccountsLoading && (
+        <Box maxHeight="100vh" className="dashboard__container">
           <section className="dashboard__integration-container">
             <Box
               gridColumn={
@@ -263,6 +269,7 @@ export const DashboardPage = () => {
               </Flex>
               {!hasIntegrationRecord && (
                 <Button
+                  disabled={isLoading ? true : false}
                   onClick={() => {
                     // set facebook integration click
                     setIntegrationClick(true);
@@ -299,6 +306,7 @@ export const DashboardPage = () => {
                     Add a new business account
                   </Text>
                   <Button
+                    disabled={isLoading ? true : false}
                     onClick={() => {
                       handleAddMoreFacebookBusinessAccounts(
                         'facebook.com',
@@ -390,7 +398,9 @@ export const DashboardPage = () => {
                       fontWeight="500"
                       color="rgb(26, 32, 44)"
                       padding={
-                        isEqualToOrLessThan800[0] ? '' : '.5rem 0 0 2rem'
+                        isEqualToOrLessThan800[0]
+                          ? '1rem 1rem 0 1rem'
+                          : '.5rem 0 0 2rem'
                       }
                     >
                       <span
@@ -458,6 +468,7 @@ export const DashboardPage = () => {
                               </Text>
                             </Box>
                             <Button
+                              disabled={isLoading ? true : false}
                               alignSelf="center"
                               className="dashboard__integration-vendor-card-remove-btn"
                               margin={

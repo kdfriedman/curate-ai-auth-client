@@ -9,7 +9,7 @@ const AcctSelector = ({ acctList, onChangeHandler, labelText }) => {
             fontSize: '13px',
             fontWeight: '800',
             color: 'rgb(26, 32, 44)',
-            margin: '1rem 0 0 2rem',
+            margin: '1rem 0 0 1rem',
           }}
           htmlFor="ad account list"
         >

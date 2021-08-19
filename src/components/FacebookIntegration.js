@@ -2,7 +2,7 @@ import { useEffect, useReducer } from 'react';
 import fetchData from '../services/fetch/fetch';
 import AcctSelector from './AcctSelector';
 import firestoreHandlers from '../services/firebase/data/firestore';
-import { Progress, Text, Link } from '@chakra-ui/react';
+import { Progress, Text, Link, useMediaQuery } from '@chakra-ui/react';
 import { v4 as uuidv4 } from 'uuid';
 
 const FacebookAppIntegration = ({
@@ -11,6 +11,10 @@ const FacebookAppIntegration = ({
   setIntegrationError,
   setProviderType,
 }) => {
+  const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
+  const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
+  const isEqualToOrLessThan950 = useMediaQuery('(max-width: 950px)');
+
   // destructure firestore handlers
   const {
     addRecordToFirestore,
@@ -505,7 +509,11 @@ const FacebookAppIntegration = ({
           colorScheme="brand"
           size="xs"
           className="loading__progress"
-          margin="1rem 0 2rem 2rem"
+          margin={
+            isEqualToOrLessThan450
+              ? '1.5rem 1rem 1rem 1rem'
+              : '1rem 0 2rem 2rem'
+          }
           width="20rem"
           isIndeterminate
         />
@@ -532,7 +540,7 @@ const FacebookAppIntegration = ({
           />
         )}
 
-      {hasErrors && (
+      {hasErrors && !isLoading && (
         <>
           <Text margin="1rem 2rem 0 2rem" color="#c5221f">
             Oops, we've encountered an error. Please contact our{' '}

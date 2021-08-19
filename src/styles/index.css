@@ -143,7 +143,7 @@ svg.header__nav-hamburger-menu {
   background: #fff;
   box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 15%);
   border-radius: 10px;
-  height: 14rem;
+  height: 12rem;
   flex-direction: column;
 }
 
@@ -190,4 +190,10 @@ svg.dashboard__fb-login-btn-icon {
 div.chakra-select__wrapper {
   width: 20rem;
   margin: 0.5rem 0 0 2rem;
+}
+
+@media (max-width: 450px) {
+  div.chakra-select__wrapper {
+    margin: 0.5rem 1rem 0 1rem;
+  }
 }
