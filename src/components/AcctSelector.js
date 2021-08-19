@@ -1,6 +1,8 @@
-import { Select, Box, Flex } from '@chakra-ui/react';
+import { Select, Box, useMediaQuery } from '@chakra-ui/react';
 
 const AcctSelector = ({ acctList, onChangeHandler, labelText }) => {
+  const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
+
   return (
     <>
       <Box margin="1rem 0 2rem;" className="acct-selector__container">
@@ -11,7 +13,9 @@ const AcctSelector = ({ acctList, onChangeHandler, labelText }) => {
             fontSize: '13px',
             fontWeight: '800',
             color: 'rgb(26, 32, 44)',
-            margin: '1rem 0 0 1rem',
+            margin: `${
+              isEqualToOrLessThan450[0] ? '1rem 0 0 1rem' : '1rem 0 0 2rem'
+            }`,
           }}
           htmlFor="ad account list"
         >
