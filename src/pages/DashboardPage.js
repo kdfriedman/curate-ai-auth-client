@@ -55,13 +55,11 @@ export const DashboardPage = () => {
   // unloads which would result in linked providers without any records saved
   useEventListener('beforeunload', (e) => {
     e.preventDefault();
-    e.returnValue = '';
     // filter provider object by providerType param
     const hasFacebookProvider = currentUser.providerData.filter(
       (providerObj) => providerObj?.providerId === 'facebook.com'
     );
     if (hasFacebookProvider.length > 0 && !hasIntegrationRecord) {
-      console.log('is this running?');
       handleUnlinkProvider('facebook.com');
     }
   });
