@@ -439,10 +439,13 @@ const FacebookAppIntegration = ({
         ['facebook']
       );
 
-      if (isMounted) {
-        if (addedFirestoreRecord?.warnMsg ?? error) {
+      if (addedFirestoreRecord?.warnMsg ?? error) {
+        if (isMounted) {
           // enable parent component integration btn
           setActiveIntegration(false);
+          /* reset render facebook integration component trigger 
+        this prevents any unnecessary renders of facebook integration componet when it's not intended */
+          setRenderFacebookIntegrationComponent(false);
           // reset business asset it to prevent 3rd useEffect from firing
           dispatch({
             type: 'businessAssetId',
@@ -465,18 +468,21 @@ const FacebookAppIntegration = ({
             isCustom: true,
           });
         }
+      }
 
-        if (record?.exists) {
+      if (record?.exists) {
+        if (isMounted) {
+          /* reset render facebook integration component trigger 
+        this prevents any unnecessary renders of facebook integration componet when it's not intended */
+          setRenderFacebookIntegrationComponent(false);
           // enable parent component integration btn
           setActiveIntegration(false);
-          /* reset render facebook integration component trigger 
-          this prevents any unnecessary renders of facebook integration componet when it's not intended */
-          setRenderFacebookIntegrationComponent(false);
           const { facebookBusinessAccts } = record?.data();
           // update parent component with firestore new record data
           setIntegrationRecord({
             facebookBusinessAccts,
           });
+
           // reset business asset it to prevent 3rd useEffect from firing
           dispatch({
             type: 'businessAssetId',

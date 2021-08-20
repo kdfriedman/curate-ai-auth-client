@@ -22,6 +22,7 @@ import { useAddMoreFacebookBusinessAccounts } from '../hooks/useAddMoreFacebookB
 import { useUnlinkProvider } from '../hooks/useUnlinkProvider';
 import { useDeleteFacebookSystemUser } from '../hooks/useDeleteFacebookSystemUser';
 import { useRefreshFacebookAccessToken } from '../hooks/useRefreshFacebookAccessToken';
+import { useReadRecordFromFirestore } from '../hooks/useReadRecordFromFirestore';
 
 export const DashboardPage = () => {
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
@@ -61,6 +62,7 @@ export const DashboardPage = () => {
     addMoreFacebookBusinessAccountsLoading,
     addMoreFacebookBusinessAccountsAuth,
   } = useAddMoreFacebookBusinessAccounts();
+  const { handleReadFirestoreRecord } = useReadRecordFromFirestore();
 
   // setup error map object to handle specific errors
   // return function when errorMap object matches query via .get() method
@@ -130,6 +132,9 @@ export const DashboardPage = () => {
         isMounted
       ) {
         const { facebookBusinessAccts } = record?.data();
+        console.log({
+          facebookBusinessAccts,
+        });
         // update firestore integration record state
         setIntegrationRecord({
           facebookBusinessAccts,
@@ -457,31 +462,30 @@ export const DashboardPage = () => {
                       }
                     />
                   )}
-                {!hasIntegrationRecord &&
-                  Object.keys(facebookAuth).length === 0 && (
-                    <Box
-                      className="dashboard__integration-dashboard-tip"
-                      fontSize="13px"
-                      fontWeight="500"
-                      color="rgb(26, 32, 44)"
-                      padding={
-                        isEqualToOrLessThan800[0]
-                          ? '1rem 1rem 0 1rem'
-                          : '.5rem 0 0 2rem'
-                      }
+                {!hasIntegrationRecord && (
+                  <Box
+                    className="dashboard__integration-dashboard-tip"
+                    fontSize="13px"
+                    fontWeight="500"
+                    color="rgb(26, 32, 44)"
+                    padding={
+                      isEqualToOrLessThan800[0]
+                        ? '1rem 1rem 0 1rem'
+                        : '.5rem 0 0 2rem'
+                    }
+                  >
+                    <span
+                      style={{
+                        fontSize: '13px',
+                        fontWeight: '800',
+                        color: 'rgb(26, 32, 44)',
+                      }}
                     >
-                      <span
-                        style={{
-                          fontSize: '13px',
-                          fontWeight: '800',
-                          color: 'rgb(26, 32, 44)',
-                        }}
-                      >
-                        Tip:{' '}
-                      </span>
-                      Get started now by integrating your Facebook account.
-                    </Box>
-                  )}
+                      Tip:{' '}
+                    </span>
+                    Get started now by integrating your Facebook account.
+                  </Box>
+                )}
 
                 {hasIntegrationRecord && (
                   <>
@@ -641,8 +645,21 @@ export const DashboardPage = () => {
                                     errVar: removedRecord,
                                   });
                                 }
-                                // reset integration record
-                                setIntegrationRecord(null);
+                                const firestoreRecord =
+                                  await handleReadFirestoreRecord(
+                                    ['clients', 'integrations'],
+                                    ['facebook']
+                                  );
+                                // if record is found, update state to render record
+                                if (firestoreRecord) {
+                                  // reset integration record
+                                  setIntegrationRecord({
+                                    facebookBusinessAccts: firestoreRecord,
+                                  });
+                                } else {
+                                  // if no record is found, reset dashboard
+                                  setIntegrationRecord(null);
+                                }
                                 // reset loader
                                 setLoading(false);
                               }}
