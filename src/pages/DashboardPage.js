@@ -462,7 +462,7 @@ export const DashboardPage = () => {
                       }
                     />
                   )}
-                {!hasIntegrationRecord && (
+                {!hasIntegrationRecord && !hasActiveIntegration && (
                   <Box
                     className="dashboard__integration-dashboard-tip"
                     fontSize="13px"
