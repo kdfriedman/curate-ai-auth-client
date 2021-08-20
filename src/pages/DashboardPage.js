@@ -22,6 +22,18 @@ import { useAddMoreFacebookBusinessAccounts } from '../hooks/useAddMoreFacebookB
 import { useUnlinkProvider } from '../hooks/useUnlinkProvider';
 
 export const DashboardPage = () => {
+  // TODO: provide delete sys user for clients - figure out how to store access token, refresh if needed, and allow user to unintegrate
+  // const [deletedSystemUserData, deletedSystemUserError] = await fetchData(
+  //   {
+  //     method: 'DELETE',
+  //     url: `https://graph.facebook.com/v11.0/419312452044680/managed_businesses?existing_client_business_id=${userBusinessId}&access_token=${facebookAuthData?.accessToken}`,
+  //     params: {},
+  //     data: {},
+  //     headers: {},
+  //   }
+  // );
+  // console.log(deletedSystemUserData, deletedSystemUserError);
+
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
   const isEqualToOrLessThan950 = useMediaQuery('(max-width: 950px)');
