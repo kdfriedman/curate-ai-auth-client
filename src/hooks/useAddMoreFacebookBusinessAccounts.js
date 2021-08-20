@@ -17,7 +17,7 @@ export const useAddMoreFacebookBusinessAccounts = () => {
   const { unlinkProvider, currentUser, linkToProviderWithPopup } = useAuth();
 
   const handleAddMoreFacebookBusinessAccounts = useCallback(
-    async (providerType, provider) => {
+    async (providerType, provider, setRenderFacebookIntegrationComponent) => {
       // set loading state
       setAddMoreFacebookBusinessAccountsLoading(true);
       // filter provider object by providerType param
@@ -53,6 +53,8 @@ export const useAddMoreFacebookBusinessAccounts = () => {
         });
         // reset loading state
         setAddMoreFacebookBusinessAccountsLoading(false);
+        // set parent state - render integration component
+        setRenderFacebookIntegrationComponent(true);
       } catch (error) {
         // Handle Errors here.
         const errorCode = error.code;

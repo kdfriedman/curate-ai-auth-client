@@ -36,6 +36,10 @@ export const DashboardPage = () => {
   const [facebookAuth, setFacebookAuth] = useState({});
   const [isIntegrationClick, setIntegrationClick] = useState(false);
   const [hasActiveIntegration, setActiveIntegration] = useState(false);
+  const [
+    isRenderFacebookIntegrationComponent,
+    setRenderFacebookIntegrationComponent,
+  ] = useState(false);
   const { linkToProvider, currentUser, getRedirectResult } = useAuth();
   const { readUserRecordFromFirestore, removeRecordFromFirestore } =
     firestoreHandlers;
@@ -119,7 +123,12 @@ export const DashboardPage = () => {
       }
 
       // if record exists, update state with firestore integration record
-      if (record && record?.exists && isMounted) {
+      if (
+        record &&
+        record?.exists &&
+        record?.data().facebookBusinessAccts.length > 0 &&
+        isMounted
+      ) {
         const { facebookBusinessAccts } = record?.data();
         // update firestore integration record state
         setIntegrationRecord({
@@ -218,6 +227,9 @@ export const DashboardPage = () => {
           setIntegrationClick(false);
           // reset loading state
           setLoading(false);
+          // trigger the rendering of facebook integration component
+          // used to prevent facebook integration component from rendering on removal of business accounts
+          setRenderFacebookIntegrationComponent(true);
         }
       } catch (error) {
         // Handle Errors here.
@@ -279,6 +291,8 @@ export const DashboardPage = () => {
               id="facebookIntegrationWidget"
               className="dashboard__integration-widget"
               display="flex"
+              maxHeight={!hasIntegrationRecord ? '12rem' : '14rem'}
+              minHeight={!hasIntegrationRecord ? 0 : '14rem'}
             >
               <Text className="dashboard__integration-info">
                 Integrate CurateAI with Facebook
@@ -317,6 +331,7 @@ export const DashboardPage = () => {
                   height="40px"
                   backgroundColor="#1877f2"
                   marginTop="7px"
+                  marginBottom="1rem"
                   width="14rem"
                   alignSelf="center"
                 >
@@ -345,7 +360,8 @@ export const DashboardPage = () => {
                     onClick={async () => {
                       await handleAddMoreFacebookBusinessAccounts(
                         'facebook.com',
-                        fbProviderPopup
+                        fbProviderPopup,
+                        setRenderFacebookIntegrationComponent
                       );
                     }}
                     _hover={{
@@ -404,10 +420,15 @@ export const DashboardPage = () => {
                 </Box>
                 {!hasIntegrationRecord &&
                   (hasError ?? addMoreFacebookBusinessAccountsError) && (
-                    <>{errorMap.get(hasError)()}</>
+                    <>
+                      {errorMap.get(hasError)
+                        ? errorMap.get(hasError)()
+                        : "Oops, there's been en error, please reach out to the CurateAI team for assistance."}
+                    </>
                   )}
                 {/* invoke FB integration component on first integration action */}
                 {!hasIntegrationRecord &&
+                  isRenderFacebookIntegrationComponent &&
                   Object.keys(facebookAuth).length > 0 && (
                     <FacebookAppIntegration
                       facebookAuthData={facebookAuth}
@@ -415,10 +436,14 @@ export const DashboardPage = () => {
                       setIntegrationError={setIntegrationError}
                       setProviderType={setProviderType}
                       setActiveIntegration={setActiveIntegration}
+                      setRenderFacebookIntegrationComponent={
+                        setRenderFacebookIntegrationComponent
+                      }
                     />
                   )}
                 {/* specific invocation of FB Integration component for add more accts action*/}
                 {addMoreFacebookBusinessAccountsAuth &&
+                  isRenderFacebookIntegrationComponent &&
                   Object.keys(addMoreFacebookBusinessAccountsAuth).length >
                     0 && (
                     <FacebookAppIntegration
@@ -427,6 +452,9 @@ export const DashboardPage = () => {
                       setIntegrationError={setIntegrationError}
                       setProviderType={setProviderType}
                       setActiveIntegration={setActiveIntegration}
+                      setRenderFacebookIntegrationComponent={
+                        setRenderFacebookIntegrationComponent
+                      }
                     />
                   )}
                 {!hasIntegrationRecord &&
@@ -512,6 +540,7 @@ export const DashboardPage = () => {
                                 // set loading state to active
                                 setLoading(true);
 
+                                // get ref to parent container with business acct id as dom id
                                 const hasMatchingContainerElement =
                                   e.target.closest(
                                     '.dashboard__integration-vendor-card-container'
@@ -593,14 +622,15 @@ export const DashboardPage = () => {
                                   });
                                 }
 
-                                // TODO: pass in removal record property id as missing arg
                                 // remove associated record data from firestore db
                                 const removedRecord =
                                   await removeRecordFromFirestore(
                                     currentUser.uid,
                                     ['clients', 'integrations'],
                                     ['facebook'],
-                                    'facebookBusinessAccts'
+                                    'facebookBusinessAccts',
+                                    selectedFacebookBusinessAccount[0]
+                                      .businessAcctId
                                   );
                                 if (!removedRecord) {
                                   // reset loader
@@ -611,7 +641,8 @@ export const DashboardPage = () => {
                                     errVar: removedRecord,
                                   });
                                 }
-                                console.log(removedRecord);
+                                // reset integration record
+                                setIntegrationRecord(null);
                                 // reset loader
                                 setLoading(false);
                               }}

@@ -11,6 +11,7 @@ const FacebookAppIntegration = ({
   setIntegrationError,
   setProviderType,
   setActiveIntegration,
+  setRenderFacebookIntegrationComponent,
 }) => {
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
 
@@ -464,9 +465,13 @@ const FacebookAppIntegration = ({
             isCustom: true,
           });
         }
+
         if (record?.exists) {
           // enable parent component integration btn
           setActiveIntegration(false);
+          /* reset render facebook integration component trigger 
+          this prevents any unnecessary renders of facebook integration componet when it's not intended */
+          setRenderFacebookIntegrationComponent(false);
           const { facebookBusinessAccts } = record?.data();
           // update parent component with firestore new record data
           setIntegrationRecord({
@@ -509,6 +514,7 @@ const FacebookAppIntegration = ({
     userBusinessList,
     readUserRecordFromFirestore,
     setActiveIntegration,
+    setRenderFacebookIntegrationComponent,
   ]);
 
   // handle user business list select element event
@@ -561,10 +567,10 @@ const FacebookAppIntegration = ({
           className="loading__progress"
           margin={
             isEqualToOrLessThan450
-              ? '1.5rem 1rem 1rem 1rem'
+              ? '1.5rem 1rem 1rem 2rem'
               : '1rem 0 2rem 2rem'
           }
-          width="18rem"
+          width="16rem"
           isIndeterminate
         />
       )}

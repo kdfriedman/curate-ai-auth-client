@@ -14,7 +14,9 @@ const AcctSelector = ({ acctList, onChangeHandler, labelText }) => {
             fontWeight: '800',
             color: 'rgb(26, 32, 44)',
             margin: `${
-              isEqualToOrLessThan450[0] ? '1rem 0 0 1rem' : '1rem 0 0 2rem'
+              isEqualToOrLessThan450[0]
+                ? '1rem 1rem 0 1rem'
+                : '1rem 1rem 0 2rem'
             }`,
           }}
           htmlFor="ad account list"
