@@ -11,7 +11,7 @@ export const useUnlinkProvider = (setProviderType) => {
         const providerObj = currentUser.providerData.filter(
           (providerObj) => providerObj?.providerId === providerType
         );
-        if (!providerObj ?? providerObj.length === 0) {
+        if (!providerObj || providerObj.length === 0) {
           console.error({
             errMsg: 'provider cannot be unlinked because it does not exist',
             errVar: providerObj,
@@ -20,9 +20,9 @@ export const useUnlinkProvider = (setProviderType) => {
         }
         // unlink provider by providerId
         await unlinkProvider(currentUser, providerObj[0]?.providerId);
-        console.log(`${providerType} unlinked`);
 
         if (isMounted) setProviderType(null);
+        return 'provider unlinked';
       } catch (err) {
         if (isMounted) setProviderType(null);
         console.error({ errMsg: 'unlinkedProvider has err', err });

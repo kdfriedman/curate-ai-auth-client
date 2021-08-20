@@ -20,20 +20,10 @@ import { FaFacebook } from 'react-icons/fa';
 import { useIntegrationError } from '../hooks/useIntegrationError';
 import { useAddMoreFacebookBusinessAccounts } from '../hooks/useAddMoreFacebookBusinessAccounts';
 import { useUnlinkProvider } from '../hooks/useUnlinkProvider';
+import { useDeleteFacebookSystemUser } from '../hooks/useDeleteFacebookSystemUser';
+import { useRefreshFacebookAccessToken } from '../hooks/useRefreshFacebookAccessToken';
 
 export const DashboardPage = () => {
-  // TODO: provide delete sys user for clients - figure out how to store access token, refresh if needed, and allow user to unintegrate
-  // const [deletedSystemUserData, deletedSystemUserError] = await fetchData(
-  //   {
-  //     method: 'DELETE',
-  //     url: `https://graph.facebook.com/v11.0/419312452044680/managed_businesses?existing_client_business_id=${userBusinessId}&access_token=${facebookAuthData?.accessToken}`,
-  //     params: {},
-  //     data: {},
-  //     headers: {},
-  //   }
-  // );
-  // console.log(deletedSystemUserData, deletedSystemUserError);
-
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
   const isEqualToOrLessThan950 = useMediaQuery('(max-width: 950px)');
@@ -47,7 +37,8 @@ export const DashboardPage = () => {
   const [isIntegrationClick, setIntegrationClick] = useState(false);
   const [hasActiveIntegration, setActiveIntegration] = useState(false);
   const { linkToProvider, currentUser, getRedirectResult } = useAuth();
-  const { readUserRecordFromFirestore } = firestoreHandlers;
+  const { readUserRecordFromFirestore, removeRecordFromFirestore } =
+    firestoreHandlers;
   //unlink auth provider handler
   const { handleUnlinkProvider } = useUnlinkProvider(setProviderType);
   // setup custom hook to handle integration errors
@@ -55,6 +46,10 @@ export const DashboardPage = () => {
     setIntegrationError,
     setProviderType
   );
+  // setup custom hook to handle removing system user from facebook and clearing record
+  const { handleDeleteFacebookSystemUser } = useDeleteFacebookSystemUser();
+  // setup custom hook to refresh facebook access token
+  const { handleRefreshFacebookAccessToken } = useRefreshFacebookAccessToken();
   // setup custom hook to handle additional accounts per integration
   const {
     handleAddMoreFacebookBusinessAccounts,
@@ -347,8 +342,8 @@ export const DashboardPage = () => {
                   </Text>
                   <Button
                     disabled={isLoading || hasActiveIntegration ? true : false}
-                    onClick={() => {
-                      handleAddMoreFacebookBusinessAccounts(
+                    onClick={async () => {
+                      await handleAddMoreFacebookBusinessAccounts(
                         'facebook.com',
                         fbProviderPopup
                       );
@@ -467,6 +462,7 @@ export const DashboardPage = () => {
                         return (
                           <Flex
                             key={record.id}
+                            id={record.businessAcctId}
                             flexDir={
                               isEqualToOrLessThan950[0] ? 'column' : 'row'
                             }
@@ -512,6 +508,113 @@ export const DashboardPage = () => {
                               </Text>
                             </Box>
                             <Button
+                              onClick={async (e) => {
+                                // set loading state to active
+                                setLoading(true);
+
+                                const hasMatchingContainerElement =
+                                  e.target.closest(
+                                    '.dashboard__integration-vendor-card-container'
+                                  );
+                                if (!hasMatchingContainerElement) {
+                                  // reset loader
+                                  setLoading(false);
+                                  return console.error({
+                                    hasMatchingContainerElement,
+                                  });
+                                }
+                                // unlink provider to then relink to fetch fresh fb token
+                                const providerUnlinked =
+                                  await handleUnlinkProvider(
+                                    'facebook.com',
+                                    true
+                                  );
+                                // check if provider was successfully unlinked
+                                if (providerUnlinked !== 'provider unlinked') {
+                                  // reset loader
+                                  setLoading(false);
+                                  return console.error({
+                                    errMsg: providerUnlinked,
+                                  });
+                                }
+                                // refresh facebook token by reauthenticating, ensuring a fresh token
+                                // I KNOW, this is NOT ideal, will look to refactor down the line
+                                const refreshedAccessToken =
+                                  await handleRefreshFacebookAccessToken(
+                                    fbProviderPopup
+                                  );
+                                // check that provider was linked properly
+                                if (!refreshedAccessToken) {
+                                  // reset loader
+                                  setLoading(false);
+                                  return console.error({
+                                    errMsg: 'linking provider error',
+                                    refreshedAccessToken: refreshedAccessToken,
+                                  });
+                                }
+
+                                // filter clicked element parent container,
+                                // which holds business acct id with business acct being requested to be removed
+                                const selectedFacebookBusinessAccount =
+                                  hasIntegrationRecord.facebookBusinessAccts.filter(
+                                    (acct) => {
+                                      return (
+                                        acct.businessAcctId ===
+                                        hasMatchingContainerElement.id
+                                      );
+                                    }
+                                  );
+                                if (
+                                  selectedFacebookBusinessAccount.length === 0
+                                ) {
+                                  // reset loader
+                                  setLoading(false);
+                                  return console.error({
+                                    errMsg:
+                                      'Err: filtering for matching business acct ids from remove acct click',
+                                    errVar: selectedFacebookBusinessAccount,
+                                  });
+                                }
+                                // remove system user from facebook - this will wipe out the curateAi
+                                // system user from their business account
+                                const deletedFacebookSystemUser =
+                                  await handleDeleteFacebookSystemUser(
+                                    selectedFacebookBusinessAccount[0]
+                                      .businessAcctId,
+                                    refreshedAccessToken
+                                  );
+                                if (!deletedFacebookSystemUser) {
+                                  // reset loader
+                                  setLoading(false);
+                                  console.error({
+                                    errMsg:
+                                      'Err: deleting facebook system user failed',
+                                    errVar: deletedFacebookSystemUser,
+                                  });
+                                }
+
+                                // TODO: pass in removal record property id as missing arg
+                                // remove associated record data from firestore db
+                                const removedRecord =
+                                  await removeRecordFromFirestore(
+                                    currentUser.uid,
+                                    ['clients', 'integrations'],
+                                    ['facebook'],
+                                    'facebookBusinessAccts'
+                                  );
+                                if (!removedRecord) {
+                                  // reset loader
+                                  setLoading(false);
+                                  return console.error({
+                                    errMsg:
+                                      'deleting record from firestore failed',
+                                    errVar: removedRecord,
+                                  });
+                                }
+                                console.log(removedRecord);
+                                // reset loader
+                                setLoading(false);
+                              }}
                               disabled={isLoading ? true : false}
                               alignSelf="center"
                               className="dashboard__integration-vendor-card-remove-btn"

@@ -52,7 +52,7 @@ const addRecordToFirestore = async (
     return console.error({
       Error: `payloadName is null or undefined: ${payloadName}`,
     });
-  if (!payload ?? Object.entries(payload).length === 0) {
+  if (!payload || Object.entries(payload).length === 0) {
     return console.error({
       Error: `payload is undefined, null, or an empty object: ${payload}`,
     });
@@ -76,7 +76,7 @@ const addRecordToFirestore = async (
       [doc1]
     );
     // check for request error
-    if (error ?? !record) return console.error({ Error: error });
+    if (error) return console.error({ Error: error });
 
     // check if record exists before further processing
     if (record?.exists) {
@@ -124,8 +124,76 @@ const addRecordToFirestore = async (
   }
 };
 
+const removeRecordFromFirestore = async (
+  uid,
+  collections,
+  docs,
+  payloadName,
+  removalRecordPropertyId
+) => {
+  // validate types of params and check for falsy values
+  if (!uid) return console.error({ Error: `uid is null or undefined: ${uid}` });
+  if (!payloadName)
+    return console.error({
+      Error: `payloadName is null or undefined: ${payloadName}`,
+    });
+  if (!Array.isArray(collections) && !Array.isArray(docs)) {
+    return console.error({
+      Error1: `collections is not type array: ${collections}`,
+      Error2: `docs is not type array: ${docs}`,
+    });
+  }
+
+  // destructure collection and doc lists
+  const [collection1, collection2] = collections;
+  const [doc1] = docs;
+
+  // read record to check if uid exists in database, otherwise create new record
+  const [record, error] = await readUserRecordFromFirestore(
+    uid,
+    [collection1, collection2],
+    [doc1]
+  );
+  if (error) {
+    return console.error({
+      errMsg: 'Err: there was an err getting data from firestore',
+      errVar: error,
+    });
+  }
+
+  if (record?.exists) {
+    const selectedRecord = record?.data()[payloadName].filter((record) => {
+      return record.businessAcctId === removalRecordPropertyId;
+    });
+    if (selectedRecord.length === 0) {
+      return console.error({
+        errMsg:
+          'Err: firestore data was not filtered properly because removalRecordPropertyId was not matched',
+        errVar: removalRecordPropertyId,
+      });
+    }
+    try {
+      await db
+        .collection(collection1)
+        .doc(uid)
+        .collection(collection2)
+        .doc(doc1)
+        .update({
+          [payloadName]: Firebase.firestore.FieldValue.arrayRemove(
+            selectedRecord[0]
+          ),
+        });
+
+      return { msg: 'firestore record removed', record: selectedRecord[0] };
+    } catch (error) {
+      console.error('Error removing object: ', error);
+    }
+  }
+};
+
 const firestoreHandlers = {
   addRecordToFirestore,
+  removeRecordFromFirestore,
   readUserRecordFromFirestore,
   readCurateAIRecordFromFirestore,
 };

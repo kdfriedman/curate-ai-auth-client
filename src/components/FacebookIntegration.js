@@ -205,7 +205,6 @@ const FacebookAppIntegration = ({
   *******/
   useEffect(() => {
     let isMounted = true;
-    // async wrapper function to allow multiple requests
     const fetchClientBusinessData = async () => {
       // fetch client business data
       const [clientBusinessData, clientBusinessError] = await fetchData({
