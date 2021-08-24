@@ -30,11 +30,17 @@ export const Header = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
-    // hide onLoad spinner icon
-    const onLoadSpinner = document.querySelector(
-      '[data-on-load-spinner="true"]'
-    );
-    onLoadSpinner.style.display = 'none';
+    let isMounted = true;
+    if (isMounted) {
+      // hide onLoad spinner icon
+      const onLoadSpinner = document.querySelector(
+        '[data-on-load-spinner="true"]'
+      );
+      onLoadSpinner.style.display = 'none';
+    }
+    return () => {
+      isMounted = false;
+    };
   });
 
   useEffect(() => {
