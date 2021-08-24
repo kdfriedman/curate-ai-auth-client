@@ -9,8 +9,109 @@
       content="Web site used to log in to the CurateAI application"
     />
     <title>Log In | CurateAI</title>
+    <style>
+      @keyframes animation-onloadSpinner {
+        0% {
+          -webkit-transform: rotate(0deg);
+          -moz-transform: rotate(0deg);
+          -ms-transform: rotate(0deg);
+          transform: rotate(0deg);
+        }
+        100% {
+          -webkit-transform: rotate(360deg);
+          -moz-transform: rotate(360deg);
+          -ms-transform: rotate(360deg);
+          transform: rotate(360deg);
+        }
+      }
+      @-webkit-keyframes animation-onloadSpinner {
+        0% {
+          -webkit-transform: rotate(0deg);
+          -moz-transform: rotate(0deg);
+          -ms-transform: rotate(0deg);
+          transform: rotate(0deg);
+        }
+        100% {
+          -webkit-transform: rotate(360deg);
+          -moz-transform: rotate(360deg);
+          -ms-transform: rotate(360deg);
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes animation-onloadSpinnerCircle {
+        0% {
+          stroke-dasharray: 1, 400;
+          stroke-dashoffset: 0;
+        }
+        50% {
+          stroke-dasharray: 400, 400;
+          stroke-dashoffset: -100;
+        }
+        100% {
+          stroke-dasharray: 400, 400;
+          stroke-dashoffset: -260;
+        }
+      }
+      @-webkit-keyframes animation-onloadSpinnerCircle {
+        0% {
+          stroke-dasharray: 1, 400;
+          stroke-dashoffset: 0;
+        }
+        50% {
+          stroke-dasharray: 400, 400;
+          stroke-dashoffset: -100;
+        }
+        100% {
+          stroke-dasharray: 400, 400;
+          stroke-dashoffset: -260;
+        }
+      }
+      .loader__spinner-container {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        position: relative;
+        vertical-align: middle;
+        font-size: 48px;
+        min-height: 100vh;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        -webkit-justify-content: center;
+        justify-content: center;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+      .loader__spinner-onload {
+        width: 48px;
+        height: 48px;
+        -webkit-animation: animation-onloadSpinner 2s linear infinite;
+        animation: animation-onloadSpinner 2s linear infinite;
+      }
+      .loader__spinner-onload-circle-1 {
+        fill: transparent;
+        stroke: #edebe9;
+      }
+      .loader__spinner-onload-circle-2 {
+        fill: transparent;
+        stroke: #635bff;
+        -webkit-animation: animation-onloadSpinnerCircle 1.5s linear infinite;
+        animation: animation-onloadSpinnerCircle 1.5s linear infinite;
+      }
+    </style>
   </head>
   <body class="login-custom-style">
+    <script>
+      const animatedSpinnerContainer = document.createElement('div');
+      animatedSpinnerContainer.dataset.onLoadSpinner = 'true';
+      animatedSpinnerContainer.classList = 'loader__spinner-container';
+      animatedSpinnerContainer.innerHTML = `
+      <svg viewBox="0 0 100 100" class="loader__spinner-onload"><circle cx="50" cy="50" r="42" stroke-width="10px" class="loader__spinner-onload-circle-1"></circle><circle cx="50" cy="50" r="42" stroke-width="10px" class="loader__spinner-onload-circle-2"></circle></svg>
+      `;
+      document.body.appendChild(animatedSpinnerContainer);
+    </script>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
   </body>

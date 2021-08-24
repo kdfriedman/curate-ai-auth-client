@@ -30,6 +30,14 @@ export const Header = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
+    // hide onLoad spinner icon
+    const onLoadSpinner = document.querySelector(
+      '[data-on-load-spinner="true"]'
+    );
+    onLoadSpinner.style.display = 'none';
+  });
+
+  useEffect(() => {
     let isMounted = true;
 
     const logoutUser = async () => {

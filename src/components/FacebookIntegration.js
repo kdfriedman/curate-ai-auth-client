@@ -411,12 +411,13 @@ const FacebookAppIntegration = ({
 
       // create payload object for facebook integration
       const facebookFirebasePayload = {
-        uid: facebookAuthData.user.uid,
-        email: facebookAuthData.user.email,
+        uid: facebookAuthData?.user?.uid,
+        email: facebookAuthData?.user?.email,
         sysUserAccessToken,
-        businessAcctName: fbBusinessAcctName[0].name,
+        businessAcctName: fbBusinessAcctName[0]?.name,
         businessAcctId: userBusinessId,
         adAccountId: businessAssetId,
+        userAccessToken: facebookAuthData?.accessToken,
         id: uuidv4(),
         createdAt: new Date().toISOString(),
       };

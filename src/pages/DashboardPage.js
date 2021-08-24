@@ -132,9 +132,6 @@ export const DashboardPage = () => {
         isMounted
       ) {
         const { facebookBusinessAccts } = record?.data();
-        console.log({
-          facebookBusinessAccts,
-        });
         // update firestore integration record state
         setIntegrationRecord({
           facebookBusinessAccts,
@@ -556,7 +553,7 @@ export const DashboardPage = () => {
                                     hasMatchingContainerElement,
                                   });
                                 }
-                                // unlink provider to then relink to fetch fresh fb token
+                                // unlink provider to to allow user to prevent firebase duplicate provider error
                                 const providerUnlinked =
                                   await handleUnlinkProvider(
                                     'facebook.com',
@@ -570,21 +567,21 @@ export const DashboardPage = () => {
                                     errMsg: providerUnlinked,
                                   });
                                 }
-                                // refresh facebook token by reauthenticating, ensuring a fresh token
+
                                 // I KNOW, this is NOT ideal, will look to refactor down the line
-                                const refreshedAccessToken =
-                                  await handleRefreshFacebookAccessToken(
-                                    fbProviderPopup
-                                  );
+                                // const refreshedAccessToken =
+                                //   await handleRefreshFacebookAccessToken(
+                                //     fbProviderPopup
+                                //   );
                                 // check that provider was linked properly
-                                if (!refreshedAccessToken) {
-                                  // reset loader
-                                  setLoading(false);
-                                  return console.error({
-                                    errMsg: 'linking provider error',
-                                    refreshedAccessToken: refreshedAccessToken,
-                                  });
-                                }
+                                // if (!refreshedAccessToken) {
+                                // reset loader
+                                //   setLoading(false);
+                                //   return console.error({
+                                //     errMsg: 'linking provider error',
+                                //     refreshedAccessToken: refreshedAccessToken,
+                                //   });
+                                // }
 
                                 // filter clicked element parent container,
                                 // which holds business acct id with business acct being requested to be removed
@@ -614,7 +611,9 @@ export const DashboardPage = () => {
                                   await handleDeleteFacebookSystemUser(
                                     selectedFacebookBusinessAccount[0]
                                       .businessAcctId,
-                                    refreshedAccessToken
+                                    // pass access token from db if still valid, otherwise handle refresh token and replace in db
+                                    selectedFacebookBusinessAccount[0]
+                                      .userAccessToken
                                   );
                                 if (!deletedFacebookSystemUser) {
                                   // reset loader
