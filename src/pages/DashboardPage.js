@@ -73,7 +73,6 @@ export const DashboardPage = () => {
     let refreshedAccessToken = null;
     // set loading state to active
     setLoading(true);
-
     // get ref to parent container with business acct id as dom id
     const hasMatchingContainerElement = e.target.closest(
       '.dashboard__integration-vendor-card-container'
