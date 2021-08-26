@@ -88,7 +88,7 @@ const addRecordToFirestore = async (
         // if record exist and payload id is equal to previous
         if (record.adAccountId === payload.adAccountId) {
           duplicateRecord.warnMsg =
-            'The record cannot be added a because a record using this ad account already exists.';
+            'The record cannot be added because a record using this ad account already exists.';
           duplicateRecord.adAcctInUse = record.adAccountId;
         }
       });
