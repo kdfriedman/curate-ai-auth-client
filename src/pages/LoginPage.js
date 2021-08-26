@@ -40,6 +40,20 @@ export const LoginPage = () => {
   errorMap.set('auth/wrong-password', 'Invalid password, please try again');
 
   useEffect(() => {
+    let isMounted = true;
+    if (isMounted) {
+      // hide onLoad spinner icon
+      const onLoadSpinner = document.querySelector(
+        '[data-on-load-spinner="true"]'
+      );
+      onLoadSpinner.style.display = 'none';
+    }
+    return () => {
+      isMounted = false;
+    };
+  });
+
+  useEffect(() => {
     // set mounted state
     let isMounted = true;
 
