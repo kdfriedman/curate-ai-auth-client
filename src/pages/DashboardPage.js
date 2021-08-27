@@ -7,6 +7,7 @@ import {
   Link,
   CircularProgress,
   useMediaQuery,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { useAuth } from '../contexts/AuthContext';
 import FacebookAppIntegration from '../components/FacebookIntegration';
@@ -16,6 +17,7 @@ import {
 } from '../services/firebase/auth/facebook';
 import firestoreHandlers from '../services/firebase/data/firestore';
 import { Header } from '../components/Header';
+import { SettingsModal } from '../components/SettingsModal';
 import { FaFacebook } from 'react-icons/fa';
 import { useIntegrationError } from '../hooks/useIntegrationError';
 import { useAddMoreFacebookBusinessAccounts } from '../hooks/useAddMoreFacebookBusinessAccounts';
@@ -66,6 +68,7 @@ export const DashboardPage = () => {
     addMoreFacebookBusinessAccountsAuth,
   } = useAddMoreFacebookBusinessAccounts();
   const { handleReadFirestoreRecord } = useReadRecordFromFirestore();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   // remove curateai fb system user from client's business account
   const handleRemoveAccount = async (e) => {
@@ -603,6 +606,7 @@ export const DashboardPage = () => {
                   fontSize="16px"
                   color="#6c757d"
                   fontWeight="800"
+                  textAlign={isEqualToOrLessThan800[0] ? 'center' : 'left'}
                 >
                   Facebook
                 </Box>
@@ -731,6 +735,7 @@ export const DashboardPage = () => {
                               className="dashboard__integration-vendor-card-btn-container"
                             >
                               <Button
+                                onClick={onOpen}
                                 _hover={{
                                   opacity: '.8',
                                 }}
@@ -742,6 +747,7 @@ export const DashboardPage = () => {
                                 }
                                 minWidth="11rem"
                                 border="1px solid #ece9e9"
+                                backgroundColor="#dadada"
                               >
                                 Select Campaigns
                               </Button>
@@ -764,6 +770,13 @@ export const DashboardPage = () => {
                               >
                                 Remove Account
                               </Button>
+                              <SettingsModal
+                                isOpen={isOpen}
+                                onClose={onClose}
+                                dbRecord={
+                                  hasIntegrationRecord?.facebookBusinessAccts
+                                }
+                              />
                             </Flex>
                           </Flex>
                         );

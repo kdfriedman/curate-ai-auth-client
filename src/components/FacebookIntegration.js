@@ -404,10 +404,36 @@ const FacebookAppIntegration = ({
         return catchErrors(sysUserAssetAssignmentDataError);
       }
 
+      // fetch list of ad campaigns to provide user for selection
+      const [adCampaignListResult, adCampaignListError] = await fetchData({
+        method: 'GET',
+        url: `https://graph.facebook.com/v11.0/${businessAssetId}/campaigns?fields=name&access_token=${facebookAuthData?.accessToken}`,
+        params: {},
+        data: {},
+        headers: {},
+      });
+
+      if (adCampaignListError && isMounted) {
+        // enable parent component integration btn
+        setActiveIntegration(false);
+        // set isLoading to true to render progress
+        dispatch({
+          type: 'isLoading',
+          payload: false,
+        });
+        return catchErrors(adCampaignListError);
+      }
+
       // filter facebook business acct name from user business list chosen user selected id
       const fbBusinessAcctName = userBusinessList.filter((businessObject) => {
         return businessObject.id === userBusinessId;
       });
+
+      const adCampaignList = adCampaignListResult?.data?.data.map(
+        (campaign) => {
+          return { id: campaign.id, name: campaign.name, isActive: false };
+        }
+      );
 
       // create payload object for facebook integration
       const facebookFirebasePayload = {
@@ -417,6 +443,7 @@ const FacebookAppIntegration = ({
         businessAcctName: fbBusinessAcctName[0]?.name,
         businessAcctId: userBusinessId,
         adAccountId: businessAssetId,
+        adCampaignList: adCampaignList,
         userAccessToken: facebookAuthData?.accessToken,
         id: uuidv4(),
         createdAt: new Date().toISOString(),
