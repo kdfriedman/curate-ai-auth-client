@@ -681,12 +681,16 @@ export const DashboardPage = () => {
                             flexDir={
                               isEqualToOrLessThan950[0] ? 'column' : 'row'
                             }
-                            maxWidth={isEqualToOrLessThan450[0] ? '20rem' : ''}
+                            maxWidth={
+                              isEqualToOrLessThan450[0] ? '20rem' : '750px'
+                            }
                             className="dashboard__integration-vendor-card-container"
                             boxShadow="0 0.5rem 1rem rgb(0 0 0 / 15%)"
-                            margin="1rem"
+                            margin="1rem 2rem"
                             borderRadius="10px"
                             border="1px solid #f0f0f0"
+                            alignItems="center"
+                            justifyContent="space-between"
                           >
                             <Box
                               className="dashboard__integration-vendor-card"
@@ -722,19 +726,45 @@ export const DashboardPage = () => {
                                 </span>
                               </Text>
                             </Box>
-                            <Button
-                              onClick={handleRemoveAccount}
-                              disabled={isLoading ? true : false}
-                              alignSelf="center"
-                              className="dashboard__integration-vendor-card-remove-btn"
-                              margin={
-                                isEqualToOrLessThan950[0]
-                                  ? '0 1rem 1rem'
-                                  : '1rem'
-                              }
+                            <Flex
+                              flexDir="column"
+                              className="dashboard__integration-vendor-card-btn-container"
                             >
-                              Remove Account
-                            </Button>
+                              <Button
+                                _hover={{
+                                  opacity: '.8',
+                                }}
+                                className="dashboard__integration-vendor-card-btn"
+                                margin={
+                                  isEqualToOrLessThan950[0]
+                                    ? '0 1rem 1rem'
+                                    : '1rem'
+                                }
+                                minWidth="11rem"
+                                border="1px solid #ece9e9"
+                              >
+                                Select Campaigns
+                              </Button>
+                              <Button
+                                _hover={{
+                                  opacity: '.8',
+                                }}
+                                onClick={handleRemoveAccount}
+                                disabled={isLoading ? true : false}
+                                alignSelf="center"
+                                backgroundColor="#E53E3E"
+                                color="#fff"
+                                className="dashboard__integration-vendor-card-btn"
+                                margin={
+                                  isEqualToOrLessThan950[0]
+                                    ? '0 1rem 1rem'
+                                    : '0 0 1rem'
+                                }
+                                minWidth="11rem"
+                              >
+                                Remove Account
+                              </Button>
+                            </Flex>
                           </Flex>
                         );
                       }
