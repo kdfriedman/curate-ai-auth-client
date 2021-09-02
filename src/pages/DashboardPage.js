@@ -94,9 +94,12 @@ export const DashboardPage = () => {
     if (providerUnlinked !== 'provider unlinked') {
       // reset loader
       setLoading(false);
-      return console.error({
+      console.error({
         errMsg: providerUnlinked,
       });
+      // if this error occurs, it most likely means that the Db is out of sync with react state
+      // flush the state to re-read the db for updated state via refresh
+      window.location.reload();
     }
     // filter clicked element parent container,
     // which holds business acct id with business acct being requested to be removed

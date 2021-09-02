@@ -433,16 +433,32 @@ const FacebookAppIntegration = ({
         (campaign) => {
           let startDate;
           let stopDate;
+
           try {
-            startDate = new Date(campaign.start_time)
-              .toISOString()
-              .slice(0, 10);
-            stopDate = new Date(campaign.stop_time).toISOString().slice(0, 10);
-          } catch (err) {}
+            if (campaign.start_time && campaign.stop_time) {
+              const startFormattedDate = new Date(campaign.start_time)
+                .toISOString()
+                .slice(0, 10);
+              const stopFormattedDate = new Date(campaign.stop_time)
+                .toISOString()
+                .slice(0, 10);
+              const startFormattedDateList = startFormattedDate.split('-');
+              const stopFormattedDateList = stopFormattedDate.split('-');
+              const startFormattedDateLastItem = startFormattedDateList.shift();
+              const stopFormattedDateLastItem = stopFormattedDateList.shift();
+              startFormattedDateList.push(startFormattedDateLastItem);
+              stopFormattedDateList.push(stopFormattedDateLastItem);
+              startDate = startFormattedDateList.join('-');
+              stopDate = stopFormattedDateList.join('-');
+            }
+          } catch (err) {
+            console.error(err);
+          }
           return {
             id: campaign.id,
             name: campaign.name,
-            flight: `${startDate} - ${stopDate}`,
+            flight:
+              startDate && stopDate ? `${startDate} - ${stopDate}` : 'N/A',
             isActive: false,
           };
         }
