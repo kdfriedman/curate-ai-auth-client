@@ -24,16 +24,17 @@ export const useAddMoreFacebookBusinessAccounts = () => {
       const providerObj = currentUser.providerData.filter(
         (providerObj) => providerObj?.providerId === providerType
       );
-      if (!providerObj ?? providerObj.length === 0) {
-        return console.error({ providerObj });
-      }
+      if (!providerObj) return console.error({ providerObj });
+
       try {
-        // unlink provider by providerId
-        const unlinkedProvider = await unlinkProvider(
-          currentUser,
-          providerObj[0]?.providerId
-        );
-        if (!unlinkedProvider) console.error({ unlinkedProvider });
+        if (providerObj.length > 0) {
+          // unlink provider by providerId
+          const unlinkedProvider = await unlinkProvider(
+            currentUser,
+            providerObj[0]?.providerId
+          );
+          if (!unlinkedProvider) console.error({ unlinkedProvider });
+        }
 
         const result = await linkToProviderWithPopup(provider);
         // check that result exists

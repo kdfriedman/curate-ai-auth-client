@@ -407,7 +407,7 @@ const FacebookAppIntegration = ({
       // fetch list of ad campaigns to provide user for selection
       const [adCampaignListResult, adCampaignListError] = await fetchData({
         method: 'GET',
-        url: `https://graph.facebook.com/v11.0/${businessAssetId}/campaigns?fields=name&access_token=${facebookAuthData?.accessToken}`,
+        url: `https://graph.facebook.com/v11.0/${businessAssetId}/campaigns?fields=name,start_time,stop_time&access_token=${facebookAuthData?.accessToken}`,
         params: {},
         data: {},
         headers: {},
@@ -431,7 +431,20 @@ const FacebookAppIntegration = ({
 
       const adCampaignList = adCampaignListResult?.data?.data.map(
         (campaign) => {
-          return { id: campaign.id, name: campaign.name, isActive: false };
+          let startDate;
+          let stopDate;
+          try {
+            startDate = new Date(campaign.start_time)
+              .toISOString()
+              .slice(0, 10);
+            stopDate = new Date(campaign.stop_time).toISOString().slice(0, 10);
+          } catch (err) {}
+          return {
+            id: campaign.id,
+            name: campaign.name,
+            flight: `${startDate} - ${stopDate}`,
+            isActive: false,
+          };
         }
       );
 

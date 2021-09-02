@@ -79,12 +79,15 @@ const addRecordToFirestore = async (
     if (error) return console.error({ Error: error });
 
     // check if record exists before further processing
-    if (record?.exists) {
+    if (
+      record?.exists &&
+      record.data() &&
+      Array.isArray(record?.data()[payloadName])
+    ) {
       // setup object to catch duplicate record data
       const duplicateRecord = {};
-
       // loop through all records within vendor array
-      record?.data()[payloadName].forEach((record) => {
+      record?.data()[payloadName]?.forEach((record) => {
         // if record exist and payload id is equal to previous
         if (record.adAccountId === payload.adAccountId) {
           duplicateRecord.warnMsg =

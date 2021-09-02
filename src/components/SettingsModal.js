@@ -10,78 +10,82 @@ import {
   Table,
   Thead,
   Tbody,
-  Tfoot,
+  Checkbox,
   Tr,
   Th,
   Td,
-  TableCaption,
+  Heading,
+  useMediaQuery,
 } from '@chakra-ui/react';
 
-export const SettingsModal = ({ isOpen, onClose, dbRecord }) => {
+export const SettingsModal = ({ isOpen, onClose, dbRecord, id }) => {
+  const isEqualToOrGreaterThan750 = useMediaQuery('(min-width: 750px)');
+
   const { adAccountId, adCampaignList, businessAcctId, businessAcctName } =
-    dbRecord[0];
+    dbRecord;
   return (
     <>
-      <Modal size={'xl'} isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>
-            Facebook Business Account: {businessAcctName}
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            Facebook Ad Account: {adAccountId}
-            <Table variant="simple">
-              <TableCaption>Imperial to metric conversion factors</TableCaption>
-              <Thead>
-                <Tr>
-                  <Th>To convert</Th>
-                  <Th>into</Th>
-                  <Th isNumeric>multiply by</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                <Tr>
-                  <Td>inches</Td>
-                  <Td>millimetres (mm)</Td>
-                  <Td isNumeric>25.4</Td>
-                </Tr>
-                <Tr>
-                  <Td>feet</Td>
-                  <Td>centimetres (cm)</Td>
-                  <Td isNumeric>30.48</Td>
-                </Tr>
-                <Tr>
-                  <Td>yards</Td>
-                  <Td>metres (m)</Td>
-                  <Td isNumeric>0.91444</Td>
-                </Tr>
-              </Tbody>
-              <Tfoot>
-                <Tr>
-                  <Th>To convert</Th>
-                  <Th>into</Th>
-                  <Th isNumeric>multiply by</Th>
-                </Tr>
-              </Tfoot>
-            </Table>
-          </ModalBody>
+      {id === businessAcctId && (
+        <Modal
+          scrollBehavior={'inside'}
+          size={'xl'}
+          isOpen={isOpen}
+          onClose={onClose}
+        >
+          <ModalOverlay />
+          <ModalContent minWidth="40rem" maxHeight="30rem">
+            <ModalHeader textAlign="center" margin="1rem 0 0">
+              Facebook Business Account | {businessAcctName}
+              <Heading as="h6" size="xs">
+                Facebook Ad Account | {adAccountId}
+              </Heading>
+            </ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              {isEqualToOrGreaterThan750[0] && (
+                <Table variant="simple">
+                  <Thead>
+                    <Tr>
+                      <Th>Campaign ID</Th>
+                      <Th>Campaign Name</Th>
+                      <Th>Campaign Flight</Th>
+                      <Th>Active Status</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {adCampaignList.map((campaign) => {
+                      return (
+                        <Tr key={campaign.id}>
+                          <Td>{campaign.id}</Td>
+                          <Td>{campaign.name}</Td>
+                          <Td>{campaign.flight}</Td>
+                          <Td>
+                            <Checkbox />
+                          </Td>
+                        </Tr>
+                      );
+                    })}
+                  </Tbody>
+                </Table>
+              )}
+            </ModalBody>
 
-          <ModalFooter>
-            <Button
-              border="1px solid #ece9e9"
-              backgroundColor="#dadada"
-              mr={3}
-              onClick={onClose}
-            >
-              Close
-            </Button>
-            <Button backgroundColor="#635bff" color="#fff" variant="ghost">
-              Save Changes
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+            <ModalFooter ml={'auto'} mr={'auto'}>
+              <Button
+                border="1px solid #ece9e9"
+                backgroundColor="#dadada"
+                mr={3}
+                onClick={onClose}
+              >
+                Close
+              </Button>
+              <Button backgroundColor="#635bff" color="#fff" variant="ghost">
+                Save Changes
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )}
     </>
   );
 };

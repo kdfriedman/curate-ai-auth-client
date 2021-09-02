@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   Flex,
   Button,
@@ -39,6 +39,7 @@ export const DashboardPage = () => {
   const [facebookAuth, setFacebookAuth] = useState({});
   const [isIntegrationClick, setIntegrationClick] = useState(false);
   const [hasActiveIntegration, setActiveIntegration] = useState(false);
+  const [settingsModalId, updateSettingsModalId] = useState(null);
   const [
     isRenderFacebookIntegrationComponent,
     setRenderFacebookIntegrationComponent,
@@ -317,7 +318,7 @@ export const DashboardPage = () => {
       if (
         record &&
         record?.exists &&
-        record?.data().facebookBusinessAccts.length > 0 &&
+        record?.data()?.facebookBusinessAccts?.length > 0 &&
         isMounted
       ) {
         const { facebookBusinessAccts } = record?.data();
@@ -735,7 +736,20 @@ export const DashboardPage = () => {
                               className="dashboard__integration-vendor-card-btn-container"
                             >
                               <Button
-                                onClick={onOpen}
+                                onClick={(e) => {
+                                  // get ref to parent container with business acct id as dom id
+                                  const vendorCardParentElement =
+                                    e.target.closest(
+                                      '.dashboard__integration-vendor-card-container'
+                                    );
+                                  // check if parent element exists, then open modal
+                                  if (vendorCardParentElement) {
+                                    updateSettingsModalId(
+                                      vendorCardParentElement.id
+                                    );
+                                    onOpen();
+                                  }
+                                }}
                                 _hover={{
                                   opacity: '.8',
                                 }}
@@ -770,13 +784,15 @@ export const DashboardPage = () => {
                               >
                                 Remove Account
                               </Button>
-                              <SettingsModal
-                                isOpen={isOpen}
-                                onClose={onClose}
-                                dbRecord={
-                                  hasIntegrationRecord?.facebookBusinessAccts
-                                }
-                              />
+                              {settingsModalId && (
+                                <SettingsModal
+                                  isOpen={isOpen}
+                                  onClose={onClose}
+                                  dbRecord={record}
+                                  id={settingsModalId}
+                                  updateSettingsModalId={updateSettingsModalId}
+                                />
+                              )}
                             </Flex>
                           </Flex>
                         );
