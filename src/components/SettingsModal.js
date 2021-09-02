@@ -19,7 +19,8 @@ import {
 } from '@chakra-ui/react';
 
 export const SettingsModal = ({ isOpen, onClose, dbRecord, id }) => {
-  const isEqualToOrGreaterThan750 = useMediaQuery('(min-width: 750px)');
+  const isEqualToOrGreaterThan870 = useMediaQuery('(min-width: 870px)');
+  const isEqualToOrLessThan400 = useMediaQuery('(max-width: 400px)');
 
   const { adAccountId, adCampaignList, businessAcctId, businessAcctName } =
     dbRecord;
@@ -33,41 +34,47 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id }) => {
           onClose={onClose}
         >
           <ModalOverlay />
-          <ModalContent minWidth="40rem" maxHeight="30rem">
+          <ModalContent
+            minWidth={isEqualToOrGreaterThan870[0] ? '53rem' : false}
+            maxWidth={isEqualToOrLessThan400[0] ? '21rem' : '36rem'}
+            maxHeight="30rem"
+          >
             <ModalHeader textAlign="center" margin="1rem 0 0">
-              Facebook Business Account | {businessAcctName}
+              {businessAcctName}
               <Heading as="h6" size="xs">
-                Facebook Ad Account | {adAccountId}
+                Ad Account | {adAccountId}
               </Heading>
             </ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              {isEqualToOrGreaterThan750[0] && (
-                <Table variant="simple">
-                  <Thead>
-                    <Tr>
-                      <Th>Campaign ID</Th>
-                      <Th>Campaign Name</Th>
-                      <Th>Campaign Flight</Th>
-                      <Th>Active Status</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {adCampaignList.map((campaign) => {
-                      return (
-                        <Tr key={campaign.id}>
-                          <Td>{campaign.id}</Td>
-                          <Td>{campaign.name}</Td>
-                          <Td>{campaign.flight}</Td>
-                          <Td>
-                            <Checkbox />
-                          </Td>
-                        </Tr>
-                      );
-                    })}
-                  </Tbody>
-                </Table>
-              )}
+              <Table variant="simple">
+                <Thead>
+                  <Tr>
+                    <Th>Campaign ID</Th>
+                    <Th>Campaign Name</Th>
+                    <Th
+                      minWidth={isEqualToOrGreaterThan870[0] ? false : '10rem'}
+                    >
+                      Campaign Flight
+                    </Th>
+                    <Th>Active Status</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {adCampaignList.map((campaign) => {
+                    return (
+                      <Tr key={campaign.id}>
+                        <Td>{campaign.id}</Td>
+                        <Td>{campaign.name}</Td>
+                        <Td>{campaign.flight}</Td>
+                        <Td>
+                          <Checkbox />
+                        </Td>
+                      </Tr>
+                    );
+                  })}
+                </Tbody>
+              </Table>
             </ModalBody>
 
             <ModalFooter ml={'auto'} mr={'auto'}>
