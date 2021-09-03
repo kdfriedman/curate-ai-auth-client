@@ -151,7 +151,7 @@ const removeRecordFromFirestore = async (
   const [collection1, collection2] = collections;
   const [doc1] = docs;
 
-  // read record to check if uid exists in database, otherwise create new record
+  // read record to check if uid exists in database, return without doing anything
   const [record, error] = await readUserRecordFromFirestore(
     uid,
     [collection1, collection2],
@@ -201,7 +201,7 @@ const removeRecordFromFirestore = async (
 
       return { msg: 'firestore record removed', record: selectedRecord[0] };
     } catch (error) {
-      console.error('Error removing object: ', error);
+      console.error('Error removing record: ', error);
     }
   }
 };
