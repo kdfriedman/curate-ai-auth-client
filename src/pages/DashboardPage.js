@@ -109,10 +109,6 @@ export const DashboardPage = () => {
       if (!hasMatchingRecord) window.location.reload();
     }
 
-    //TODO: there's an error that occurs when the facebook system user token does not exist
-    // but our record exists and tries to delete it. In this case, we will have to check if the token deletion request fails,
-    // and then remove the firestore record anyways
-
     // filter clicked element parent container,
     // which holds business acct id with business acct being requested to be removed
     const selectedFacebookBusinessAccount =
