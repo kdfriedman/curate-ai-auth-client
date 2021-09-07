@@ -16,11 +16,11 @@ export const useDeleteFacebookSystemUser = () => {
           }
         );
         if (deletedSystemUserError) {
-          return console.error({ deletedSystemUserError });
+          return deletedSystemUserError;
         }
         return deletedSystemUserData;
       } catch (err) {
-        console.error({ errMsg: 'deletion of system user has err', err });
+        return err;
       }
     },
     []

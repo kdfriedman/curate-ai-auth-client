@@ -92,15 +92,27 @@ export const DashboardPage = () => {
     const providerUnlinked = await handleUnlinkProvider('facebook.com', true);
     // check if provider was successfully unlinked
     if (providerUnlinked !== 'provider unlinked') {
-      // reset loader
-      setLoading(false);
       console.error({
         errMsg: providerUnlinked,
       });
+      // get current list of firestore records
+      const firestoreRecords = await handleReadFirestoreRecord(
+        ['clients', 'integrations'],
+        ['facebook']
+      );
+      // check if record exists which was clicked on to be removed
+      const hasMatchingRecord = firestoreRecords.filter((record) => {
+        return record.businessAcctId === hasMatchingContainerElement.id;
+      });
       // if this error occurs, it most likely means that the Db is out of sync with react state
       // flush the state to re-read the db for updated state via refresh
-      window.location.reload();
+      if (!hasMatchingRecord) window.location.reload();
     }
+
+    //TODO: there's an error that occurs when the facebook system user token does not exist
+    // but our record exists and tries to delete it. In this case, we will have to check if the token deletion request fails,
+    // and then remove the firestore record anyways
+
     // filter clicked element parent container,
     // which holds business acct id with business acct being requested to be removed
     const selectedFacebookBusinessAccount =
