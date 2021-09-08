@@ -543,7 +543,7 @@ export const DashboardPage = () => {
                     style={{ margin: '0 0 0 10px', fontWeight: '800' }}
                     className="dashboard__fb-login-btn-text"
                   >
-                    Log In With Facebook
+                    Login With Facebook
                   </span>
                 </Button>
               )}
