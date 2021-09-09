@@ -171,9 +171,9 @@ const FacebookAppIntegration = ({
       } else {
         catchErrors({
           isCustom: true,
-          errMsg:
+          errMsg: 'Error: userBusinessList is empty array',
+          errUserMsg:
             'User must be logged into facebook with an account that has one or more associated facebook business accounts. Log into facebook.com to select a different account.',
-          errUserMsg: 'Error: userBusinessList is empty array',
         });
         if (isMounted) {
           // enable parent component integration btn
