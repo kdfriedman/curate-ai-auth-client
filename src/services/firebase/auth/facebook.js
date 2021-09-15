@@ -4,7 +4,7 @@ import firebase from 'firebase/app';
 export const fbProviderRedirect = new firebase.auth.FacebookAuthProvider();
 // add business_manager scope to access user's business manager data
 fbProviderRedirect.addScope(
-  'business_management, public_profile, ads_read, read_insights, ads_management'
+  'business_management, public_profile, ads_read, ads_management'
 );
 fbProviderRedirect.setCustomParameters({ auth_type: 'reauthenticate' });
 
@@ -12,5 +12,5 @@ fbProviderRedirect.setCustomParameters({ auth_type: 'reauthenticate' });
 export const fbProviderPopup = new firebase.auth.FacebookAuthProvider();
 // add business_manager scope to access user's business manager data
 fbProviderPopup.addScope(
-  'business_management, public_profile, ads_read, read_insights, ads_management'
+  'business_management, public_profile, ads_read, ads_management'
 );
