@@ -167,25 +167,17 @@ const removeRecordFromFirestore = async (
   if (record?.exists) {
     // this check is used for users who attempt to remove record which has been manually removed by admin prior, therefore no record exists to remove
     if (!record.data() || !Array.isArray(record?.data()[payloadName])) {
-      return console.error({
-        errMsg:
-          'Err: firestore record could not be removed because no record exists. This error may occur when the record is manually removed from firebase, prior to removing from the UI.',
-        errVar: {
-          '!record.data()': record.data(),
-          'Array.isArray(record?.data()[payloadName]':
-            record?.data()[payloadName],
-        },
-      });
+      // if this error occurs, most likely caused by db getting unsynced with app
+      // reload page as fail safe
+      window.location.reload();
     }
     const selectedRecord = record?.data()[payloadName].filter((record) => {
       return record.businessAcctId === removalRecordPropertyId;
     });
     if (selectedRecord.length === 0) {
-      return console.error({
-        errMsg:
-          'Err: firestore data was not filtered properly because removalRecordPropertyId was not matched',
-        errVar: removalRecordPropertyId,
-      });
+      // if this error occurs, most likely caused by db getting unsynced with app
+      // reload page as fail safe
+      window.location.reload();
     }
     try {
       await db

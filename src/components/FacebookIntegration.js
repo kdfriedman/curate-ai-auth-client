@@ -672,7 +672,7 @@ const FacebookAppIntegration = ({
             </Link>
           </Text>
           <Text margin="1rem 2rem 0 2rem" color="#c5221f">
-            Error: {hasErrors?.errUserMsg}
+            {hasErrors?.errUserMsg}
           </Text>
         </>
       )}

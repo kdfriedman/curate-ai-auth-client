@@ -100,10 +100,14 @@ export const DashboardPage = () => {
         ['clients', 'integrations'],
         ['facebook']
       );
-      // check if record exists which was clicked on to be removed
-      const hasMatchingRecord = firestoreRecords.filter((record) => {
-        return record.businessAcctId === hasMatchingContainerElement.id;
-      });
+      // set hasMatching record var to set with filtered record if firestoreRecords is truthy
+      let hasMatchingRecord;
+      if (firestoreRecords) {
+        // check if record exists which was clicked on to be removed
+        hasMatchingRecord = firestoreRecords.filter((record) => {
+          return record.businessAcctId === hasMatchingContainerElement.id;
+        });
+      }
       // if this error occurs, it most likely means that the Db is out of sync with react state
       // flush the state to re-read the db for updated state via refresh
       if (!hasMatchingRecord) window.location.reload();
@@ -271,13 +275,12 @@ export const DashboardPage = () => {
   const errorHandler = () => {
     return (
       <Text
-        fontSize="13px"
         color="#c5221f"
         fontWeight="500"
         className="error__provider-already-linked"
         padding={
           isEqualToOrLessThan450
-            ? '1rem 1rem 0rem 1rem'
+            ? '1rem 1rem 0rem 2rem'
             : isEqualToOrLessThan800[0]
             ? '1rem 0 0 0'
             : '1rem 2rem 0 2rem'
@@ -297,6 +300,7 @@ export const DashboardPage = () => {
   errorMap.set('auth/popup-closed-by-user', errorHandler);
   errorMap.set('auth/provider-already-linked', errorHandler);
   errorMap.set('failed to read record from firestore', errorHandler);
+  errorMap.set('auth/email-already-in-use', errorHandler);
 
   // read data from firebase to set integration state
   useEffect(() => {
