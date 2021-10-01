@@ -2,6 +2,7 @@ import { useState } from 'react';
 import firestoreHandlers from '../services/firebase/data/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import {
+  Flex,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -17,12 +18,15 @@ import {
   Tr,
   Th,
   Td,
+  Tooltip,
   Heading,
   useMediaQuery,
 } from '@chakra-ui/react';
+import { MdInfo } from 'react-icons/md';
 
 export const SettingsModal = ({ isOpen, onClose, dbRecord, id }) => {
   const isEqualToOrGreaterThan870 = useMediaQuery('(min-width: 870px)');
+  const isEqualToOrLessThan500 = useMediaQuery('(max-width: 500px)');
   const isEqualToOrLessThan400 = useMediaQuery('(max-width: 400px)');
 
   // upack firestore handlers
@@ -48,13 +52,12 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id }) => {
       );
       // if campaign has associated change stored in state, update record with new state
       if (hasUpdatedCampaign) {
-        campaign.id = hasUpdatedCampaign.id;
         campaign.isActive = hasUpdatedCampaign.isActive;
       }
       return campaign;
     });
 
-    // TODO: using diffing function to only update db if changes exist between adCampaignLists
+    // diffing function to only update db if changes exist between adCampaignLists
     const diffOfAdCampaignList = dbRecord.adCampaignList.filter(
       (campaign, i) => {
         // loop through both arrays and compare the isActive property as type strings
@@ -66,7 +69,9 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id }) => {
     );
     //update db record with updated campaign list
     if (diffOfAdCampaignList.length > 0) {
-      console.log('diff exists, update firestore');
+      console.log(
+        '[Campaign Activation]: isActive diff exists, update firestore with campaign activation state change'
+      );
       dbRecord.adCampaignList = updatedAdCampaignList;
       // update db with new updated db record
       const removedRecord = await removeRecordFromFirestore(
@@ -183,34 +188,70 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id }) => {
               </Table>
             </ModalBody>
 
-            <ModalFooter ml={'auto'} mr={'auto'}>
-              <Button
-                _hover={{
-                  opacity: '.8',
-                }}
-                border="1px solid #ece9e9"
-                backgroundColor="#dadada"
-                mr={3}
-                onClick={onClose}
+            <ModalFooter
+              flexDir={isEqualToOrLessThan500[0] ? 'column' : 'row'}
+              className="settings-modal__footer"
+              justifyContent="space-evenly"
+            >
+              <Flex marginBottom="1rem" className="settings-modal__btn-wrapper">
+                <Button
+                  onClick={() => {
+                    // pass in db prop
+                    saveModalSettings(dbRecord);
+                    // close modal after saving
+                    onClose();
+                  }}
+                  _hover={{
+                    opacity: '.8',
+                  }}
+                  backgroundColor="#635bff"
+                  color="#fff"
+                  variant="ghost"
+                >
+                  Save Changes
+                </Button>
+                <Button
+                  _hover={{
+                    opacity: '.8',
+                  }}
+                  border="1px solid #ece9e9"
+                  backgroundColor="#dadada"
+                  ml={3}
+                  onClick={onClose}
+                >
+                  Close
+                </Button>
+              </Flex>
+              <Flex
+                marginBottom="1rem"
+                className="settings-modal__btn-wrapper"
+                alignItems="center"
               >
-                Close
-              </Button>
-              <Button
-                onClick={() => {
-                  // pass in db prop
-                  saveModalSettings(dbRecord);
-                  // close modal after saving
-                  onClose();
-                }}
-                _hover={{
-                  opacity: '.8',
-                }}
-                backgroundColor="#635bff"
-                color="#fff"
-                variant="ghost"
-              >
-                Save Changes
-              </Button>
+                {/* Tooltip - sync data information*/}
+                <Tooltip
+                  label="When selected, the 'Refresh Data' feature will connect with Facebook and retrieve the latest campaign data in your Facebook advertising account. Select this option only if you know that your Facebook data needs to be refreshed."
+                  fontSize="sm"
+                >
+                  <span className="settings-modal__tooltip-wrapper">
+                    <MdInfo />
+                  </span>
+                </Tooltip>
+                <Button
+                  className="settings-modal__refresh-btn"
+                  onClick={() => {
+                    // update fb campaign data here
+                  }}
+                  _hover={{
+                    opacity: '.8',
+                  }}
+                  backgroundColor="#635bff"
+                  color="#fff"
+                  variant="ghost"
+                  marginLeft="12px"
+                >
+                  Refresh Data
+                </Button>
+              </Flex>
             </ModalFooter>
           </ModalContent>
         </Modal>
