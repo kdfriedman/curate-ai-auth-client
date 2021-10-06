@@ -23,8 +23,20 @@ import {
   useMediaQuery,
 } from '@chakra-ui/react';
 import { MdInfo } from 'react-icons/md';
+import { useRefreshFacebookCampaignData } from '../hooks/useRefreshFacebookCampaignData';
+import { fbProviderPopup } from '../services/firebase/auth/facebook';
 
-export const SettingsModal = ({ isOpen, onClose, dbRecord, id }) => {
+export const SettingsModal = ({
+  isOpen,
+  onClose,
+  dbRecord,
+  id,
+  setIntegrationRecord,
+  Loading,
+}) => {
+  const { handleRefreshFacebookCampaignData } =
+    useRefreshFacebookCampaignData();
+
   const isEqualToOrGreaterThan870 = useMediaQuery('(min-width: 870px)');
   const isEqualToOrLessThan500 = useMediaQuery('(max-width: 500px)');
   const isEqualToOrLessThan400 = useMediaQuery('(max-width: 400px)');
@@ -36,6 +48,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id }) => {
 
   // set campaign status state (isActive checkbox)
   const [campaignStatus, setCampaignStatus] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const { adAccountId, adCampaignList, businessAcctId, businessAcctName } =
     dbRecord;
@@ -154,38 +167,53 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id }) => {
             </ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <Table variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th>Campaign ID</Th>
-                    <Th>Campaign Name</Th>
-                    <Th
-                      minWidth={isEqualToOrGreaterThan870[0] ? false : '10rem'}
-                    >
-                      Campaign Flight
-                    </Th>
-                    <Th>Active Status</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {adCampaignList.map((campaign) => {
-                    return (
-                      <Tr data-campaign-id={campaign.id} key={campaign.id}>
-                        <Td>{campaign.id}</Td>
-                        <Td>{campaign.name}</Td>
-                        <Td>{campaign.flight}</Td>
-                        <Td>
-                          <Checkbox
-                            onChange={activateAdCampaign}
-                            colorScheme="brand"
-                            defaultChecked={campaign.isActive ? true : false}
-                          />
-                        </Td>
-                      </Tr>
-                    );
-                  })}
-                </Tbody>
-              </Table>
+              {loading && (
+                <Loading
+                  className="loading__spinner"
+                  minHeight="18rem"
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  isIndeterminate
+                  color="#635bff"
+                />
+              )}
+              {!loading && (
+                <Table variant="simple">
+                  <Thead>
+                    <Tr>
+                      <Th>Campaign ID</Th>
+                      <Th>Campaign Name</Th>
+                      <Th
+                        minWidth={
+                          isEqualToOrGreaterThan870[0] ? false : '10rem'
+                        }
+                      >
+                        Campaign Flight
+                      </Th>
+                      <Th>Active Status</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {adCampaignList.map((campaign) => {
+                      return (
+                        <Tr data-campaign-id={campaign.id} key={campaign.id}>
+                          <Td>{campaign.id}</Td>
+                          <Td>{campaign.name}</Td>
+                          <Td>{campaign.flight}</Td>
+                          <Td>
+                            <Checkbox
+                              onChange={activateAdCampaign}
+                              colorScheme="brand"
+                              defaultChecked={campaign.isActive ? true : false}
+                            />
+                          </Td>
+                        </Tr>
+                      );
+                    })}
+                  </Tbody>
+                </Table>
+              )}
             </ModalBody>
 
             <ModalFooter
@@ -195,9 +223,9 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id }) => {
             >
               <Flex marginBottom="1rem" className="settings-modal__btn-wrapper">
                 <Button
-                  onClick={() => {
+                  onClick={async () => {
                     // pass in db prop
-                    saveModalSettings(dbRecord);
+                    await saveModalSettings(dbRecord);
                     // close modal after saving
                     onClose();
                   }}
@@ -229,7 +257,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id }) => {
               >
                 {/* Tooltip - sync data information*/}
                 <Tooltip
-                  label="When selected, the 'Refresh Data' feature will connect with Facebook and retrieve the latest campaign data in your Facebook advertising account. Select this option only if you know that your Facebook data needs to be refreshed."
+                  label="When selected, the 'Refresh Data' feature will connect with Facebook and retrieve the latest campaign data in your Facebook advertising account. Select this option only if you know that your Facebook campaign data needs to be refreshed."
                   fontSize="sm"
                 >
                   <span className="settings-modal__tooltip-wrapper">
@@ -238,8 +266,14 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id }) => {
                 </Tooltip>
                 <Button
                   className="settings-modal__refresh-btn"
-                  onClick={() => {
+                  onClick={async () => {
                     // update fb campaign data here
+                    await handleRefreshFacebookCampaignData(
+                      fbProviderPopup,
+                      dbRecord,
+                      setIntegrationRecord,
+                      setLoading
+                    );
                   }}
                   _hover={{
                     opacity: '.8',

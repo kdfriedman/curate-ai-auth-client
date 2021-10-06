@@ -805,7 +805,8 @@ export const DashboardPage = () => {
                                   onClose={onClose}
                                   dbRecord={record}
                                   id={settingsModalId}
-                                  updateSettingsModalId={updateSettingsModalId}
+                                  setIntegrationRecord={setIntegrationRecord}
+                                  Loading={CircularProgress}
                                 />
                               )}
                             </Flex>
