@@ -88,7 +88,7 @@ export const DashboardPage = () => {
         hasMatchingContainerElement,
       });
     }
-    // unlink provider to to allow user to prevent firebase duplicate provider error
+    // unlink provider to allow user to prevent firebase duplicate provider error
     const providerUnlinked = await handleUnlinkProvider('facebook.com', true);
     // check if provider was successfully unlinked
     if (providerUnlinked !== 'provider unlinked') {
@@ -807,6 +807,7 @@ export const DashboardPage = () => {
                                   id={settingsModalId}
                                   setIntegrationRecord={setIntegrationRecord}
                                   Loading={CircularProgress}
+                                  setProviderType={setProviderType}
                                 />
                               )}
                             </Flex>

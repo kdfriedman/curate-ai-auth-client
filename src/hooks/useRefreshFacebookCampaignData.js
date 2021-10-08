@@ -1,8 +1,10 @@
 import { useRefreshFacebookAccessToken } from '../hooks/useRefreshFacebookAccessToken';
+import { useUnlinkProvider } from '../hooks/useUnlinkProvider';
 import fetchData from '../services/fetch/fetch';
 import firestoreHandlers from '../services/firebase/data/firestore';
-export const useRefreshFacebookCampaignData = () => {
+export const useRefreshFacebookCampaignData = (setProviderType) => {
   const { handleRefreshFacebookAccessToken } = useRefreshFacebookAccessToken();
+  const { handleUnlinkProvider } = useUnlinkProvider(setProviderType);
   const {
     addRecordToFirestore,
     readUserRecordFromFirestore,
@@ -66,12 +68,19 @@ export const useRefreshFacebookCampaignData = () => {
     const [adCampaignListResult, adCampaignListError] =
       await getFacebookCampaignData(
         facebookRecord.adAccountId,
-        '12937029jd0923n90dn0230'
+        facebookRecord.userAccessToken
       );
 
     // setup state for refresh token campign data fetch call
     let refreshTokenAdCampaignResult = null;
     if (adCampaignListError) {
+      // unlink provider before refreshing token to avoid firebase error
+      const providerUnlinked = await handleUnlinkProvider('facebook.com', true);
+      if (providerUnlinked !== 'provider unlinked') {
+        return console.error({
+          errMsg: providerUnlinked,
+        });
+      }
       const refreshedAccessUserToken = await handleRefreshFacebookAccessToken(
         provider
       );

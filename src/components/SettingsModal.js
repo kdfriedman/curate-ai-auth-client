@@ -33,9 +33,10 @@ export const SettingsModal = ({
   id,
   setIntegrationRecord,
   Loading,
+  setProviderType,
 }) => {
   const { handleRefreshFacebookCampaignData } =
-    useRefreshFacebookCampaignData();
+    useRefreshFacebookCampaignData(setProviderType);
 
   const isEqualToOrGreaterThan870 = useMediaQuery('(min-width: 870px)');
   const isEqualToOrLessThan500 = useMediaQuery('(max-width: 500px)');
