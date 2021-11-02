@@ -1,6 +1,8 @@
 import { useAuth } from '../contexts/AuthContext';
+import firestoreHandlers from '../services/firebase/data/firestore';
 
 export const useIntegrationError = (setIntegrationError, setProviderType) => {
+  const { addRecordToFirestore } = firestoreHandlers;
   const { unlinkProvider, currentUser } = useAuth();
   const handleIntegrationError = async (isMounted, providerType) => {
     // if linked provider error occurs, unlink provider first before handling error further
@@ -33,6 +35,17 @@ export const useIntegrationError = (setIntegrationError, setProviderType) => {
         // reset provider type
         setProviderType(null);
       }
+      // save errors in firestore db
+      await addRecordToFirestore(
+        currentUser.user.uid,
+        ['clients', 'logs'],
+        ['errors'],
+        {
+          error: err,
+          timeErrorOccurred: new Date().toISOString(),
+        },
+        'clientErrors'
+      );
       console.error({ errMsg: 'unlinkedProvider has err', err });
     }
   };

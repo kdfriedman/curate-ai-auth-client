@@ -3,7 +3,8 @@ import firestoreHandlers from '../services/firebase/data/firestore';
 
 export const useReadRecordFromFirestore = () => {
   const { currentUser } = useAuth();
-  const { readUserRecordFromFirestore } = firestoreHandlers;
+  const { readUserRecordFromFirestore, addRecordToFirestore } =
+    firestoreHandlers;
 
   // read data from firebase to set integration state
   const handleReadFirestoreRecord = async (collections, docs) => {
@@ -33,6 +34,17 @@ export const useReadRecordFromFirestore = () => {
       );
 
       if (error) {
+        // save errors in firestore db
+        await addRecordToFirestore(
+          currentUser.user.uid,
+          ['clients', 'logs'],
+          ['errors'],
+          {
+            error,
+            timeErrorOccurred: new Date().toISOString(),
+          },
+          'clientErrors'
+        );
         return console.error({
           errMsg: 'Err: firestore returned an error instead of a value',
           errVar: error,
@@ -49,6 +61,17 @@ export const useReadRecordFromFirestore = () => {
         return facebookBusinessAccts;
       }
     } catch (error) {
+      // save errors in firestore db
+      await addRecordToFirestore(
+        currentUser.user.uid,
+        ['clients', 'logs'],
+        ['errors'],
+        {
+          error,
+          timeErrorOccurred: new Date().toISOString(),
+        },
+        'clientErrors'
+      );
       console.error({
         errMsg: 'Err: failed to read data from firestore',
         errVar: error,

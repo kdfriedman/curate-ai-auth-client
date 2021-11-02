@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import firestoreHandlers from '../services/firebase/data/firestore';
 
 export const useAddMoreFacebookBusinessAccounts = () => {
+  const { addRecordToFirestore } = firestoreHandlers;
   const [
     addMoreFacebookBusinessAccountsError,
     setAddMoreFacebookBusinessAccountsError,
@@ -65,6 +67,17 @@ export const useAddMoreFacebookBusinessAccounts = () => {
       const errorMessage = error.message;
       // log errors
       console.error({ errorCode, errorMessage });
+      // save errors in firestore db
+      await addRecordToFirestore(
+        currentUser.user.uid,
+        ['clients', 'logs'],
+        ['errors'],
+        {
+          error: { errorCode, errorMessage },
+          timeErrorOccurred: new Date().toISOString(),
+        },
+        'clientErrors'
+      );
       // reset loading state
       setAddMoreFacebookBusinessAccountsLoading(false);
       // set error state

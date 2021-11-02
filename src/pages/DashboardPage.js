@@ -136,6 +136,20 @@ export const DashboardPage = () => {
       selectedFacebookBusinessAccount[0].userAccessToken
     );
     if (!deletedFacebookSystemUser) {
+      // save errors in firestore db
+      await addRecordToFirestore(
+        currentUser.user.uid,
+        ['clients', 'logs'],
+        ['errors'],
+        {
+          error: {
+            errMsg: 'Err: deleting facebook system user failed',
+            errVar: deletedFacebookSystemUser,
+          },
+          timeErrorOccurred: new Date().toISOString(),
+        },
+        'clientErrors'
+      );
       // reset loader
       console.error({
         errMsg: 'Err: deleting facebook system user failed',
@@ -149,6 +163,20 @@ export const DashboardPage = () => {
       if (!refreshedAccessToken) {
         // reset loader
         setLoading(false);
+        // save errors in firestore db
+        await addRecordToFirestore(
+          currentUser.user.uid,
+          ['clients', 'logs'],
+          ['errors'],
+          {
+            error: {
+              errMsg: 'linking provider error',
+              refreshedAccessToken: refreshedAccessToken,
+            },
+            timeErrorOccurred: new Date().toISOString(),
+          },
+          'clientErrors'
+        );
         return console.error({
           errMsg: 'linking provider error',
           refreshedAccessToken: refreshedAccessToken,
@@ -165,6 +193,20 @@ export const DashboardPage = () => {
       if (!deletedUserUsingRefreshToken) {
         // reset loader
         setLoading(false);
+        // save errors in firestore db
+        await addRecordToFirestore(
+          currentUser.user.uid,
+          ['clients', 'logs'],
+          ['errors'],
+          {
+            error: {
+              errMsg: 'deleted fb system user using refresh token failed',
+              errVar: deletedUserUsingRefreshToken,
+            },
+            timeErrorOccurred: new Date().toISOString(),
+          },
+          'clientErrors'
+        );
         return console.error({
           errMsg: 'deleted fb system user using refresh token failed',
           errVar: deletedUserUsingRefreshToken,
@@ -326,6 +368,17 @@ export const DashboardPage = () => {
         setLoading(false);
         // set error state
         setError('failed to read record from firestore');
+        // save erros in firestore db
+        await addRecordToFirestore(
+          currentUser.uid,
+          ['clients', 'logs'],
+          ['errors'],
+          {
+            error: 'failed to read record from firestore',
+            timeErrorOccurred: new Date().toISOString(),
+          },
+          'clientErrors'
+        );
         return console.error('Error: failed to read record from firestore');
       }
 
@@ -354,7 +407,7 @@ export const DashboardPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [currentUser, readUserRecordFromFirestore]);
+  }, [currentUser, readUserRecordFromFirestore, addRecordToFirestore]);
 
   // link credential with facebook authentication provider
   useEffect(() => {
@@ -382,6 +435,20 @@ export const DashboardPage = () => {
         const errorMessage = error.message;
         // log errors
         console.error({ errorCode, errorMessage });
+        // save erros in firestore db
+        await addRecordToFirestore(
+          currentUser.uid,
+          ['clients', 'logs'],
+          ['errors'],
+          {
+            error: {
+              errorCode,
+              errorMessage,
+            },
+            timeErrorOccurred: new Date().toISOString(),
+          },
+          'clientErrors'
+        );
 
         if (isMounted) {
           // reset loading state
@@ -408,6 +475,7 @@ export const DashboardPage = () => {
     currentUser,
     hasIntegrationRecord,
     handleUnlinkProvider,
+    addRecordToFirestore,
   ]);
 
   // receive results from redirected auth login
@@ -444,6 +512,20 @@ export const DashboardPage = () => {
         const errorMessage = error.message;
         // log errors
         console.error({ errorCode, errorMessage });
+        // save erros in firestore db
+        await addRecordToFirestore(
+          currentUser.uid,
+          ['clients', 'logs'],
+          ['errors'],
+          {
+            error: {
+              errorCode,
+              errorMessage,
+            },
+            timeErrorOccurred: new Date().toISOString(),
+          },
+          'clientErrors'
+        );
         // reset loading state
         setLoading(false);
         // reset facebook integration click event state
@@ -459,7 +541,7 @@ export const DashboardPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [getRedirectResult]);
+  }, [getRedirectResult, addRecordToFirestore, currentUser]);
 
   // handle any integration errors if they occur
   useEffect(() => {
