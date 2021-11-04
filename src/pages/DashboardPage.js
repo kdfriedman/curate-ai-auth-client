@@ -629,9 +629,25 @@ export const DashboardPage = () => {
                 {!hasIntegrationRecord &&
                   (hasError ?? addMoreFacebookBusinessAccountsError) && (
                     <>
-                      {errorMap.get(hasError)
-                        ? errorMap.get(hasError)()
-                        : "Oops, there's been en error, please reach out to the CurateAI team for assistance."}
+                      {errorMap.get(hasError) ? (
+                        errorMap.get(hasError)()
+                      ) : (
+                        <Text
+                          color="#c5221f"
+                          fontWeight="500"
+                          className="error"
+                          padding={
+                            isEqualToOrLessThan450
+                              ? '1rem 1rem 0rem 2rem'
+                              : isEqualToOrLessThan800[0]
+                              ? '1rem 0 0 0'
+                              : '1rem 2rem 0 2rem'
+                          }
+                        >
+                          Oops, there's been en error, please reach out to the
+                          CurateAI team for assistance.
+                        </Text>
+                      )}
                     </>
                   )}
                 {/* invoke FB integration component on first integration action */}
