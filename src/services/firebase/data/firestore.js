@@ -22,6 +22,7 @@ const readUserRecordFromFirestore = async (uid, collections, docs) => {
       .get();
     return [record, null];
   } catch (error) {
+    console.error('Error getting document: ', error);
     return [null, error];
   }
 };
@@ -33,6 +34,7 @@ const readCurateAIRecordFromFirestore = async (uid, collection) => {
     const record = await db.collection(collection).doc(uid).get();
     return [record, null];
   } catch (error) {
+    console.error('Error getting document: ', error);
     return [null, error];
   }
 };

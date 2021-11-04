@@ -1,11 +1,8 @@
 import { useRefreshFacebookAccessToken } from '../hooks/useRefreshFacebookAccessToken';
 import { useUnlinkProvider } from '../hooks/useUnlinkProvider';
-import { useAuth } from '../contexts/AuthContext';
 import fetchData from '../services/fetch/fetch';
 import firestoreHandlers from '../services/firebase/data/firestore';
-
 export const useRefreshFacebookCampaignData = (setProviderType) => {
-  const { currentUser } = useAuth();
   const { handleRefreshFacebookAccessToken } = useRefreshFacebookAccessToken();
   const { handleUnlinkProvider } = useUnlinkProvider(setProviderType);
   const {
@@ -36,7 +33,7 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
     };
 
     const generateAdCampaignPayload = (adCampaignListResult) => {
-      return adCampaignListResult?.data?.data.map(async (campaign) => {
+      return adCampaignListResult?.data?.data.map((campaign) => {
         let startDate;
         let stopDate;
         try {
@@ -57,17 +54,6 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
             stopDate = stopFormattedDateList.join('-');
           }
         } catch (err) {
-          // save errors in firestore db
-          await addRecordToFirestore(
-            currentUser.user.uid,
-            ['clients', 'logs'],
-            ['errors'],
-            {
-              error: err,
-              timeErrorOccurred: new Date().toISOString(),
-            },
-            'clientErrors'
-          );
           console.error(err);
         }
         return {
@@ -91,19 +77,6 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
       // unlink provider before refreshing token to avoid firebase error
       const providerUnlinked = await handleUnlinkProvider('facebook.com', true);
       if (providerUnlinked !== 'provider unlinked') {
-        // save errors in firestore db
-        await addRecordToFirestore(
-          currentUser.user.uid,
-          ['clients', 'logs'],
-          ['errors'],
-          {
-            error: {
-              errMsg: providerUnlinked,
-            },
-            timeErrorOccurred: new Date().toISOString(),
-          },
-          'clientErrors'
-        );
         return console.error({
           errMsg: providerUnlinked,
         });
@@ -112,18 +85,6 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
         provider
       );
       if (!refreshedAccessUserToken) {
-        // save errors in firestore db
-        await addRecordToFirestore(
-          currentUser.user.uid,
-          ['clients', 'logs'],
-          ['errors'],
-          {
-            error:
-              '[line 45: refreshedAccessToken] Err failed to refresh facebook user access token, see useRefreshFacebookCampaignData for details',
-            timeErrorOccurred: new Date().toISOString(),
-          },
-          'clientErrors'
-        );
         return console.error(
           '[line 45: refreshedAccessToken] Err failed to refresh facebook user access token, see useRefreshFacebookCampaignData for details'
         );
@@ -134,18 +95,6 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
           refreshedAccessUserToken
         );
       if (adCampaignListError) {
-        // save errors in firestore db
-        await addRecordToFirestore(
-          currentUser.user.uid,
-          ['clients', 'logs'],
-          ['errors'],
-          {
-            error:
-              '[line: 58 adCampaignListError]: fetch err has occured, fetch facebook campaign data with refreshed fb token has failed. see useRefreshFacebookCampaignData for details',
-            timeErrorOccurred: new Date().toISOString(),
-          },
-          'clientErrors'
-        );
         return console.error(
           '[line: 58 adCampaignListError]: fetch err has occured, fetch facebook campaign data with refreshed fb token has failed. see useRefreshFacebookCampaignData for details'
         );
@@ -169,18 +118,6 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
       adCampaignList.length === 0 ||
       (!adCampaignListResult && !refreshTokenAdCampaignResult)
     ) {
-      // save errors in firestore db
-      await addRecordToFirestore(
-        currentUser.user.uid,
-        ['clients', 'logs'],
-        ['errors'],
-        {
-          error:
-            '[Line 106: adCampaignList.length === 0] Err failed to fetch fb ad campaign data using saved fb user token or refreshed fb user token. See useRefreshFacebookCampaignData for details.',
-          timeErrorOccurred: new Date().toISOString(),
-        },
-        'clientErrors'
-      );
       return console.error(
         '[Line 106: adCampaignList.length === 0] Err failed to fetch fb ad campaign data using saved fb user token or refreshed fb user token. See useRefreshFacebookCampaignData for details.'
       );
@@ -211,18 +148,6 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
         facebookRecord?.businessAcctId
       );
       if (!removedRecord) {
-        // save errors in firestore db
-        await addRecordToFirestore(
-          currentUser.user.uid,
-          ['clients', 'logs'],
-          ['errors'],
-          {
-            error:
-              '[line 86: removedRecordFromFirestore] Err firestore record not removed',
-            timeErrorOccurred: new Date().toISOString(),
-          },
-          'clientErrors'
-        );
         console.error(
           '[line 86: removedRecordFromFirestore] Err firestore record not removed'
         );
@@ -246,21 +171,6 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
       );
 
       if (addedFirestoreRecord?.warnMsg || error) {
-        // save errors in firestore db
-        await addRecordToFirestore(
-          currentUser.user.uid,
-          ['clients', 'logs'],
-          ['errors'],
-          {
-            error: {
-              error,
-              errMsg:
-                '[line 93: useRefreshFacebookCampaigndata] Error: failed to read record from firestore',
-            },
-            timeErrorOccurred: new Date().toISOString(),
-          },
-          'clientErrors'
-        );
         console.error(error);
         return console.error(
           '[line 93: useRefreshFacebookCampaigndata] Error: failed to read record from firestore'
@@ -278,17 +188,6 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
         setLoading(false);
       }
     } catch (err) {
-      // save errors in firestore db
-      await addRecordToFirestore(
-        currentUser.user.uid,
-        ['clients', 'logs'],
-        ['errors'],
-        {
-          error: err,
-          timeErrorOccurred: new Date().toISOString(),
-        },
-        'clientErrors'
-      );
       console.error(err);
     }
   };

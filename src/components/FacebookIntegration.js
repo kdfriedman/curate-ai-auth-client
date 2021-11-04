@@ -62,22 +62,13 @@ const FacebookAppIntegration = ({
   } = state;
 
   // generic error handler for fb specific api response errors
-  const catchErrors = async (error) => {
+  const catchErrors = (error) => {
     if (!error) {
       return dispatch({
         type: 'hasErrors',
         payload: null,
       });
     }
-
-    // save errors in firestore db
-    await addRecordToFirestore(
-      facebookAuthData.user.uid,
-      ['clients', 'logs'],
-      ['errors'],
-      { error, timeErrorOccurred: new Date().toISOString() },
-      'clientErrors'
-    );
     // custom errors
     if (error?.isCustom) {
       dispatch({
