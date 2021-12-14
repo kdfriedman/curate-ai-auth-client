@@ -104,7 +104,7 @@ export const Header = () => {
                 </Link>
                 <Link
                   className="header__nav-menu-link"
-                  href="http://curateapp.ai"
+                  href="http://curateapp.ai/#about-us"
                   isExternal
                   display="flex"
                   flexDir="column"
@@ -112,7 +112,7 @@ export const Header = () => {
                   About
                 </Link>
                 <Link
-                  href="http://curateapp.ai"
+                  href="http://curateapp.ai/#contact"
                   isExternal
                   className="header__nav-menu-link"
                 >
@@ -120,7 +120,7 @@ export const Header = () => {
                 </Link>
                 <Link
                   className="header__nav-menu-link"
-                  href="http://curateapp.ai"
+                  href="http://curateapp.ai/#features"
                   isExternal
                 >
                   Questions
