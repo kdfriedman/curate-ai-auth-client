@@ -16,6 +16,7 @@ import {
   CloseButton,
   Checkbox,
 } from '@chakra-ui/react';
+import { errorMap } from '../components/ErrorMap';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 
@@ -33,11 +34,6 @@ export const LoginPage = () => {
     email: Yup.string().email('Invalid email').required('Required'),
     password: Yup.string().required('Required'),
   });
-
-  // error map to render dynamic errors
-  const errorMap = new Map();
-  errorMap.set('auth/user-not-found', 'Invalid email, please try again');
-  errorMap.set('auth/wrong-password', 'Invalid password, please try again');
 
   useEffect(() => {
     let isMounted = true;

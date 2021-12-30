@@ -114,9 +114,10 @@ svg.header__nav-hamburger-menu {
 }
 
 /* header component nav profile menu items */
-.header__nav-profile-menu-item {
+.header__nav-menu-item {
   font-weight: 600;
   font-size: 16px;
+  text-decoration: none;
 }
 
 /* dashboard component integration widget card container */
@@ -190,6 +191,22 @@ svg.dashboard__fb-login-btn-icon {
 div.chakra-select__wrapper {
   width: 20rem;
   margin: 0.5rem 1rem 0 2rem;
+}
+
+/* dashboard component dashboard card */
+.profile__section {
+  display: grid;
+  margin: 0.5rem;
+  padding: 1rem;
+  grid-gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  min-height: 20rem;
+}
+
+.profile__dashboard {
+  background: #fff;
+  box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 15%);
+  border-radius: 10px;
 }
 
 @media (max-width: 450px) {

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Flex, Link, Text, Box } from '@chakra-ui/react';
 
-const NotFoundPage = () => {
+export const NotFoundPage = () => {
   useEffect(() => {
     let isMounted = true;
     if (isMounted) {
@@ -99,5 +99,3 @@ const NotFoundPage = () => {
     </>
   );
 };
-
-export default NotFoundPage;
