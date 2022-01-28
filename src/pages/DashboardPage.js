@@ -18,7 +18,7 @@ import firestoreHandlers from '../services/firebase/data/firestore';
 import { Header } from '../components/Header';
 import { SettingsModal } from '../components/SettingsModal';
 import { errorMap } from '../components/ErrorMap';
-import { FaFacebook } from 'react-icons/fa';
+import { FaFacebook, FaLess } from 'react-icons/fa';
 import { useIntegrationError } from '../hooks/useIntegrationError';
 import { useAddMoreFacebookBusinessAccounts } from '../hooks/useAddMoreFacebookBusinessAccounts';
 import { useUnlinkProvider } from '../hooks/useUnlinkProvider';
@@ -26,6 +26,7 @@ import { useDeleteFacebookSystemUser } from '../hooks/useDeleteFacebookSystemUse
 import { useRefreshFacebookAccessToken } from '../hooks/useRefreshFacebookAccessToken';
 import { useReadRecordFromFirestore } from '../hooks/useReadRecordFromFirestore';
 import { useRemoveAccount } from '../hooks/useRemoveAccount';
+import { useUpdateStateWithFirestoreRecord } from '../hooks/useUpdateStateWithFirebaseRecord';
 
 export const DashboardPage = () => {
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
@@ -46,11 +47,7 @@ export const DashboardPage = () => {
     setRenderFacebookIntegrationComponent,
   ] = useState(false);
   const { linkToProvider, currentUser, getRedirectResult } = useAuth();
-  const {
-    readUserRecordFromFirestore,
-    removeRecordFromFirestore,
-    addRecordToFirestore,
-  } = firestoreHandlers;
+  const { removeRecordFromFirestore, addRecordToFirestore } = firestoreHandlers;
   //unlink auth provider handler
   const { handleUnlinkProvider } = useUnlinkProvider(setProviderType);
   // setup custom hook to handle integration errors
@@ -70,62 +67,22 @@ export const DashboardPage = () => {
     addMoreFacebookBusinessAccountsAuth,
   } = useAddMoreFacebookBusinessAccounts();
   const { handleReadFirestoreRecord } = useReadRecordFromFirestore();
+  const firebaseCollections = ['clients', 'integrations'];
+  const firebaseDocs = ['facebook'];
+  const { updateStateWithFirestoreRecord } = useUpdateStateWithFirestoreRecord(
+    firebaseCollections,
+    firebaseDocs,
+    setLoading,
+    setError,
+    setIntegrationRecord
+  );
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { handleRemoveAccount } = useRemoveAccount();
 
-  // read data from firebase to set integration state
   useEffect(() => {
-    let isMounted = true;
-    const readrecord = async () => {
-      // set loading state
-      setLoading(true);
-
-      // ****** FACEBOOK record ******
-      // read facebook record from firestore to validate if integration exists
-      const [record, error] = await readUserRecordFromFirestore(
-        // user id
-        currentUser.uid,
-        // collections
-        ['clients', 'integrations'],
-        // docs
-        ['facebook']
-      );
-
-      // log out any errors from firestore fetch
-      if (error && isMounted) {
-        // reset loading state
-        setLoading(false);
-        // set error state
-        setError('failed to read record from firestore');
-        return console.error('Error: failed to read record from firestore');
-      }
-
-      // if record exists, update state with firestore integration record
-      if (
-        record &&
-        record?.exists &&
-        record?.data()?.facebookBusinessAccts?.length > 0 &&
-        isMounted
-      ) {
-        const { facebookBusinessAccts } = record?.data();
-        // update firestore integration record state
-        setIntegrationRecord({
-          facebookBusinessAccts,
-        });
-        // reset loading state
-        setLoading(false);
-      }
-      // reset loading state
-      setLoading(false);
-    };
-
-    // call firestore read wrapper function to initiate firestore read handler
-    readrecord();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [currentUser, readUserRecordFromFirestore]);
+    if (hasIntegrationRecord) return setLoading(false);
+    updateStateWithFirestoreRecord().catch((err) => {});
+  }, [updateStateWithFirestoreRecord, hasIntegrationRecord]);
 
   // link credential with facebook authentication provider
   useEffect(() => {
