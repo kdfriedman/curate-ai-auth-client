@@ -27,6 +27,7 @@ import { useRefreshFacebookAccessToken } from '../hooks/useRefreshFacebookAccess
 import { useReadRecordFromFirestore } from '../hooks/useReadRecordFromFirestore';
 import { useRemoveAccount } from '../hooks/useRemoveAccount';
 import { useUpdateStateWithFirestoreRecord } from '../hooks/useUpdateStateWithFirebaseRecord';
+import { useFacebookSDK } from '../hooks/useFacebookSDK';
 
 export const DashboardPage = () => {
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
@@ -67,6 +68,7 @@ export const DashboardPage = () => {
     addMoreFacebookBusinessAccountsAuth,
   } = useAddMoreFacebookBusinessAccounts();
   const { handleReadFirestoreRecord } = useReadRecordFromFirestore();
+  const { fbSdkLoaded, fbLoginStatus } = useFacebookSDK();
   const firebaseCollections = ['clients', 'integrations'];
   const firebaseDocs = ['facebook'];
   const { updateStateWithFirestoreRecord } = useUpdateStateWithFirestoreRecord(
