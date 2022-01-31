@@ -4,6 +4,8 @@ import AcctSelector from './AcctSelector';
 import firestoreHandlers from '../services/firebase/data/firestore';
 import { Progress, Text, Link, useMediaQuery } from '@chakra-ui/react';
 import { v4 as uuidv4 } from 'uuid';
+import { FACEBOOK_API, FACEBOOK_APP } from '../services/facebook/constants';
+import { HTTP_METHODS } from '../services/fetch/constants';
 
 const FacebookAppIntegration = ({
   facebookAuthData,
@@ -15,12 +17,15 @@ const FacebookAppIntegration = ({
 }) => {
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
 
-  // destructure firestore handlers
+  // firestore db functions
   const {
     addRecordToFirestore,
     readCurateAIRecordFromFirestore,
     readUserRecordFromFirestore,
   } = firestoreHandlers;
+
+  // http methods
+  const { GET, POST } = HTTP_METHODS;
 
   // setup useReducer callback function
   const reducer = (state, action) => {
@@ -114,8 +119,8 @@ const FacebookAppIntegration = ({
     const fetchFacebookUserData = async () => {
       // fetch account user data
       const [userData, userError] = await fetchData({
-        method: 'GET',
-        url: `https://graph.facebook.com/v11.0/me?fields=id&access_token=${facebookAuthData?.accessToken}`,
+        method: GET,
+        url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION.V12}/me?fields=id&access_token=${facebookAuthData?.accessToken}`,
         params: {},
         data: {},
         headers: {},
@@ -140,8 +145,8 @@ const FacebookAppIntegration = ({
 
       // fetch user business list
       const [userBusinessList, userBusinessError] = await fetchData({
-        method: 'GET',
-        url: `https://graph.facebook.com/v11.0/${userId}/businesses?&access_token=${facebookAuthData?.accessToken}`,
+        method: GET,
+        url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION.V12}/${userId}/businesses?&access_token=${facebookAuthData?.accessToken}`,
         params: {},
         data: {},
         headers: {},
@@ -198,6 +203,7 @@ const FacebookAppIntegration = ({
     setIntegrationError,
     setProviderType,
     setActiveIntegration,
+    GET,
   ]);
 
   /******* 
@@ -209,8 +215,8 @@ const FacebookAppIntegration = ({
     const fetchClientBusinessData = async () => {
       // fetch client business data
       const [clientBusinessData, clientBusinessError] = await fetchData({
-        method: 'POST',
-        url: `https://graph.facebook.com/v11.0/419312452044680/managed_businesses?existing_client_business_id=${userBusinessId}&access_token=${facebookAuthData?.accessToken}`,
+        method: POST,
+        url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION.V12}/${FACEBOOK_APP.CURATEAI.BUSINESS_ID}/managed_businesses?existing_client_business_id=${userBusinessId}&access_token=${facebookAuthData?.accessToken}`,
         params: {},
         data: {},
         headers: {},
@@ -246,8 +252,8 @@ const FacebookAppIntegration = ({
 
       // fetch system user token and create sys user in client's business acct
       const [sysUserData, sysUserError] = await fetchData({
-        method: 'POST',
-        url: `https://graph.facebook.com/v11.0/${clientBusinessAcctId}/access_token?scope=ads_read,read_insights&app_id=1198476710574497&access_token=${curateAiSysUserAccessToken}`,
+        method: POST,
+        url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION.V12}/${clientBusinessAcctId}/access_token?scope=ads_read,read_insights&app_id=1198476710574497&access_token=${curateAiSysUserAccessToken}`,
         params: {},
         data: {},
         headers: {},
@@ -272,8 +278,8 @@ const FacebookAppIntegration = ({
 
       // fetch system user id
       const [sysUserIdData, sysUserIdError] = await fetchData({
-        method: 'GET',
-        url: `https://graph.facebook.com/v11.0/me?access_token=${sysUserAccessToken}`,
+        method: GET,
+        url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION.V12}/me?access_token=${sysUserAccessToken}`,
         params: {},
         data: {},
         headers: {},
@@ -296,8 +302,8 @@ const FacebookAppIntegration = ({
       }
 
       const [adAcctAssetList, adAcctAssetListError] = await fetchData({
-        method: 'GET',
-        url: `https://graph.facebook.com/v11.0/${clientBusinessAcctId}/owned_ad_accounts?access_token=${facebookAuthData?.accessToken}&fields=name`,
+        method: GET,
+        url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION.V12}/${clientBusinessAcctId}/owned_ad_accounts?access_token=${facebookAuthData?.accessToken}&fields=name`,
         params: {},
         data: {},
         headers: {},
@@ -374,6 +380,8 @@ const FacebookAppIntegration = ({
     userBusinessId,
     facebookAuthData,
     setActiveIntegration,
+    GET,
+    POST,
   ]);
 
   /******* 
@@ -387,8 +395,8 @@ const FacebookAppIntegration = ({
     const fetchSystemUserAssetData = async () => {
       // assign assets to system user on behalf of client business manager acct
       const [, sysUserAssetAssignmentDataError] = await fetchData({
-        method: 'POST',
-        url: `https://graph.facebook.com/v11.0/${businessAssetId}/assigned_users?user=${businessSystemUserId}&tasks=MANAGE&access_token=${facebookAuthData.accessToken}`,
+        method: POST,
+        url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION.V12}/${businessAssetId}/assigned_users?user=${businessSystemUserId}&tasks=MANAGE&access_token=${facebookAuthData.accessToken}`,
         params: {},
         data: {},
         headers: {},
@@ -406,8 +414,8 @@ const FacebookAppIntegration = ({
 
       // fetch list of ad campaigns to provide user for selection
       const [adCampaignListResult, adCampaignListError] = await fetchData({
-        method: 'GET',
-        url: `https://graph.facebook.com/v11.0/${businessAssetId}/campaigns?fields=name,start_time,stop_time&access_token=${facebookAuthData?.accessToken}`,
+        method: GET,
+        url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION.V12}/${businessAssetId}/campaigns?fields=name,start_time,stop_time&access_token=${facebookAuthData?.accessToken}`,
         params: {},
         data: {},
         headers: {},
@@ -578,6 +586,8 @@ const FacebookAppIntegration = ({
     readUserRecordFromFirestore,
     setActiveIntegration,
     setRenderFacebookIntegrationComponent,
+    GET,
+    POST,
   ]);
 
   // handle user business list select element event

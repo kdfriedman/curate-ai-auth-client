@@ -218,18 +218,6 @@ export const DashboardPage = () => {
         />
       )}
 
-      <button
-        style={{
-          backgroundColor: 'red',
-          color: 'white',
-          padding: '1rem 3rem',
-          border: 'yellow',
-        }}
-        onClick={loginToFacebook}
-      >
-        Login with Facebook
-      </button>
-
       {!isLoading && !addMoreFacebookBusinessAccountsLoading && (
         <Box maxHeight="100vh" className="dashboard__container">
           <section className="dashboard__integration-container">

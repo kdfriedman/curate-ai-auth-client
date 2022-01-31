@@ -2,7 +2,11 @@ import { useRefreshFacebookAccessToken } from '../hooks/useRefreshFacebookAccess
 import { useUnlinkProvider } from '../hooks/useUnlinkProvider';
 import fetchData from '../services/fetch/fetch';
 import firestoreHandlers from '../services/firebase/data/firestore';
+import { FACEBOOK_API } from '../services/facebook/constants';
+import { HTTP_METHODS } from '../services/fetch/constants';
+
 export const useRefreshFacebookCampaignData = (setProviderType) => {
+  const { GET } = HTTP_METHODS;
   const { handleRefreshFacebookAccessToken } = useRefreshFacebookAccessToken();
   const { handleUnlinkProvider } = useUnlinkProvider(setProviderType);
   const {
@@ -23,8 +27,8 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
     const getFacebookCampaignData = async (adAccountId, userAccessToken) => {
       // fetch list of ad campaigns to render refreshed facebook ad campaign data
       const [adCampaignListResult, adCampaignListError] = await fetchData({
-        method: 'GET',
-        url: `https://graph.facebook.com/v11.0/${adAccountId}/campaigns?fields=name,start_time,stop_time&access_token=${userAccessToken}`,
+        method: GET,
+        url: `${FACEBOOK_API.GRAPH.HOSTNAME}/${FACEBOOK_API.GRAPH.VERSION.V12}/${adAccountId}/campaigns?fields=name,start_time,stop_time&access_token=${userAccessToken}`,
         params: {},
         data: {},
         headers: {},
