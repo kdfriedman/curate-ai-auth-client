@@ -27,7 +27,7 @@ import { useRefreshFacebookAccessToken } from '../hooks/useRefreshFacebookAccess
 import { useReadRecordFromFirestore } from '../hooks/useReadRecordFromFirestore';
 import { useRemoveAccount } from '../hooks/useRemoveAccount';
 import { useUpdateStateWithFirestoreRecord } from '../hooks/useUpdateStateWithFirebaseRecord';
-import { useFacebookSDK } from '../hooks/useFacebookSDK';
+import { useFacebookAuth } from '../contexts/FacebookContext';
 
 export const DashboardPage = () => {
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
@@ -68,7 +68,8 @@ export const DashboardPage = () => {
     addMoreFacebookBusinessAccountsAuth,
   } = useAddMoreFacebookBusinessAccounts();
   const { handleReadFirestoreRecord } = useReadRecordFromFirestore();
-  const { fbSdkLoaded, fbLoginStatus } = useFacebookSDK();
+  const { facebookAuthChange, loginToFacebook } = useFacebookAuth();
+
   const firebaseCollections = ['clients', 'integrations'];
   const firebaseDocs = ['facebook'];
   const { updateStateWithFirestoreRecord } = useUpdateStateWithFirestoreRecord(
@@ -83,7 +84,7 @@ export const DashboardPage = () => {
 
   useEffect(() => {
     if (hasIntegrationRecord) return setLoading(false);
-    updateStateWithFirestoreRecord().catch((err) => {});
+    updateStateWithFirestoreRecord().catch((err) => console.error(err));
   }, [updateStateWithFirestoreRecord, hasIntegrationRecord]);
 
   // link credential with facebook authentication provider
@@ -216,6 +217,18 @@ export const DashboardPage = () => {
           color="#635bff"
         />
       )}
+
+      <button
+        style={{
+          backgroundColor: 'red',
+          color: 'white',
+          padding: '1rem 3rem',
+          border: 'yellow',
+        }}
+        onClick={loginToFacebook}
+      >
+        Login with Facebook
+      </button>
 
       {!isLoading && !addMoreFacebookBusinessAccountsLoading && (
         <Box maxHeight="100vh" className="dashboard__container">

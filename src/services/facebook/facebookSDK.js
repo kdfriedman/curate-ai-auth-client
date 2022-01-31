@@ -1,12 +1,12 @@
 const appId = process.env.REACT_APP_FACEBOOK_APP_ID || 'dev_app_id';
 
-export const getFbLoginStatus = (FB, setFbLoginStatus) => {
-  FB.getLoginStatus((response) => {
-    setFbLoginStatus(response);
-  });
+export const getFbLoginStatus = (resolve) => {
+  window.FB.getLoginStatus((response) => {
+    resolve(response);
+  }, true);
 };
 
-export const setFbAsyncInit = (setFbSdkLoaded, setFbLoginStatus) => {
+export const setFbAsyncInit = (resolve) => {
   window.fbAsyncInit = () => {
     window.FB.init({
       appId,
@@ -14,8 +14,7 @@ export const setFbAsyncInit = (setFbSdkLoaded, setFbLoginStatus) => {
       xfbml: true,
       version: 'v12.0',
     });
-    setFbSdkLoaded(true);
-    getFbLoginStatus(window.FB, setFbLoginStatus);
+    getFbLoginStatus(resolve);
   };
 };
 
@@ -28,16 +27,20 @@ export const loadSdkAsynchronously = () => {
     }
     js = d.createElement(s);
     js.id = id;
-    js.src = 'https://connect.facebook.net/en_US/sdk.js';
+    js.src = `https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v12.0&appId=${appId}&autoLogAppEvents=1`;
+    js.nonce = 'mBTlHUSw';
     fjs.parentNode.insertBefore(js, fjs);
   })(document, 'script', 'facebook-jssdk');
 };
 
-export const createFbRoot = () => {
-  let fbRoot = document.getElementById('fb-root');
-  if (!fbRoot) {
-    fbRoot = document.createElement('div');
-    fbRoot.id = 'fb-root';
-    document.body.appendChild(fbRoot);
-  }
+export const handleFacebookLogin = (setFacebookAuthChange) => {
+  window.FB.login(
+    (response) => {
+      setFacebookAuthChange(response);
+    },
+    {
+      scope:
+        'business_management,public_profile,email,ads_read ,ads_management',
+    }
+  );
 };
