@@ -13,12 +13,16 @@ import { HTTP_METHODS } from '../services/fetch/constants';
 import { catchErrors } from '../util/error.js';
 import { useFacebookAuth } from '../contexts/FacebookContext';
 import { ERROR, FACEBOOK_ERROR } from '../constants/error';
+import { useFetchFacebookBusinessAccounts } from '../hooks/useFetchFacebookBusinessAccounts';
 
 const FacebookAppIntegration = ({ setIntegrationRecord }) => {
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
 
   // facebook auth context
   const { facebookAuthChange } = useFacebookAuth();
+
+  const { handleFetchFacebookBusinessAccounts } =
+    useFetchFacebookBusinessAccounts();
 
   // firestore db functions
   const {
@@ -40,7 +44,6 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
     IS_LOADING,
     HAS_ERRORS,
     IS_BUTTON_CLICKED,
-    USER_BUSINESS_LIST,
     HAS_USER_BUSINESS_LIST,
     HAS_USER_BUSINESS_ID,
     USER_BUSINESS_ID,
@@ -88,88 +91,11 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
   fetch user business accts list 
   *******/
   useEffect(() => {
-    // reset any errors
-    catchErrors({ type: HAS_ERRORS, payload: null }, dispatch);
-    // async wrapper function to allow multiple requests
-    const fetchFacebookUserData = async () => {
-      // fetch account user data
-      const [userData, userError] = await fetchData({
-        method: GET,
-        url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION}/me?fields=id&access_token=${facebookAuthChange?.authResponse?.accessToken}`,
-      });
-
-      if (userError) {
-        // set isLoading to true to render progress
-        dispatch({
-          type: IS_LOADING,
-          payload: false,
-        });
-        return catchErrors(userError);
-      }
-      const userId = userData?.data?.id;
-
-      // fetch user business list
-      const [userBusinessList, userBusinessError] = await fetchData({
-        method: GET,
-        url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION}/${userId}/businesses?&access_token=${facebookAuthChange?.authResponse?.accessToken}`,
-      });
-      if (userBusinessError) {
-        // set isLoading to true to render progress
-        dispatch({
-          type: IS_LOADING,
-          payload: false,
-        });
-        return catchErrors(
-          {
-            type: HAS_ERRORS,
-            payload: {
-              errorMessage: userBusinessError,
-              errorUIMessage: ERROR.DASHBOARD.MAIN,
-            },
-          },
-          dispatch
-        );
-      }
-
-      if (userBusinessList && userBusinessList?.data?.data.length > 0) {
-        // update local state with user business list data
-        dispatch({
-          type: USER_BUSINESS_LIST,
-          payload: userBusinessList?.data?.data,
-        });
-        // update local state with async completion update
-        dispatch({
-          type: HAS_USER_BUSINESS_LIST,
-          payload: true,
-        });
-      } else {
-        catchErrors(
-          {
-            type: HAS_ERRORS,
-            payload: {
-              errorMessage:
-                FACEBOOK_ERROR.MARKETING_API.USER_BUSINESS_LIST_IS_EMPTY,
-              errorUIMessage:
-                FACEBOOK_ERROR.MARKETING_API.MUST_HAVE_VALID_BUSINESS_ACCOUNT,
-            },
-          },
-          dispatch
-        );
-
-        // ERROR: 'User must be logged into facebook with an account that has one or more associated facebook business accounts. Log into facebook.com to select a different account.'
-      }
-    };
-    if (facebookAuthChange.authResponse) {
-      fetchFacebookUserData();
-    }
-  }, [
-    facebookAuthChange,
-    GET,
-    HAS_USER_BUSINESS_LIST,
-    HAS_ERRORS,
-    IS_LOADING,
-    USER_BUSINESS_LIST,
-  ]);
+    if (!facebookAuthChange?.authResponse) return null;
+    handleFetchFacebookBusinessAccounts(dispatch, catchErrors).catch((err) =>
+      console.error(err)
+    );
+  }, [handleFetchFacebookBusinessAccounts, facebookAuthChange]);
 
   /******* 
   2nd useEffect hook - connect partner business with client business, 

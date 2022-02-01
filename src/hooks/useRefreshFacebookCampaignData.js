@@ -29,9 +29,6 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
       const [adCampaignListResult, adCampaignListError] = await fetchData({
         method: GET,
         url: `${FACEBOOK_API.GRAPH.HOSTNAME}/${FACEBOOK_API.GRAPH.VERSION}/${adAccountId}/campaigns?fields=name,start_time,stop_time&access_token=${userAccessToken}`,
-        params: {},
-        data: {},
-        headers: {},
       });
       return [adCampaignListResult, adCampaignListError];
     };
