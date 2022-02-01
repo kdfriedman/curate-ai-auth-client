@@ -12,10 +12,7 @@ export const useDeleteFacebookSystemUser = () => {
       // TODO: provide delete sys user for clients - figure out how to store access token, refresh if needed, and allow user to unintegrate
       const [deletedSystemUserData, deletedSystemUserError] = await fetchData({
         method: DELETE,
-        url: `${FACEBOOK_API.GRAPH.HOSTNAME}/${FACEBOOK_API.GRAPH.VERSION.V12}/${FACEBOOK_APP.CURATEAI.BUSINESS_ID}/managed_businesses?existing_client_business_id=${userBusinessId}&access_token=${accessToken}`,
-        params: {},
-        data: {},
-        headers: {},
+        url: `${FACEBOOK_API.GRAPH.HOSTNAME}/${FACEBOOK_API.GRAPH.VERSION}/${FACEBOOK_APP.CURATEAI.BUSINESS_ID}/managed_businesses?existing_client_business_id=${userBusinessId}&access_token=${accessToken}`,
       });
       if (deletedSystemUserError) {
         return deletedSystemUserError;

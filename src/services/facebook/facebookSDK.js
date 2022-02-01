@@ -1,6 +1,10 @@
-const appId = process.env.REACT_APP_FACEBOOK_APP_ID || 'dev_app_id';
+import { FACEBOOK_API } from '../facebook/constants';
+const appId = process.env.REACT_APP_FACEBOOK_APP_ID;
 
 export const getFbLoginStatus = (resolve) => {
+  if (!window.FB?.getLoginStatus) {
+    return console.error('window.FB.getLoginStatus is undefined');
+  }
   window.FB.getLoginStatus((response) => {
     resolve(response);
   }, true);
@@ -8,11 +12,12 @@ export const getFbLoginStatus = (resolve) => {
 
 export const setFbAsyncInit = (resolve) => {
   window.fbAsyncInit = () => {
+    if (!window.FB?.init) return console.error('window.FB.init is undefined');
     window.FB.init({
       appId,
       autoLogAppEvents: true,
       xfbml: true,
-      version: 'v12.0',
+      version: FACEBOOK_API.GRAPH.VERSION,
     });
     getFbLoginStatus(resolve);
   };
@@ -34,6 +39,7 @@ export const loadSdkAsynchronously = () => {
 };
 
 export const handleFacebookLogin = (setFacebookAuthChange) => {
+  if (!window.FB?.login) return console.error('window.FB.login is undefined');
   window.FB.login(
     (response) => {
       setFacebookAuthChange(response);

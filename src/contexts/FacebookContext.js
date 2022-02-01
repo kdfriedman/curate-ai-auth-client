@@ -19,7 +19,6 @@ export const FacebookAuthProvider = ({ children }) => {
 
   const handleFacebookAuthResponse = (response) => {
     setFacebookAuthChange(response);
-    console.log('facebook auth changed', response);
   };
 
   useEffect(() => {
