@@ -12,12 +12,13 @@ export const FACEBOOK_APP = {
 };
 
 export const ACTION_TYPES = {
+  IS_FETCH_FACEBOOK_BUSINESS_ACCOUNTS: 'isFetchFacebookBusinessAccounts',
+  IS_FETCH_FACEBOOK_SYSTEM_USER_TOKEN: 'isFetchFacebookSystemUserToken',
+  IS_FETCH_FACEBOOK_AD_ASSET_ASSIGNMENT: 'isFetchFacebookAdAssetAssignment',
   IS_LOADING: 'isLoading',
   HAS_ERRORS: 'hasErrors',
   IS_BUTTON_CLICKED: 'isBtnClicked',
   USER_BUSINESS_LIST: 'userBusinessList',
-  HAS_USER_BUSINESS_LIST: 'hasUserBusinessList',
-  HAS_USER_BUSINESS_ID: 'hasUserBusinessId',
   USER_BUSINESS_ID: 'userBusinessId',
   SYSTEM_USER_ACCESS_TOKEN: 'sysUserAccessToken',
   BUSINESS_AD_ACCOUNT_LIST: 'businessAdAcctList',

@@ -21,17 +21,24 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
   };
 
   // reducer action types
-  const { IS_LOADING, HAS_USER_BUSINESS_ID, USER_BUSINESS_ID, BUSINESS_ASSET_ID } = ACTION_TYPES;
+  const {
+    IS_LOADING,
+    USER_BUSINESS_ID,
+    BUSINESS_ASSET_ID,
+    IS_FETCH_FACEBOOK_SYSTEM_USER_TOKEN,
+    IS_FETCH_FACEBOOK_AD_ASSET_ASSIGNMENT,
+  } = ACTION_TYPES;
 
   // setup initial field object for reducer function
   const initialState = {
+    isFetchFacebookBusinessAccounts: true,
+    isFetchFacebookSystemUserToken: false,
+    isFetchFacebookAdAssetAssignment: false,
     isLoading: false,
     hasErrors: null,
     isFacebookLoginAction: false,
     isBtnClicked: false,
     userBusinessList: null,
-    hasUserBusinessList: false,
-    hasUserBusinessId: false,
     userBusinessId: null,
     sysUserAccessToken: null,
     businessAdAcctList: null,
@@ -44,15 +51,15 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
 
   // destructure state object into individual state properties
   const {
+    isFetchFacebookBusinessAccounts,
+    isFetchFacebookSystemUserToken,
+    isFetchFacebookAdAssetAssignment,
     isLoading,
     hasErrors,
     userBusinessList,
-    hasUserBusinessList,
-    hasUserBusinessId,
     userBusinessId,
     businessAdAcctList,
     businessSystemUserId,
-    businessAssetId,
   } = state;
 
   // custom hooks for fetching fb business lists
@@ -62,23 +69,23 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
 
   // fetch user business accts list
   useEffect(() => {
-    if (!facebookAuthChange?.authResponse) return null;
+    if (!isFetchFacebookBusinessAccounts) return null;
     handleFetchFacebookBusinessAccounts(dispatch, catchErrors).catch((err) => console.error(err));
-  }, [handleFetchFacebookBusinessAccounts, facebookAuthChange]);
+  }, [handleFetchFacebookBusinessAccounts, facebookAuthChange, isFetchFacebookBusinessAccounts]);
 
   // connect partner biz with client biz, create sys user in client biz, fetch client ad account list
   useEffect(() => {
-    if (!hasUserBusinessId) return null;
+    if (!isFetchFacebookSystemUserToken) return null;
     handleFetchFacebookSystemUserToken(dispatch, catchErrors, userBusinessId).catch((err) => console.error(err));
-  }, [handleFetchFacebookSystemUserToken, hasUserBusinessId, userBusinessId]);
+  }, [handleFetchFacebookSystemUserToken, userBusinessId, isFetchFacebookSystemUserToken]);
 
   // add assets to system user within client's facebook business account
   useEffect(() => {
-    if (!businessAssetId) return null;
+    if (!isFetchFacebookAdAssetAssignment) return null;
     handleFetchFacebookAdAssetAssignment(dispatch, catchErrors, state, setIntegrationRecord).catch((err) =>
       console.error(err)
     );
-  }, [handleFetchFacebookAdAssetAssignment, businessAssetId, state, setIntegrationRecord]);
+  }, [handleFetchFacebookAdAssetAssignment, isFetchFacebookAdAssetAssignment, state, setIntegrationRecord]);
 
   // handle user business list select element event
   const handleSelectUserBusinessList = (e) => {
@@ -89,9 +96,9 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
         payload: e.target?.value,
       });
 
-      // update user business id trigger state to re-render component and call useEffect
+      // update fetch facebook system user state to trigger 2nd batch of facebook fetch calls
       dispatch({
-        type: HAS_USER_BUSINESS_ID,
+        type: IS_FETCH_FACEBOOK_SYSTEM_USER_TOKEN,
         payload: true,
       });
 
@@ -110,6 +117,12 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
       dispatch({
         type: BUSINESS_ASSET_ID,
         payload: e.target?.value,
+      });
+
+      // update fetch facebook ad asset assignment state to trigger 3rd batch of facebook fetch calls
+      dispatch({
+        type: IS_FETCH_FACEBOOK_AD_ASSET_ASSIGNMENT,
+        payload: true,
       });
 
       // set isLoading to true to render spinner
@@ -135,7 +148,7 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
       )}
 
       {/* setup user business account selector */}
-      {!isLoading && hasUserBusinessList && (
+      {!isLoading && userBusinessList?.length > 0 && !businessAdAcctList && (
         <AcctSelector
           acctList={userBusinessList}
           onChangeHandler={handleSelectUserBusinessList}
@@ -144,7 +157,7 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
       )}
 
       {/* setup business ad account selector */}
-      {!isLoading && businessAdAcctList && businessAdAcctList.length > 0 && businessSystemUserId && (
+      {!isLoading && businessAdAcctList?.length > 0 && businessSystemUserId && (
         <AcctSelector
           acctList={businessAdAcctList}
           onChangeHandler={handleSelectBusinessAdAcct}

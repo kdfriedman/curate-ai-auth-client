@@ -17,15 +17,17 @@ const { GET, POST } = HTTP_METHODS;
 const {
   IS_LOADING,
   HAS_ERRORS,
-  HAS_USER_BUSINESS_LIST,
-  HAS_USER_BUSINESS_ID,
   BUSINESS_AD_ACCOUNT_LIST,
   BUSINESS_SYSTEM_USER_ID,
   IS_BUTTON_CLICKED,
   SYSTEM_USER_ACCESS_TOKEN,
+  IS_FETCH_FACEBOOK_SYSTEM_USER_TOKEN,
 } = ACTION_TYPES;
 
 const fetchFacebookUserBusinessAccount = async (dispatch, catchErrors, facebookAuthChange, userBusinessId) => {
+  // reset state to prevent unwanted useEffect renders
+  dispatch({ type: IS_FETCH_FACEBOOK_SYSTEM_USER_TOKEN, payload: false });
+
   // fetch client business data
   const [clientBusinessData, clientBusinessError] = await fetchData({
     method: POST,
@@ -160,19 +162,9 @@ const fetchFacebookUserAdAccountAssetList = async (dispatch, catchErrors, facebo
 };
 
 const saveFacebookUserSystemUserAccessToken = (dispatch, sysUserAccessToken) => {
-  // reset user business id state, preventing further fb business asset look up requests
-  dispatch({
-    type: HAS_USER_BUSINESS_ID,
-    payload: false,
-  });
   // reset facebook login btn click state
   dispatch({
     type: IS_BUTTON_CLICKED,
-    payload: false,
-  });
-  // reset async ready state to false to signify completion of 2nd useEffect
-  dispatch({
-    type: HAS_USER_BUSINESS_LIST,
     payload: false,
   });
   // update state with system user access token for later storage

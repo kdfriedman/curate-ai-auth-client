@@ -5,7 +5,8 @@ export const useUpdateStateWithFirestoreRecord = (
   docs,
   setLoading,
   setError,
-  setIntegrationRecord
+  setIntegrationRecord,
+  setUpdateStateWithFirestoreRecord
 ) => {
   const { handleReadFirestoreRecord } = useReadRecordFromFirestore();
   const updateStateWithFirestoreRecord = async () => {
@@ -15,9 +16,11 @@ export const useUpdateStateWithFirestoreRecord = (
         facebookBusinessAccts: result,
       });
       setLoading(false);
+      setUpdateStateWithFirestoreRecord(false);
     } catch (error) {
       setError(error);
       setLoading(false);
+      setUpdateStateWithFirestoreRecord(false);
     }
   };
   return { updateStateWithFirestoreRecord };

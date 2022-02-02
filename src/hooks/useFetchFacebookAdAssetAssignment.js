@@ -13,7 +13,8 @@ const { addRecordToFirestore, readUserRecordFromFirestore } = firestoreHandlers;
 
 // Constants
 const { GET, POST } = HTTP_METHODS;
-const { IS_LOADING, HAS_ERRORS, BUSINESS_ASSET_ID, BUSINESS_SYSTEM_USER_ID } = ACTION_TYPES;
+const { IS_LOADING, HAS_ERRORS, BUSINESS_ASSET_ID, BUSINESS_SYSTEM_USER_ID, IS_FETCH_FACEBOOK_AD_ASSET_ASSIGNMENT } =
+  ACTION_TYPES;
 
 const fetchFacebookUserAdAssetAssignment = async (
   dispatch,
@@ -22,6 +23,9 @@ const fetchFacebookUserAdAssetAssignment = async (
   businessAssetId,
   businessSystemUserId
 ) => {
+  // reset state to prevent unwanted useEffect renders
+  dispatch({ type: IS_FETCH_FACEBOOK_AD_ASSET_ASSIGNMENT, payload: false });
+
   // assign assets to system user on behalf of client business manager acct
   const [, sysUserAssetAssignmentDataError] = await fetchData({
     method: POST,
@@ -115,8 +119,8 @@ const generateFacebookFirestorePayload = (
 ) => {
   // create payload object for facebook integration
   const facebookFirebasePayload = {
-    uid: currentUser?.user?.uid,
-    email: currentUser?.user?.email,
+    uid: currentUser.uid,
+    email: currentUser.providerData?.[0]?.email,
     sysUserAccessToken,
     businessAcctName: fbBusinessAcctName.name,
     businessAcctId: userBusinessId,
@@ -132,7 +136,7 @@ const generateFacebookFirestorePayload = (
 const updateFirestoreWithFacebookUserRecord = async (currentUser, facebookFirebasePayload) => {
   // update firestore with system user access token, auth uid, and email
   return await addRecordToFirestore(
-    currentUser.user.uid,
+    currentUser.uid,
     FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
     FIREBASE.FIRESTORE.FACEBOOK.DOCS,
     facebookFirebasePayload,
@@ -143,7 +147,7 @@ const updateFirestoreWithFacebookUserRecord = async (currentUser, facebookFireba
 const validateFacebookUserFirestoreRecord = async (dispatch, catchErrors, currentUser, addedFirestoreRecord) => {
   // read facebook record from firestore to validate if integration exists
   const [record, error] = await readUserRecordFromFirestore(
-    currentUser.user.uid,
+    currentUser.uid,
     FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
     FIREBASE.FIRESTORE.FACEBOOK.DOCS
   );
