@@ -1,4 +1,4 @@
-import { fetchData } from '../services/fetch/fetch';
+import fetchData from '../services/fetch/fetch';
 import { ERROR } from '../constants/error';
 import { HTTP_METHODS } from '../services/fetch/constants';
 import {
@@ -6,14 +6,18 @@ import {
   ACTION_TYPES,
   FACEBOOK_ERROR,
 } from '../services/facebook/constants';
-import { facebookAuthChange } from '../contexts/FacebookContext';
+import { useFacebookAuth } from '../contexts/FacebookContext';
 
 // Constants
 const { GET } = HTTP_METHODS;
 const { IS_LOADING, HAS_ERRORS, USER_BUSINESS_LIST, HAS_USER_BUSINESS_LIST } =
   ACTION_TYPES;
 
-const fetchFacebookUserData = async (dispatch, catchErrors) => {
+const fetchFacebookUserData = async (
+  dispatch,
+  catchErrors,
+  facebookAuthChange
+) => {
   // fetch account user data
   const [userData, userError] = await fetchData({
     method: GET,
@@ -32,7 +36,12 @@ const fetchFacebookUserData = async (dispatch, catchErrors) => {
   return userData;
 };
 
-const fetchFacebookBusinessAccounts = async (userId, dispatch, catchErrors) => {
+const fetchFacebookUserBusinessAccounts = async (
+  userId,
+  dispatch,
+  catchErrors,
+  facebookAuthChange
+) => {
   // fetch user business list
   const [userBusinessList, userBusinessError] = await fetchData({
     method: GET,
@@ -59,11 +68,8 @@ const fetchFacebookBusinessAccounts = async (userId, dispatch, catchErrors) => {
   return userBusinessList;
 };
 
-const validateFacebookBusinessList = (
-  userBusinessList,
-  dispatch,
-  catchErrors
-) => {
+// prettier-ignore
+const validateFacebookUserBusinessList = (userBusinessList, dispatch, catchErrors) => {
   // check if user has valid businesses
   if (userBusinessList && userBusinessList?.data?.data.length > 0) {
     // update local state with user business list data
@@ -93,16 +99,26 @@ const validateFacebookBusinessList = (
 };
 
 export const useFetchFacebookBusinessAccounts = () => {
+  const { facebookAuthChange } = useFacebookAuth();
   const handleFetchFacebookBusinessAccounts = async (dispatch, catchErrors) => {
     catchErrors({ type: HAS_ERRORS, payload: null }, dispatch);
-    const facebookUserData = await fetchFacebookUserData();
+    const facebookUserData = await fetchFacebookUserData(
+      dispatch,
+      catchErrors,
+      facebookAuthChange
+    );
     const facebookUserID = facebookUserData?.data?.id;
-    const facebookBusinessAccounts = await fetchFacebookBusinessAccounts(
+    const facebookBusinessAccounts = await fetchFacebookUserBusinessAccounts(
       facebookUserID,
+      dispatch,
+      catchErrors,
+      facebookAuthChange
+    );
+    validateFacebookUserBusinessList(
+      facebookBusinessAccounts,
       dispatch,
       catchErrors
     );
-    validateFacebookBusinessList(facebookBusinessAccounts);
   };
   return { handleFetchFacebookBusinessAccounts };
 };

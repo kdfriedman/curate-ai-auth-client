@@ -4,16 +4,13 @@ import AcctSelector from './AcctSelector';
 import firestoreHandlers from '../services/firebase/data/firestore';
 import { Progress, Text, Link, useMediaQuery } from '@chakra-ui/react';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  FACEBOOK_API,
-  FACEBOOK_APP,
-  ACTION_TYPES,
-} from '../services/facebook/constants';
+import { FACEBOOK_API, FACEBOOK_APP, ACTION_TYPES, FACEBOOK_ERROR } from '../services/facebook/constants';
 import { HTTP_METHODS } from '../services/fetch/constants';
 import { catchErrors } from '../util/error.js';
 import { useFacebookAuth } from '../contexts/FacebookContext';
-import { ERROR, FACEBOOK_ERROR } from '../constants/error';
+import { ERROR } from '../constants/error';
 import { useFetchFacebookBusinessAccounts } from '../hooks/useFetchFacebookBusinessAccounts';
+import { useFetchFacebookSystemUserToken } from '../hooks/useFetchFacebookSystemUserToken';
 
 const FacebookAppIntegration = ({ setIntegrationRecord }) => {
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
@@ -21,15 +18,8 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
   // facebook auth context
   const { facebookAuthChange } = useFacebookAuth();
 
-  const { handleFetchFacebookBusinessAccounts } =
-    useFetchFacebookBusinessAccounts();
-
   // firestore db functions
-  const {
-    addRecordToFirestore,
-    readCurateAIRecordFromFirestore,
-    readUserRecordFromFirestore,
-  } = firestoreHandlers;
+  const { addRecordToFirestore, readCurateAIRecordFromFirestore, readUserRecordFromFirestore } = firestoreHandlers;
 
   // http methods
   const { GET, POST } = HTTP_METHODS;
@@ -40,18 +30,9 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
     return { ...state, [type]: payload };
   };
 
-  const {
-    IS_LOADING,
-    HAS_ERRORS,
-    IS_BUTTON_CLICKED,
-    HAS_USER_BUSINESS_LIST,
-    HAS_USER_BUSINESS_ID,
-    USER_BUSINESS_ID,
-    SYSTEM_USER_ACCESS_TOKEN,
-    BUSINESS_AD_ACCOUNT_LIST,
-    BUSINESS_SYSTEM_USER_ID,
-    BUSINESS_ASSET_ID,
-  } = ACTION_TYPES;
+  // reducer action types
+  const { IS_LOADING, HAS_USER_BUSINESS_ID, USER_BUSINESS_ID, BUSINESS_SYSTEM_USER_ID, BUSINESS_ASSET_ID } =
+    ACTION_TYPES;
 
   // setup initial field object for reducer function
   const initialState = {
@@ -86,164 +67,21 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
     businessAssetId,
   } = state;
 
-  /******* 
-  1st useEffect hook - handle facebook login, 
-  fetch user business accts list 
-  *******/
+  // custom hooks for fetching fb business lists
+  const { handleFetchFacebookBusinessAccounts } = useFetchFacebookBusinessAccounts();
+  const { handleFetchFacebookSystemUserToken } = useFetchFacebookSystemUserToken();
+
+  // fetch user business accts list
   useEffect(() => {
     if (!facebookAuthChange?.authResponse) return null;
-    handleFetchFacebookBusinessAccounts(dispatch, catchErrors).catch((err) =>
-      console.error(err)
-    );
+    handleFetchFacebookBusinessAccounts(dispatch, catchErrors).catch((err) => console.error(err));
   }, [handleFetchFacebookBusinessAccounts, facebookAuthChange]);
 
-  /******* 
-  2nd useEffect hook - connect partner business with client business, 
-  create sys user in client business, fetch client ad account list 
-  *******/
+  // connect partner business with client business, create sys user in client business, fetch client ad account list
   useEffect(() => {
-    const fetchClientBusinessData = async () => {
-      // fetch client business data
-      const [clientBusinessData, clientBusinessError] = await fetchData({
-        method: POST,
-        url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION}/${FACEBOOK_APP.CURATEAI.BUSINESS_ID}/managed_businesses?existing_client_business_id=${userBusinessId}&access_token=${facebookAuthChange?.authResponse?.accessToken}`,
-      });
-      if (clientBusinessError) {
-        // set isLoading to true to render progress
-        dispatch({
-          type: IS_LOADING,
-          payload: false,
-        });
-        return catchErrors(clientBusinessError);
-      }
-      const clientBusinessAcctId = clientBusinessData?.data?.id;
-      if (!clientBusinessAcctId) {
-        return console.error({ clientBusinessAcctId });
-      }
-
-      // read record from firestore to retrieve curateai sys user token
-      const [record, error] = await readCurateAIRecordFromFirestore(
-        'oixaOBWftYMd2kZjD2Yx',
-        'curateai'
-      );
-      if (error || !record?.exists) {
-        return console.error('Error: CurateAi system user token not fetchable');
-      }
-      const { curateAiSysUserAccessToken } = record?.data();
-
-      // fetch system user token and create sys user in client's business acct
-      const [sysUserData, sysUserError] = await fetchData({
-        method: POST,
-        url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION}/${clientBusinessAcctId}/access_token?scope=ads_read,read_insights&app_id=1198476710574497&access_token=${curateAiSysUserAccessToken}`,
-      });
-      if (sysUserError) {
-        // set isLoading to true to render progress
-        dispatch({
-          type: IS_LOADING,
-          payload: false,
-        });
-        return catchErrors(sysUserError);
-      }
-      // system user access token
-      const sysUserAccessToken = sysUserData?.data?.access_token;
-      if (!sysUserAccessToken) {
-        return console.error({ sysUserAccessToken });
-      }
-
-      // fetch system user id
-      const [sysUserIdData, sysUserIdError] = await fetchData({
-        method: GET,
-        url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION}/me?access_token=${sysUserAccessToken}`,
-      });
-      if (sysUserIdError) {
-        // set isLoading to true to render progress
-        dispatch({
-          type: IS_LOADING,
-          payload: false,
-        });
-        return catchErrors(sysUserIdError);
-      }
-      const sysUserId = sysUserIdData?.data?.id;
-      if (!sysUserId) {
-        return console.error({ sysUserId });
-      }
-
-      const [adAcctAssetList, adAcctAssetListError] = await fetchData({
-        method: GET,
-        url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION}/${clientBusinessAcctId}/owned_ad_accounts?access_token=${facebookAuthChange?.authResponse?.accessToken}&fields=name`,
-      });
-      if (adAcctAssetListError) {
-        // set isLoading to true to render progress
-        dispatch({
-          type: IS_LOADING,
-          payload: false,
-        });
-        return catchErrors(adAcctAssetListError);
-      }
-
-      // reset user business id state, preventing further fb business asset look up requests
-      dispatch({
-        type: HAS_USER_BUSINESS_ID,
-        payload: false,
-      });
-      // reset facebook login btn click state
-      dispatch({
-        type: IS_BUTTON_CLICKED,
-        payload: false,
-      });
-      // reset async ready state to false to signify completion of 2nd useEffect
-      dispatch({
-        type: HAS_USER_BUSINESS_LIST,
-        payload: false,
-      });
-      // update state with system user access token for later storage
-      dispatch({
-        type: SYSTEM_USER_ACCESS_TOKEN,
-        payload: sysUserAccessToken,
-      });
-
-      if (adAcctAssetList && adAcctAssetList?.data?.data.length > 0) {
-        // update local state with user business list data
-        dispatch({
-          type: BUSINESS_AD_ACCOUNT_LIST,
-          payload: adAcctAssetList?.data?.data,
-        });
-        // set business system user id
-        dispatch({
-          type: BUSINESS_SYSTEM_USER_ID,
-          payload: sysUserId,
-        });
-
-        // reset loading state
-        dispatch({
-          type: IS_LOADING,
-          payload: false,
-        });
-      } else {
-        return console.error(
-          'Error: adAcctAssetList has a falsy value:',
-          adAcctAssetList
-        );
-      }
-    };
-    if (hasUserBusinessId) {
-      fetchClientBusinessData();
-    }
-  }, [
-    readCurateAIRecordFromFirestore,
-    hasUserBusinessId,
-    userBusinessId,
-    facebookAuthChange,
-    GET,
-    POST,
-    BUSINESS_AD_ACCOUNT_LIST,
-    BUSINESS_SYSTEM_USER_ID,
-    HAS_USER_BUSINESS_ID,
-    HAS_USER_BUSINESS_LIST,
-    IS_BUTTON_CLICKED,
-    IS_LOADING,
-    SYSTEM_USER_ACCESS_TOKEN,
-  ]);
+    if (!hasUserBusinessId) return null;
+    handleFetchFacebookSystemUserToken(dispatch, catchErrors, userBusinessId).catch((err) => console.error(err));
+  }, [handleFetchFacebookSystemUserToken, hasUserBusinessId, userBusinessId]);
 
   /******* 
   3rd useEffect hook - add assets to sys user within client's business acct 
@@ -285,40 +123,33 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
         return businessObject.id === userBusinessId;
       });
 
-      const adCampaignList = adCampaignListResult?.data?.data.map(
-        (campaign) => {
-          let startDate;
-          let stopDate;
+      const adCampaignList = adCampaignListResult?.data?.data.map((campaign) => {
+        let startDate;
+        let stopDate;
 
-          try {
-            if (campaign.start_time && campaign.stop_time) {
-              const startFormattedDate = new Date(campaign.start_time)
-                .toISOString()
-                .slice(0, 10);
-              const stopFormattedDate = new Date(campaign.stop_time)
-                .toISOString()
-                .slice(0, 10);
-              const startFormattedDateList = startFormattedDate.split('-');
-              const stopFormattedDateList = stopFormattedDate.split('-');
-              const startFormattedDateLastItem = startFormattedDateList.shift();
-              const stopFormattedDateLastItem = stopFormattedDateList.shift();
-              startFormattedDateList.push(startFormattedDateLastItem);
-              stopFormattedDateList.push(stopFormattedDateLastItem);
-              startDate = startFormattedDateList.join('-');
-              stopDate = stopFormattedDateList.join('-');
-            }
-          } catch (err) {
-            console.error(err);
+        try {
+          if (campaign.start_time && campaign.stop_time) {
+            const startFormattedDate = new Date(campaign.start_time).toISOString().slice(0, 10);
+            const stopFormattedDate = new Date(campaign.stop_time).toISOString().slice(0, 10);
+            const startFormattedDateList = startFormattedDate.split('-');
+            const stopFormattedDateList = stopFormattedDate.split('-');
+            const startFormattedDateLastItem = startFormattedDateList.shift();
+            const stopFormattedDateLastItem = stopFormattedDateList.shift();
+            startFormattedDateList.push(startFormattedDateLastItem);
+            stopFormattedDateList.push(stopFormattedDateLastItem);
+            startDate = startFormattedDateList.join('-');
+            stopDate = stopFormattedDateList.join('-');
           }
-          return {
-            id: campaign.id,
-            name: campaign.name,
-            flight:
-              startDate && stopDate ? `${startDate} - ${stopDate}` : 'N/A',
-            isActive: false,
-          };
+        } catch (err) {
+          console.error(err);
         }
-      );
+        return {
+          id: campaign.id,
+          name: campaign.name,
+          flight: startDate && stopDate ? `${startDate} - ${stopDate}` : 'N/A',
+          isActive: false,
+        };
+      });
 
       // create payload object for facebook integration
       const facebookFirebasePayload = {
@@ -469,11 +300,7 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
           colorScheme="brand"
           size="xs"
           className="loading__progress"
-          margin={
-            isEqualToOrLessThan450
-              ? '1.5rem 1rem 1rem 2rem'
-              : '1rem 0 2rem 2rem'
-          }
+          margin={isEqualToOrLessThan450 ? '1.5rem 1rem 1rem 2rem' : '1rem 0 2rem 2rem'}
           width="16rem"
           isIndeterminate
         />
@@ -489,16 +316,13 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
       )}
 
       {/* setup business ad account selector */}
-      {!isLoading &&
-        businessAdAcctList &&
-        businessAdAcctList.length > 0 &&
-        businessSystemUserId && (
-          <AcctSelector
-            acctList={businessAdAcctList}
-            onChangeHandler={handleSelectBusinessAdAcct}
-            labelText="Choose your facebook business ad account:"
-          />
-        )}
+      {!isLoading && businessAdAcctList && businessAdAcctList.length > 0 && businessSystemUserId && (
+        <AcctSelector
+          acctList={businessAdAcctList}
+          onChangeHandler={handleSelectBusinessAdAcct}
+          labelText="Choose your facebook business ad account:"
+        />
+      )}
 
       {hasErrors && !isLoading && (
         <>
@@ -507,9 +331,7 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
             <Link
               href={`mailto:ryanwelling@gmail.com?cc=kev.d.friedman@gmail.com&subject=CurateApp.AI%20Integration%20Error&body=Error: ${hasErrors?.errUserMsg}`}
             >
-              <span style={{ textDecoration: 'underline' }}>
-                tech team for assistance.
-              </span>
+              <span style={{ textDecoration: 'underline' }}>tech team for assistance.</span>
             </Link>
           </Text>
           <Text margin="1rem 2rem 0 2rem" color="#c5221f">
