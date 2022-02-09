@@ -39,9 +39,7 @@ export const LoginPage = () => {
     let isMounted = true;
     if (isMounted) {
       // hide onLoad spinner icon
-      const onLoadSpinner = document.querySelector(
-        '[data-on-load-spinner="true"]'
-      );
+      const onLoadSpinner = document.querySelector('[data-on-load-spinner="true"]');
       onLoadSpinner.style.display = 'none';
     }
     return () => {
@@ -85,12 +83,7 @@ export const LoginPage = () => {
         resetForm();
       }
     };
-    if (
-      values &&
-      actions &&
-      Object.keys(values).length > 0 &&
-      Object.keys(actions).length > 0
-    ) {
+    if (values && actions && Object.keys(values).length > 0 && Object.keys(actions).length > 0) {
       handleAsyncLogin();
     }
     // clean up function to signify when component is unmounted
@@ -119,19 +112,9 @@ export const LoginPage = () => {
 
   return (
     <>
-      <Flex
-        padding="1rem"
-        margin="1rem"
-        flexDir="column"
-        alignItems="center"
-        className="login__container"
-      >
+      <Flex padding="1rem" margin="1rem" flexDir="column" alignItems="center" className="login__container">
         <Flex>
-          <svg
-            style={{ width: '15rem', height: 'auto' }}
-            viewBox="0 0 320 185.34639618779255"
-            className="login__logo"
-          >
+          <svg style={{ width: '15rem', height: 'auto' }} viewBox="0 0 320 185.34639618779255" className="login__logo">
             <g
               featurekey="symbolFeature-0"
               transform="matrix(1.352824017039201,0,0,1.352824017039201,98.95449227155036,-7.0441556475610225)"
@@ -161,12 +144,7 @@ export const LoginPage = () => {
             <Alert margin="1rem 0" status="error">
               <AlertIcon />
               {errorMap.get(error)}
-              <CloseButton
-                onClick={handleCloseBtnClick}
-                position="absolute"
-                right="8px"
-                top="8px"
-              />
+              <CloseButton onClick={handleCloseBtnClick} position="absolute" right="8px" top="8px" />
             </Alert>
           )}
           <Formik
@@ -179,38 +157,18 @@ export const LoginPage = () => {
           >
             {({ errors, touched }) => (
               <Form className="login__form" width="330px">
-                <FormControl
-                  className="form-floating"
-                  isInvalid={errors.email && touched.email}
-                >
+                <FormControl className="form-floating" isInvalid={errors.email && touched.email}>
                   <FormLabel fontSize="16px" htmlFor="email">
                     Email
                   </FormLabel>
-                  <Field
-                    className="form-control"
-                    name="email"
-                    type="email"
-                    placeholder="name@example.com"
-                  />
+                  <Field className="form-control" name="email" type="email" placeholder="name@example.com" />
                   <FormErrorMessage>{errors.email}</FormErrorMessage>
                 </FormControl>
-                <FormControl
-                  className="form-floating"
-                  isInvalid={errors.password && touched.password}
-                >
-                  <FormLabel
-                    fontSize="16px"
-                    marginTop="10px"
-                    htmlFor="password"
-                  >
+                <FormControl className="form-floating" isInvalid={errors.password && touched.password}>
+                  <FormLabel fontSize="16px" marginTop="10px" htmlFor="password">
                     Password
                   </FormLabel>
-                  <Field
-                    className="form-control"
-                    name="password"
-                    type={inputType}
-                    placeholder="Password"
-                  />
+                  <Field className="form-control" name="password" type={inputType} placeholder="Password" />
                   <Checkbox
                     onChange={handleInputTypeChange}
                     colorScheme="brand"
@@ -239,22 +197,12 @@ export const LoginPage = () => {
                 >
                   Sign In
                 </Button>
-                <Flex
-                  className="login__password-reset"
-                  margin=".5rem 0"
-                  color="#635bff"
-                  fontSize="14px"
-                >
+                <Flex className="login__password-reset" margin=".5rem 0" color="#635bff" fontSize="14px">
                   <Link as={NavLink} to="/password-reset">
                     Forgot password?
                   </Link>
                 </Flex>
-                <Box
-                  backgroundColor="#d9d9d9"
-                  height="1px"
-                  margin="2rem 0"
-                  width="100%"
-                ></Box>
+                <Box backgroundColor="#d9d9d9" height="1px" margin="2rem 0" width="100%"></Box>
               </Form>
             )}
           </Formik>
@@ -274,12 +222,7 @@ export const LoginPage = () => {
             </Text>
           </Box>
         </Flex>
-        <Flex
-          margin="1.5rem"
-          className="login__copy-right"
-          color="#6c757d"
-          fontWeight="500"
-        >
+        <Flex margin="1.5rem" className="login__copy-right" color="#6c757d" fontWeight="500">
           © CurateAI {new Date().getFullYear()}
         </Flex>
       </Flex>

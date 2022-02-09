@@ -5,8 +5,11 @@ import FacebookAppIntegration from '../components/FacebookIntegration';
 import { fbProviderPopup } from '../services/firebase/auth/facebook';
 import firestoreHandlers from '../services/firebase/data/firestore';
 import { Header } from '../components/Header';
+import { IntegrationVendorWidget } from '../components/IntegrationVendorWidget';
+import { IntegrationVendorLoginButton } from '../components/IntegrationVendorLoginButton';
+import { IntegrationVendorSwitchAccount } from '../components/IntegrationVendorSwitchAccount';
 import { SettingsModal } from '../components/SettingsModal';
-import { errorMap } from '../components/ErrorMap';
+import { ErrorMessage } from '../components/ErrorMessage';
 import { FaFacebook } from 'react-icons/fa';
 import { useDeleteFacebookSystemUser } from '../hooks/useDeleteFacebookSystemUser';
 import { useRefreshFacebookAccessToken } from '../hooks/useRefreshFacebookAccessToken';
@@ -15,6 +18,7 @@ import { useRemoveAccount } from '../hooks/useRemoveAccount';
 import { useUpdateStateWithFirestoreRecord } from '../hooks/useUpdateStateWithFirebaseRecord';
 import { useFacebookAuth } from '../contexts/FacebookContext';
 import { ERROR } from '../constants/error';
+import { FIREBASE } from '../services/firebase/constants';
 
 export const DashboardPage = () => {
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
@@ -23,6 +27,7 @@ export const DashboardPage = () => {
   const [hasError, setError] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [hasIntegrationRecord, setIntegrationRecord] = useState(null);
+  const [isIntegrationActiveStatus, setIntegrationActiveStatus] = useState(false);
   const [isUpdateStateWithFirestoreRecord, setUpdateStateWithFirestoreRecord] = useState(true);
   const [settingsModalId, updateSettingsModalId] = useState(null);
   const { currentUser } = useAuth();
@@ -32,12 +37,10 @@ export const DashboardPage = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { handleRemoveAccount } = useRemoveAccount();
   const { handleReadFirestoreRecord } = useReadRecordFromFirestore();
-  const { facebookAuthChange, loginToFacebook } = useFacebookAuth();
-  const firebaseCollections = ['clients', 'integrations'];
-  const firebaseDocs = ['facebook'];
+  const { facebookAuthChange, loginToFacebook, switchFacebookAdAccounts } = useFacebookAuth();
   const { updateStateWithFirestoreRecord } = useUpdateStateWithFirestoreRecord(
-    firebaseCollections,
-    firebaseDocs,
+    FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
+    FIREBASE.FIRESTORE.FACEBOOK.DOCS,
     setLoading,
     setError,
     setIntegrationRecord,
@@ -68,76 +71,18 @@ export const DashboardPage = () => {
       {!isLoading && (
         <Box maxHeight="100vh" className="dashboard__container">
           <section className="dashboard__integration-container">
-            <Box
-              gridColumn={isEqualToOrLessThan800[0] ? '1 / span 3' : '1 / span 2'}
-              gridRow={isEqualToOrLessThan800[0] ? 2 : ''}
-              id="facebookIntegrationWidget"
-              className="dashboard__integration-widget"
-              display="flex"
-              maxHeight={!hasIntegrationRecord ? '12rem' : '14rem'}
-              minHeight={!hasIntegrationRecord ? 0 : '14rem'}
-            >
-              <Text className="dashboard__integration-info">Integrate CurateAI with Facebook</Text>
-              <Flex className="dashboard__integration-status-container">
-                <Box
-                  className="dashboard__integration-status-indicator"
-                  h="10px"
-                  w="10px"
-                  borderRadius="50%"
-                  backgroundColor={!hasIntegrationRecord ? '#dc3545' : '#35b653'}
-                />
-                <Text display="flex" flexDir="column" className="dashboard__integration-status-text" color="#6c757d">
-                  Status: {!hasIntegrationRecord ? 'Inactive' : 'Active'}
-                </Text>
-              </Flex>
-              {!hasIntegrationRecord && (
-                <Button
-                  disabled={isLoading}
-                  onClick={() => loginToFacebook()}
-                  _hover={{
-                    opacity: '.8',
-                    textDecoration: 'none',
-                  }}
-                  color="#fff"
-                  height="40px"
-                  backgroundColor="#1877f2"
-                  marginTop="7px"
-                  marginBottom="1rem"
-                  width="14rem"
-                  alignSelf="center"
-                >
-                  <FaFacebook className="dashboard__fb-login-btn-icon" />{' '}
-                  <span style={{ margin: '0 0 0 10px', fontWeight: '800' }} className="dashboard__fb-login-btn-text">
-                    Login With Facebook
-                  </span>
-                </Button>
-              )}
-              {hasIntegrationRecord && (
-                <>
-                  <Text fontWeight="500" fontSize="13px" color="rgb(26, 32, 44)" textAlign="center" marginTop="1rem">
-                    Switch FB Accounts
-                  </Text>
-                  <Button
-                    disabled={isLoading}
-                    onClick={async () => {
-                      console.log('TODO: change to log out of current FB account');
-                    }}
-                    _hover={{
-                      opacity: '.8',
-                      textDecoration: 'none',
-                    }}
-                    color="#fff"
-                    height="40px"
-                    backgroundColor="#635bff"
-                    marginTop="7px"
-                    width="10rem"
-                    alignSelf="center"
-                  >
-                    Add Account
-                  </Button>
-                </>
-              )}
-            </Box>
+            <IntegrationVendorWidget
+              integrationRecord={hasIntegrationRecord}
+              setIntegrationActiveStatus={setIntegrationActiveStatus}
+              integrationVendorInfo={'Integrate CurateAI with Facebook'}
+              IntegrationVendorLoginButton={IntegrationVendorLoginButton}
+              integrationVendorLoginHandler={loginToFacebook}
+              integrationVendorLoginCTA={'Login With Facebook'}
+              IntegrationVendorSwitchAccount={IntegrationVendorSwitchAccount}
+              integrationVendorSwitchAccountHandler={switchFacebookAdAccounts}
+              IntegrationVendorIcon={FaFacebook}
+              isLoading={isLoading}
+            />
 
             <Box
               gridColumn={isEqualToOrLessThan800[0] ? '1 / span 3' : '3'}
@@ -170,31 +115,15 @@ export const DashboardPage = () => {
                 >
                   Facebook
                 </Box>
-                {!hasIntegrationRecord && hasError && (
-                  <>
-                    {errorMap.get(hasError) ? (
-                      errorMap.get(hasError)()
-                    ) : (
-                      <Text
-                        color="#c5221f"
-                        fontWeight="500"
-                        className="error"
-                        padding={
-                          isEqualToOrLessThan450
-                            ? '1rem 1rem 0rem 2rem'
-                            : isEqualToOrLessThan800[0]
-                            ? '1rem 0 0 0'
-                            : '1rem 2rem 0 2rem'
-                        }
-                      >
-                        {ERROR.DASHBOARD.MAIN}
-                      </Text>
-                    )}
-                  </>
-                )}
+
+                {!hasIntegrationRecord && hasError && <ErrorMessage errorMessage={ERROR.DASHBOARD.MAIN} />}
+
                 {/* invoke FB integration component on first integration action */}
-                {!hasIntegrationRecord && facebookAuthChange?.authResponse && (
-                  <FacebookAppIntegration setIntegrationRecord={setIntegrationRecord} />
+                {isIntegrationActiveStatus && facebookAuthChange?.authResponse && (
+                  <FacebookAppIntegration
+                    setIntegrationActiveStatus={setIntegrationActiveStatus}
+                    setIntegrationRecord={setIntegrationRecord}
+                  />
                 )}
                 {!hasIntegrationRecord && (
                   <Box

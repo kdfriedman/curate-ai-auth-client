@@ -18,7 +18,6 @@ const { IS_LOADING, HAS_ERRORS, BUSINESS_ASSET_ID, BUSINESS_SYSTEM_USER_ID, IS_F
 
 const fetchFacebookUserAdAssetAssignment = async (
   dispatch,
-  catchErrors,
   facebookAuthChange,
   businessAssetId,
   businessSystemUserId
@@ -37,20 +36,17 @@ const fetchFacebookUserAdAssetAssignment = async (
       type: IS_LOADING,
       payload: false,
     });
-    catchErrors(
-      {
-        type: HAS_ERRORS,
-        payload: {
-          errorMessage: sysUserAssetAssignmentDataError,
-          errorUIMessage: ERROR.DASHBOARD.MAIN,
-        },
+    dispatch({
+      type: HAS_ERRORS,
+      payload: {
+        errorMessage: sysUserAssetAssignmentDataError,
+        errorUIMessage: ERROR.DASHBOARD.MAIN,
       },
-      dispatch
-    );
+    });
   }
 };
 
-const fetchFacebookUserAdCampaigns = async (dispatch, catchErrors, facebookAuthChange, businessAssetId) => {
+const fetchFacebookUserAdCampaigns = async (dispatch, facebookAuthChange, businessAssetId) => {
   // fetch list of ad campaigns to provide user for selection
   const [adCampaignListResult, adCampaignListError] = await fetchData({
     method: GET,
@@ -63,16 +59,13 @@ const fetchFacebookUserAdCampaigns = async (dispatch, catchErrors, facebookAuthC
       type: IS_LOADING,
       payload: false,
     });
-    catchErrors(
-      {
-        type: HAS_ERRORS,
-        payload: {
-          errorMessage: adCampaignListError,
-          errorUIMessage: ERROR.DASHBOARD.MAIN,
-        },
+    dispatch({
+      type: HAS_ERRORS,
+      payload: {
+        errorMessage: adCampaignListError,
+        errorUIMessage: ERROR.DASHBOARD.MAIN,
       },
-      dispatch
-    );
+    });
     return;
   }
   return adCampaignListResult;
@@ -144,7 +137,7 @@ const updateFirestoreWithFacebookUserRecord = async (currentUser, facebookFireba
   );
 };
 
-const validateFacebookUserFirestoreRecord = async (dispatch, catchErrors, currentUser, addedFirestoreRecord) => {
+const validateFacebookUserFirestoreRecord = async (dispatch, currentUser, addedFirestoreRecord) => {
   // read facebook record from firestore to validate if integration exists
   const [record, error] = await readUserRecordFromFirestore(
     currentUser.uid,
@@ -169,22 +162,19 @@ const validateFacebookUserFirestoreRecord = async (dispatch, catchErrors, curren
       type: IS_LOADING,
       payload: false,
     });
-    catchErrors(
-      {
-        type: HAS_ERRORS,
-        payload: {
-          errorMessage: addedFirestoreRecord?.warnMsg,
-          errorUIMessage: ERROR.DASHBOARD.MAIN,
-        },
+    dispatch({
+      type: HAS_ERRORS,
+      payload: {
+        errorMessage: addedFirestoreRecord?.warnMsg,
+        errorUIMessage: ERROR.DASHBOARD.MAIN,
       },
-      dispatch
-    );
+    });
     return;
   }
   return record;
 };
 
-const updateStateWithFacebookFirestoreRecord = (dispatch, record, setIntegrationRecord) => {
+const updateStateWithFacebookFirestoreRecord = (dispatch, record, setIntegrationRecord, setIntegrationActiveStatus) => {
   if (record?.exists) {
     const { facebookBusinessAccts } = record?.data();
     // update parent component with firestore new record data
@@ -208,27 +198,24 @@ const updateStateWithFacebookFirestoreRecord = (dispatch, record, setIntegration
       type: IS_LOADING,
       payload: false,
     });
+
+    // reset integration status to hide FB integration related components
+    setIntegrationActiveStatus(false);
   }
 };
 
 export const useFetchFacebookAdAssetAssignment = () => {
   const { currentUser } = useAuth();
   const { facebookAuthChange } = useFacebookAuth();
-  const handleFetchFacebookAdAssetAssignment = async (dispatch, catchErrors, state, setIntegrationRecord) => {
+  const handleFetchFacebookAdAssetAssignment = async (
+    dispatch,
+    state,
+    setIntegrationRecord,
+    setIntegrationActiveStatus
+  ) => {
     const { businessAssetId, businessSystemUserId, userBusinessList, userBusinessId, sysUserAccessToken } = state;
-    await fetchFacebookUserAdAssetAssignment(
-      dispatch,
-      catchErrors,
-      facebookAuthChange,
-      businessAssetId,
-      businessSystemUserId
-    );
-    const facebooUserAdCampaignData = await fetchFacebookUserAdCampaigns(
-      dispatch,
-      catchErrors,
-      facebookAuthChange,
-      businessAssetId
-    );
+    await fetchFacebookUserAdAssetAssignment(dispatch, facebookAuthChange, businessAssetId, businessSystemUserId);
+    const facebooUserAdCampaignData = await fetchFacebookUserAdCampaigns(dispatch, facebookAuthChange, businessAssetId);
     // find facebook business acct name from user business list chosen with user selected id
     const facebookBusinessAccountName = userBusinessList.find((businessObject) => businessObject.id === userBusinessId);
     const formattedFacebookUserAdCampaignList = formatFacebookUserAdCampaignList(facebooUserAdCampaignData);
@@ -247,11 +234,15 @@ export const useFetchFacebookAdAssetAssignment = () => {
     );
     const validatedFacebookUserFirestoreRecord = await validateFacebookUserFirestoreRecord(
       dispatch,
-      catchErrors,
       currentUser,
       facebookFirestoreAddedRecord
     );
-    updateStateWithFacebookFirestoreRecord(dispatch, validatedFacebookUserFirestoreRecord, setIntegrationRecord);
+    updateStateWithFacebookFirestoreRecord(
+      dispatch,
+      validatedFacebookUserFirestoreRecord,
+      setIntegrationRecord,
+      setIntegrationActiveStatus
+    );
   };
   return { handleFetchFacebookAdAssetAssignment };
 };

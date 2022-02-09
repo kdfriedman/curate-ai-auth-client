@@ -5,4 +5,8 @@ export const ERROR = {
   FUNCTION: {
     INVALID_ARGS: 'Function arguments contain one or more invalid types',
   },
+  AUTH: {
+    INVALID_EMAIL: 'Invalid email, please try again',
+    INVALID_PASSWORD: 'Invalid password, please try again',
+  },
 };

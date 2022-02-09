@@ -1,18 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Header } from '../components/Header';
 import { NavLink } from 'react-router-dom';
-import {
-  Flex,
-  Box,
-  Text,
-  useMediaQuery,
-  Link,
-  Button,
-  CircularProgress,
-} from '@chakra-ui/react';
+import { Flex, Box, Text, useMediaQuery, Link, Button, CircularProgress } from '@chakra-ui/react';
 import { useAuth } from '../contexts/AuthContext';
 import firestoreHandlers from '../services/firebase/data/firestore';
 import { errorMap } from '../components/ErrorMap';
+import { FIREBASE } from '../services/firebase/constants';
+import { ERROR } from '../constants/error';
 
 export const Profile = () => {
   const [hasError, setError] = useState(false);
@@ -21,14 +15,12 @@ export const Profile = () => {
 
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
-  const isEqualToOrLessThan950 = useMediaQuery('(max-width: 950px)');
 
   const { currentUser } = useAuth();
   const { readUserRecordFromFirestore } = firestoreHandlers;
 
   // read data from firebase to set integration state
   useEffect(() => {
-    let isMounted = true;
     const readrecord = async () => {
       // set loading state
       setLoading(true);
@@ -36,16 +28,13 @@ export const Profile = () => {
       // ****** FACEBOOK record ******
       // read facebook record from firestore to validate if integration exists
       const [record, error] = await readUserRecordFromFirestore(
-        // user id
         currentUser.uid,
-        // collections
-        ['clients', 'integrations'],
-        // docs
-        ['facebook']
+        FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
+        FIREBASE.FIRESTORE.FACEBOOK.DOCS
       );
 
       // log out any errors from firestore fetch
-      if (error && isMounted) {
+      if (error) {
         // reset loading state
         setLoading(false);
         // set error state
@@ -54,12 +43,7 @@ export const Profile = () => {
       }
 
       // if record exists, update state with firestore integration record
-      if (
-        record &&
-        record?.exists &&
-        record?.data()?.facebookBusinessAccts?.length > 0 &&
-        isMounted
-      ) {
+      if (record && record?.exists && record?.data()?.facebookBusinessAccts?.length > 0) {
         const { facebookBusinessAccts } = record?.data();
         // update firestore integration record state
         setIntegrationRecord({
@@ -73,10 +57,6 @@ export const Profile = () => {
     };
     // call firestore read wrapper function to initiate firestore read handler
     readrecord();
-
-    return () => {
-      isMounted = false;
-    };
   }, [currentUser, readUserRecordFromFirestore]);
 
   return (
@@ -110,20 +90,13 @@ export const Profile = () => {
                   : '1rem 2rem 0 2rem'
               }
             >
-              Oops, there's been en error, please reach out to the CurateAI team
-              for assistance.
+              {ERROR.DASHBOARD.MAIN}
             </Text>
           )}
         </>
       )}
       <section className="profile__section">
-        <Box
-          gridColumn="1 / 5"
-          gridRow="1"
-          className="profile__dashboard"
-          minHeight="20rem"
-          paddingBottom="2rem"
-        >
+        <Box gridColumn="1 / 5" gridRow="1" className="profile__dashboard" minHeight="20rem" paddingBottom="2rem">
           <Flex
             boxShadow="0 0.125rem 0.25rem rgb(0 0 0 / 8%)"
             padding="2rem"
@@ -140,9 +113,7 @@ export const Profile = () => {
           <Flex flexDirection="column" className="profile__dashboard-body">
             <Box
               className="profile__dashboard-account-info"
-              padding={
-                isEqualToOrLessThan800[0] ? '1rem 1rem 0 1rem' : '2rem 0 0 2rem'
-              }
+              padding={isEqualToOrLessThan800[0] ? '1rem 1rem 0 1rem' : '2rem 0 0 2rem'}
               fontSize="16px"
               color="#6c757d"
               fontWeight="800"
@@ -170,8 +141,7 @@ export const Profile = () => {
                 padding="1rem 2rem"
               >
                 <Text>
-                  Email:{' '}
-                  <span style={{ fontWeight: '500' }}>{currentUser.email}</span>
+                  Email: <span style={{ fontWeight: '500' }}>{currentUser.email}</span>
                 </Text>
                 <Text>
                   Integrations:{' '}
@@ -181,11 +151,7 @@ export const Profile = () => {
                     'N/A'
                   )}
                 </Text>
-                <Link
-                  as={NavLink}
-                  to="/password-reset"
-                  style={{ textDecoration: 'none' }}
-                >
+                <Link as={NavLink} to="/password-reset" style={{ textDecoration: 'none' }}>
                   <Button
                     _hover={{
                       opacity: '.8',

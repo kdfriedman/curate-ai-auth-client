@@ -33,9 +33,7 @@ export const Header = () => {
     let isMounted = true;
     if (isMounted) {
       // hide onLoad spinner icon
-      const onLoadSpinner = document.querySelector(
-        '[data-on-load-spinner="true"]'
-      );
+      const onLoadSpinner = document.querySelector('[data-on-load-spinner="true"]');
       onLoadSpinner.style.display = 'none';
     }
     return () => {
@@ -80,10 +78,7 @@ export const Header = () => {
       >
         <Flex className="header__nav-hamburger-menu-container">
           <Link href="#" onClick={onOpen}>
-            <HiOutlineMenuAlt1
-              className="header__nav-hamburger-menu"
-              color="rgb(173, 181, 189)"
-            />
+            <HiOutlineMenuAlt1 className="header__nav-hamburger-menu" color="rgb(173, 181, 189)" />
           </Link>
           <Drawer placement={'left'} onClose={onClose} isOpen={isOpen}>
             <DrawerOverlay />
@@ -111,18 +106,10 @@ export const Header = () => {
                 >
                   About
                 </Link>
-                <Link
-                  href="http://curateapp.ai/#contact"
-                  isExternal
-                  className="header__nav-menu-link"
-                >
+                <Link href="http://curateapp.ai/#contact" isExternal className="header__nav-menu-link">
                   Contact
                 </Link>
-                <Link
-                  className="header__nav-menu-link"
-                  href="http://curateapp.ai/#features"
-                  isExternal
-                >
+                <Link className="header__nav-menu-link" href="http://curateapp.ai/#features" isExternal>
                   Questions
                 </Link>
               </DrawerBody>
@@ -165,20 +152,16 @@ export const Header = () => {
               <Avatar bg="rgb(173, 181, 189)" />
             </MenuButton>
             <MenuList>
-              {/* trigger logout event onClick */}
-              <MenuItem
-                onClick={() => setLogoutEvent(true)}
-                className="header__nav-menu-item"
-              >
-                Logout
-              </MenuItem>
-              <Link
-                as={NavLink}
-                to="/profile"
-                style={{ textDecoration: 'none' }}
-              >
+              <Link as={NavLink} to="/profile" style={{ textDecoration: 'none' }}>
                 <MenuItem className="header__nav-menu-item">Profile</MenuItem>
               </Link>
+              <Link as={NavLink} to="/" style={{ textDecoration: 'none' }}>
+                <MenuItem className="header__nav-menu-item">Integrations</MenuItem>
+              </Link>
+              {/* trigger logout event onClick */}
+              <MenuItem onClick={() => setLogoutEvent(true)} className="header__nav-menu-item">
+                Logout
+              </MenuItem>
             </MenuList>
           </Menu>
         </Flex>

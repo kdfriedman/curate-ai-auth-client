@@ -42,11 +42,25 @@ export const handleFacebookLogin = (setFacebookAuthChange) => {
   if (!window.FB?.login) return console.error('window.FB.login is undefined');
   window.FB.login(
     (response) => {
-      setFacebookAuthChange(response);
+      if (response.status === 'connected') {
+        return setFacebookAuthChange(response);
+      }
+      console.error('handleFacebookLogin failed to log in user - response', response);
     },
     {
-      scope:
-        'business_management,public_profile,email,ads_read ,ads_management',
+      scope: 'business_management,public_profile,email,ads_read ,ads_management',
     }
   );
+};
+
+export const handleSwitchFacebookAdAccounts = (setFacebookAuthChange) => {
+  if (!window.FB?.logout) return console.error('window.FB.logout is undefined');
+  if (!window.FB?.getAccessToken()) {
+    console.log('facebook access token is null, log in user');
+    return handleFacebookLogin(setFacebookAuthChange);
+  }
+  window.FB.logout((response) => {
+    console.log('facebook access token is valid, log out user, then proceed to log them back in');
+    handleFacebookLogin(setFacebookAuthChange);
+  });
 };

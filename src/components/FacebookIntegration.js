@@ -1,14 +1,15 @@
 import { useEffect, useReducer } from 'react';
 import AcctSelector from './AcctSelector';
-import { Progress, Text, Link, useMediaQuery } from '@chakra-ui/react';
+import { ErrorMessage } from '../components/ErrorMessage';
+import { Progress, Text, useMediaQuery } from '@chakra-ui/react';
+import { ERROR } from '../constants/error';
 import { ACTION_TYPES } from '../services/facebook/constants';
-import { catchErrors } from '../util/error.js';
 import { useFacebookAuth } from '../contexts/FacebookContext';
 import { useFetchFacebookBusinessAccounts } from '../hooks/useFetchFacebookBusinessAccounts';
 import { useFetchFacebookSystemUserToken } from '../hooks/useFetchFacebookSystemUserToken';
 import { useFetchFacebookAdAssetAssignment } from '../hooks/useFetchFacebookAdAssetAssignment';
 
-const FacebookAppIntegration = ({ setIntegrationRecord }) => {
+const FacebookAppIntegration = ({ setIntegrationRecord, setIntegrationActiveStatus }) => {
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
 
   // facebook auth context
@@ -69,23 +70,30 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
 
   // fetch user business accts list
   useEffect(() => {
-    if (!isFetchFacebookBusinessAccounts) return null;
-    handleFetchFacebookBusinessAccounts(dispatch, catchErrors).catch((err) => console.error(err));
-  }, [handleFetchFacebookBusinessAccounts, facebookAuthChange, isFetchFacebookBusinessAccounts]);
+    if (!isFetchFacebookBusinessAccounts || hasErrors) return null;
+    handleFetchFacebookBusinessAccounts(dispatch).catch((err) => console.error(err));
+  }, [handleFetchFacebookBusinessAccounts, facebookAuthChange, isFetchFacebookBusinessAccounts, hasErrors]);
 
   // connect partner biz with client biz, create sys user in client biz, fetch client ad account list
   useEffect(() => {
-    if (!isFetchFacebookSystemUserToken) return null;
-    handleFetchFacebookSystemUserToken(dispatch, catchErrors, userBusinessId).catch((err) => console.error(err));
-  }, [handleFetchFacebookSystemUserToken, userBusinessId, isFetchFacebookSystemUserToken]);
+    if (!isFetchFacebookSystemUserToken || hasErrors) return null;
+    handleFetchFacebookSystemUserToken(dispatch, userBusinessId).catch((err) => console.error(err));
+  }, [handleFetchFacebookSystemUserToken, userBusinessId, isFetchFacebookSystemUserToken, hasErrors]);
 
   // add assets to system user within client's facebook business account
   useEffect(() => {
-    if (!isFetchFacebookAdAssetAssignment) return null;
-    handleFetchFacebookAdAssetAssignment(dispatch, catchErrors, state, setIntegrationRecord).catch((err) =>
-      console.error(err)
+    if (!isFetchFacebookAdAssetAssignment || hasErrors) return null;
+    handleFetchFacebookAdAssetAssignment(dispatch, state, setIntegrationRecord, setIntegrationActiveStatus).catch(
+      (err) => console.error(err)
     );
-  }, [handleFetchFacebookAdAssetAssignment, isFetchFacebookAdAssetAssignment, state, setIntegrationRecord]);
+  }, [
+    handleFetchFacebookAdAssetAssignment,
+    isFetchFacebookAdAssetAssignment,
+    state,
+    setIntegrationRecord,
+    setIntegrationActiveStatus,
+    hasErrors,
+  ]);
 
   // handle user business list select element event
   const handleSelectUserBusinessList = (e) => {
@@ -148,7 +156,7 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
       )}
 
       {/* setup user business account selector */}
-      {!isLoading && userBusinessList?.length > 0 && !businessAdAcctList && (
+      {!hasErrors && !isLoading && userBusinessList?.length > 0 && !businessAdAcctList && (
         <AcctSelector
           acctList={userBusinessList}
           onChangeHandler={handleSelectUserBusinessList}
@@ -157,7 +165,7 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
       )}
 
       {/* setup business ad account selector */}
-      {!isLoading && businessAdAcctList?.length > 0 && businessSystemUserId && (
+      {!hasErrors && !isLoading && businessAdAcctList?.length > 0 && businessSystemUserId && (
         <AcctSelector
           acctList={businessAdAcctList}
           onChangeHandler={handleSelectBusinessAdAcct}
@@ -165,21 +173,7 @@ const FacebookAppIntegration = ({ setIntegrationRecord }) => {
         />
       )}
 
-      {hasErrors && !isLoading && (
-        <>
-          <Text margin="1rem 2rem 0 2rem" color="#c5221f">
-            Oops, we've encountered an error. Please contact our{' '}
-            <Link
-              href={`mailto:ryanwelling@gmail.com?cc=kev.d.friedman@gmail.com&subject=CurateApp.AI%20Integration%20Error&body=Error: ${hasErrors?.errUserMsg}`}
-            >
-              <span style={{ textDecoration: 'underline' }}>tech team for assistance.</span>
-            </Link>
-          </Text>
-          <Text margin="1rem 2rem 0 2rem" color="#c5221f">
-            {hasErrors?.errUserMsg}
-          </Text>
-        </>
-      )}
+      {hasErrors && !isLoading && <ErrorMessage errorMessage={ERROR.DASHBOARD.MAIN} />}
     </>
   );
 };

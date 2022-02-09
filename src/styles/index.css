@@ -11,9 +11,8 @@ body {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
+    'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -23,8 +22,7 @@ body.login-custom-style {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
 /* facebook Login btn */
@@ -139,15 +137,6 @@ svg.header__nav-hamburger-menu {
   }
 }
 
-/* dashboard component integration widget (card) */
-.dashboard__integration-widget {
-  background: #fff;
-  box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 15%);
-  border-radius: 10px;
-  height: 100%;
-  flex-direction: column;
-}
-
 /* dashboard component dashboard card */
 .dashboard__integration-dashboard {
   background: #fff;
@@ -155,33 +144,8 @@ svg.header__nav-hamburger-menu {
   border-radius: 10px;
 }
 
-/* dashboard component descriptive title for each integration card */
-.dashboard__integration-info {
-  font-weight: 800;
-  font-size: 14px;
-  color: rgb(26, 32, 44);
-  padding: 10px;
-  margin: 0.5rem 1rem;
-  text-align: center;
-}
-
-/* dashboard component integration status container */
-.dashboard__integration-status-container {
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-}
-
-/* dashboard component integration status text */
-.dashboard__integration-status-text {
-  font-weight: 800;
-  font-size: 12px;
-  color: rgb(26, 32, 44);
-  padding: 10px;
-}
-
 /* dashboard component integration fb login icon */
-svg.dashboard__fb-login-btn-icon {
+svg.login-btn-icon {
   width: 25px;
   height: 25px;
   min-width: 25px;

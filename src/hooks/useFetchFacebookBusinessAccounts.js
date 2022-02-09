@@ -9,7 +9,7 @@ const { GET } = HTTP_METHODS;
 const { IS_LOADING, HAS_ERRORS, USER_BUSINESS_LIST, HAS_USER_BUSINESS_LIST, IS_FETCH_FACEBOOK_BUSINESS_ACCOUNTS } =
   ACTION_TYPES;
 
-const fetchFacebookUserData = async (dispatch, catchErrors, facebookAuthChange) => {
+const fetchFacebookUserData = async (dispatch, facebookAuthChange) => {
   // reset state to prevent unwanted useEffect renders
   dispatch({ type: IS_FETCH_FACEBOOK_BUSINESS_ACCOUNTS, payload: false });
 
@@ -25,13 +25,19 @@ const fetchFacebookUserData = async (dispatch, catchErrors, facebookAuthChange) 
       type: IS_LOADING,
       payload: false,
     });
-    catchErrors({ type: HAS_ERRORS, payload: userError }, dispatch);
+    dispatch({
+      type: HAS_ERRORS,
+      payload: {
+        errorMessage: userError,
+        errorUIMessage: ERROR.DASHBOARD.MAIN,
+      },
+    });
     return;
   }
   return userData;
 };
 
-const fetchFacebookUserBusinessAccounts = async (userId, dispatch, catchErrors, facebookAuthChange) => {
+const fetchFacebookUserBusinessAccounts = async (userId, dispatch, facebookAuthChange) => {
   // fetch user business list
   const [userBusinessList, userBusinessError] = await fetchData({
     method: GET,
@@ -43,23 +49,20 @@ const fetchFacebookUserBusinessAccounts = async (userId, dispatch, catchErrors, 
       type: IS_LOADING,
       payload: false,
     });
-    catchErrors(
-      {
-        type: HAS_ERRORS,
-        payload: {
-          errorMessage: userBusinessError,
-          errorUIMessage: ERROR.DASHBOARD.MAIN,
-        },
+    dispatch({
+      type: HAS_ERRORS,
+      payload: {
+        errorMessage: userBusinessError,
+        errorUIMessage: ERROR.DASHBOARD.MAIN,
       },
-      dispatch
-    );
+    });
     return;
   }
   return userBusinessList;
 };
 
 // prettier-ignore
-const validateFacebookUserBusinessList = (userBusinessList, dispatch, catchErrors) => {
+const validateFacebookUserBusinessList = (userBusinessList, dispatch) => {
   // check if user has valid businesses
   if (userBusinessList && userBusinessList?.data?.data.length > 0) {
     // update local state with user business list data
@@ -73,7 +76,7 @@ const validateFacebookUserBusinessList = (userBusinessList, dispatch, catchError
       payload: true,
     });
   } else {
-    catchErrors(
+    dispatch(
       {
         type: HAS_ERRORS,
         payload: {
@@ -82,8 +85,7 @@ const validateFacebookUserBusinessList = (userBusinessList, dispatch, catchError
           errorUIMessage:
             FACEBOOK_ERROR.MARKETING_API.MUST_HAVE_VALID_BUSINESS_ACCOUNT,
         },
-      },
-      dispatch
+      }
     );
   }
 };
@@ -91,16 +93,15 @@ const validateFacebookUserBusinessList = (userBusinessList, dispatch, catchError
 export const useFetchFacebookBusinessAccounts = () => {
   const { facebookAuthChange } = useFacebookAuth();
   const handleFetchFacebookBusinessAccounts = async (dispatch, catchErrors) => {
-    catchErrors({ type: HAS_ERRORS, payload: null }, dispatch, true);
-    const facebookUserData = await fetchFacebookUserData(dispatch, catchErrors, facebookAuthChange);
+    dispatch({ type: HAS_ERRORS, payload: null });
+    const facebookUserData = await fetchFacebookUserData(dispatch, facebookAuthChange);
     const facebookUserID = facebookUserData?.data?.id;
     const facebookBusinessAccounts = await fetchFacebookUserBusinessAccounts(
       facebookUserID,
       dispatch,
-      catchErrors,
       facebookAuthChange
     );
-    validateFacebookUserBusinessList(facebookBusinessAccounts, dispatch, catchErrors);
+    validateFacebookUserBusinessList(facebookBusinessAccounts, dispatch);
   };
   return { handleFetchFacebookBusinessAccounts };
 };
