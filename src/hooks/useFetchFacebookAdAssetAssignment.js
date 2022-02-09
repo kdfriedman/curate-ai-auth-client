@@ -43,6 +43,7 @@ const fetchFacebookUserAdAssetAssignment = async (
         errorUIMessage: ERROR.DASHBOARD.MAIN,
       },
     });
+    throw new Error('sysUserAssetAssignmentDataError is type ' + sysUserAssetAssignmentDataError);
   }
 };
 
@@ -66,7 +67,7 @@ const fetchFacebookUserAdCampaigns = async (dispatch, facebookAuthChange, busine
         errorUIMessage: ERROR.DASHBOARD.MAIN,
       },
     });
-    return;
+    throw new Error('adCampaignListError is type ' + adCampaignListError);
   }
   return adCampaignListResult;
 };
@@ -169,7 +170,7 @@ const validateFacebookUserFirestoreRecord = async (dispatch, currentUser, addedF
         errorUIMessage: ERROR.DASHBOARD.MAIN,
       },
     });
-    return;
+    throw new Error('readUserRecordFromFirestore returned an error: ' + error);
   }
   return record;
 };
@@ -215,7 +216,9 @@ export const useFetchFacebookAdAssetAssignment = () => {
   ) => {
     const { businessAssetId, businessSystemUserId, userBusinessList, userBusinessId, sysUserAccessToken } = state;
     await fetchFacebookUserAdAssetAssignment(dispatch, facebookAuthChange, businessAssetId, businessSystemUserId);
+
     const facebooUserAdCampaignData = await fetchFacebookUserAdCampaigns(dispatch, facebookAuthChange, businessAssetId);
+
     // find facebook business acct name from user business list chosen with user selected id
     const facebookBusinessAccountName = userBusinessList.find((businessObject) => businessObject.id === userBusinessId);
     const formattedFacebookUserAdCampaignList = formatFacebookUserAdCampaignList(facebooUserAdCampaignData);
@@ -232,11 +235,13 @@ export const useFetchFacebookAdAssetAssignment = () => {
       currentUser,
       facebookFirestorePayload
     );
+
     const validatedFacebookUserFirestoreRecord = await validateFacebookUserFirestoreRecord(
       dispatch,
       currentUser,
       facebookFirestoreAddedRecord
     );
+
     updateStateWithFacebookFirestoreRecord(
       dispatch,
       validatedFacebookUserFirestoreRecord,

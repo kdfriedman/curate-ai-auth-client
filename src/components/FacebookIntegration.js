@@ -1,7 +1,7 @@
 import { useEffect, useReducer } from 'react';
 import AcctSelector from './AcctSelector';
 import { ErrorMessage } from '../components/ErrorMessage';
-import { Progress, Text, useMediaQuery } from '@chakra-ui/react';
+import { Progress, useMediaQuery } from '@chakra-ui/react';
 import { ERROR } from '../constants/error';
 import { ACTION_TYPES } from '../services/facebook/constants';
 import { useFacebookAuth } from '../contexts/FacebookContext';
@@ -77,7 +77,9 @@ const FacebookAppIntegration = ({ setIntegrationRecord, setIntegrationActiveStat
   // connect partner biz with client biz, create sys user in client biz, fetch client ad account list
   useEffect(() => {
     if (!isFetchFacebookSystemUserToken || hasErrors) return null;
-    handleFetchFacebookSystemUserToken(dispatch, userBusinessId).catch((err) => console.error(err));
+    handleFetchFacebookSystemUserToken(dispatch, userBusinessId).catch((err) => {
+      console.error(err);
+    });
   }, [handleFetchFacebookSystemUserToken, userBusinessId, isFetchFacebookSystemUserToken, hasErrors]);
 
   // add assets to system user within client's facebook business account

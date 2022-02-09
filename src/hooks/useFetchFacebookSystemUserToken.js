@@ -46,7 +46,7 @@ const fetchFacebookUserBusinessAccount = async (dispatch, facebookAuthChange, us
         errorUIMessage: ERROR.DASHBOARD.MAIN,
       },
     });
-    return;
+    throw new Error('clientBusinessData is type ' + clientBusinessData);
   }
   return clientBusinessData;
 };
@@ -65,7 +65,7 @@ const fetchCurateAISystemUserAccessToken = async (dispatch) => {
         errorUIMessage: ERROR.DASHBOARD.MAIN,
       },
     });
-    return;
+    throw new Error('readCurateAIRecordFromFirestore returned an error: ' + error);
   }
   const { curateAiSysUserAccessToken } = record?.data();
   return curateAiSysUserAccessToken;
@@ -94,6 +94,7 @@ const generateFacebookUserSystemUserAccessToken = async (
         errorUIMessage: ERROR.DASHBOARD.MAIN,
       },
     });
+    throw new Error('sysUserError is type ' + sysUserError);
   }
   return sysUserData;
 };
@@ -117,7 +118,7 @@ const fetchFacebookUserSystemUserId = async (dispatch, sysUserAccessToken) => {
         errorUIMessage: ERROR.DASHBOARD.MAIN,
       },
     });
-    return;
+    throw new Error('sysUserIdError is type ' + sysUserIdError);
   }
   return sysUserIdData;
 };
@@ -140,7 +141,7 @@ const fetchFacebookUserAdAccountAssetList = async (dispatch, facebookAuthChange,
         errorUIMessage: ERROR.DASHBOARD.MAIN,
       },
     });
-    return;
+    throw new Error('adAcctAssetListError is type ' + adAcctAssetListError);
   }
   return adAcctAssetList;
 };
@@ -196,24 +197,29 @@ export const useFetchFacebookSystemUserToken = () => {
       facebookAuthChange,
       userBusinessId
     );
+
     const facebookUserBusinessAccountId = facebookUserBusinessAccount?.data?.id;
     const curateAISystemUserAccessToken = await fetchCurateAISystemUserAccessToken(dispatch);
+
     const facebookUserSystemUserAccessTokenData = await generateFacebookUserSystemUserAccessToken(
       dispatch,
       facebookUserBusinessAccountId,
       curateAISystemUserAccessToken
     );
+
     const facebookUserSystemUserAccessToken = facebookUserSystemUserAccessTokenData?.data?.access_token;
     const facebookUserSystemUserIdData = await fetchFacebookUserSystemUserId(
       dispatch,
       facebookUserSystemUserAccessToken
     );
+
     const facebookUserSystemUserId = facebookUserSystemUserIdData?.data?.id;
     const facebookUserAdAccountAssetList = await fetchFacebookUserAdAccountAssetList(
       dispatch,
       facebookAuthChange,
       facebookUserBusinessAccountId
     );
+
     saveFacebookUserSystemUserAccessToken(dispatch, facebookUserSystemUserAccessToken);
     validateFacebookUserAdAccountAssetList(dispatch, facebookUserAdAccountAssetList, facebookUserSystemUserId);
   };

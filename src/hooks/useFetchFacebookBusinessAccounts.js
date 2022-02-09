@@ -32,7 +32,7 @@ const fetchFacebookUserData = async (dispatch, facebookAuthChange) => {
         errorUIMessage: ERROR.DASHBOARD.MAIN,
       },
     });
-    return;
+    throw new Error('userError is type ' + userError);
   }
   return userData;
 };
@@ -56,7 +56,7 @@ const fetchFacebookUserBusinessAccounts = async (userId, dispatch, facebookAuthC
         errorUIMessage: ERROR.DASHBOARD.MAIN,
       },
     });
-    return;
+    throw new Error('userBusinessError is type ' + userBusinessError);
   }
   return userBusinessList;
 };
@@ -95,12 +95,14 @@ export const useFetchFacebookBusinessAccounts = () => {
   const handleFetchFacebookBusinessAccounts = async (dispatch, catchErrors) => {
     dispatch({ type: HAS_ERRORS, payload: null });
     const facebookUserData = await fetchFacebookUserData(dispatch, facebookAuthChange);
+
     const facebookUserID = facebookUserData?.data?.id;
     const facebookBusinessAccounts = await fetchFacebookUserBusinessAccounts(
       facebookUserID,
       dispatch,
       facebookAuthChange
     );
+
     validateFacebookUserBusinessList(facebookBusinessAccounts, dispatch);
   };
   return { handleFetchFacebookBusinessAccounts };
