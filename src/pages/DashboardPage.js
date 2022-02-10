@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Flex, Button, Box, Text, CircularProgress, useMediaQuery, useDisclosure } from '@chakra-ui/react';
+import { Flex, Button, Box, CircularProgress, useMediaQuery, useDisclosure } from '@chakra-ui/react';
 import { useAuth } from '../contexts/AuthContext';
 import FacebookAppIntegration from '../components/FacebookIntegration';
 import { fbProviderPopup } from '../services/firebase/auth/facebook';
@@ -25,7 +25,6 @@ import { ERROR } from '../constants/error';
 import { FIREBASE } from '../services/firebase/constants';
 
 export const DashboardPage = () => {
-  const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
   const isEqualToOrLessThan950 = useMediaQuery('(max-width: 950px)');
   const [hasError, setError] = useState(false);
   const [isLoading, setLoading] = useState(false);
