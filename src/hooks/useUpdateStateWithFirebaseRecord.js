@@ -1,4 +1,5 @@
-import { useReadRecordFromFirestore } from './useReadRecordFromFirestore';
+import { useAuth } from '../contexts/AuthContext';
+import firestoreHandlers from '../services/firebase/data/firestore';
 
 export const useUpdateStateWithFirestoreRecord = (
   collections,
@@ -8,12 +9,14 @@ export const useUpdateStateWithFirestoreRecord = (
   setIntegrationRecord,
   setUpdateStateWithFirestoreRecord
 ) => {
-  const { handleReadFirestoreRecord } = useReadRecordFromFirestore();
+  const { currentUser } = useAuth();
+  const { readUserRecordFromFirestore } = firestoreHandlers;
   const updateStateWithFirestoreRecord = async () => {
     try {
-      const result = await handleReadFirestoreRecord(collections, docs);
+      const [record, recordError] = await readUserRecordFromFirestore(currentUser.uid, collections, docs);
+      if (recordError) throw recordError;
       setIntegrationRecord({
-        facebookBusinessAccts: result,
+        facebookBusinessAccts: record.data().facebookBusinessAccts,
       });
       setLoading(false);
       setUpdateStateWithFirestoreRecord(false);

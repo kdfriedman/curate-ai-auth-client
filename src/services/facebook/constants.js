@@ -34,5 +34,6 @@ export const FACEBOOK_ERROR = {
     MUST_HAVE_VALID_AD_ACCOUNT:
       'User must be logged into facebook with an account that has one or more associated facebook ad accounts. Log into facebook.com to select a different account.',
     AD_ASSET_LIST_IS_EMPTY: 'adAcctAssetList is an empty array',
+    FAILED_TO_REMOVE_SYSTEM_USER_TOKEN: 'Failed to delete system access user token',
   },
 };

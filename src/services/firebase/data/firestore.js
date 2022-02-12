@@ -1,103 +1,52 @@
 import { db, Firebase } from '../firebase';
+import { FIREBASE_ERROR, FIREBASE } from '../constants';
 
 const readUserRecordFromFirestore = async (uid, collections, docs) => {
-  // check if uid is falsy
-  if (!uid) return console.error({ Error: `uid is null or undefined: ${uid}` });
-  if (!Array.isArray(collections) && !Array.isArray(docs)) {
-    return console.error({
-      Error1: `collections is not type array: ${collections}`,
-      Error2: `docs is not type array: ${docs}`,
-    });
-  }
-
-  // destructure collection and doc lists
   const [collection1, collection2] = collections;
   const [doc1] = docs;
   try {
-    const record = await db
-      .collection(collection1)
-      .doc(uid)
-      .collection(collection2)
-      .doc(doc1)
-      .get();
+    const record = await db.collection(collection1).doc(uid).collection(collection2).doc(doc1).get();
     return [record, null];
   } catch (error) {
-    console.error('Error getting document: ', error);
+    console.error(FIREBASE_ERROR.FIRESTORE.GENERIC.FAILED_READING_DATA);
     return [null, error];
   }
 };
 
 const readCurateAIRecordFromFirestore = async (uid, collection) => {
-  // check if uid is falsy
-  if (!uid) return console.error({ uid });
   try {
     const record = await db.collection(collection).doc(uid).get();
     return [record, null];
   } catch (error) {
-    console.error('Error getting document: ', error);
+    console.error(FIREBASE_ERROR.FIRESTORE.CURATEAI.SYSTEM_USER_ACCESS_TOKEN_CANNOT_BE_FETCHED);
     return [null, error];
   }
 };
 
-const addRecordToFirestore = async (
-  uid,
-  collections,
-  docs,
-  payload,
-  payloadName
-) => {
-  // validate types of params and check for falsy values
-  if (!uid) return console.error({ Error: `uid is null or undefined: ${uid}` });
-  if (!payloadName)
-    return console.error({
-      Error: `payloadName is null or undefined: ${payloadName}`,
-    });
-  if (!payload || Object.entries(payload).length === 0) {
-    return console.error({
-      Error: `payload is undefined, null, or an empty object: ${payload}`,
-    });
-  }
-  if (!Array.isArray(collections) && !Array.isArray(docs)) {
-    return console.error({
-      Error1: `collections is not type array: ${collections}`,
-      Error2: `docs is not type array: ${docs}`,
-    });
-  }
-
-  // destructure collection and doc lists
+const addRecordToFirestore = async (uid, collections, docs, payload, payloadName) => {
   const [collection1, collection2] = collections;
   const [doc1] = docs;
 
-  try {
-    // read record to check if uid exists in database, otherwise create new record
-    const [record, error] = await readUserRecordFromFirestore(
-      uid,
-      [collection1, collection2],
-      [doc1]
-    );
-    // check for request error
-    if (error) return console.error({ Error: error });
+  // read record to check if uid exists in database, otherwise create new record
+  const [record, error] = await readUserRecordFromFirestore(uid, [collection1, collection2], [doc1]);
+  // check for request error
+  if (error) {
+    console.error(FIREBASE_ERROR.FIRESTORE.GENERIC.FAILED_READING_DATA);
+    return [null, error];
+  }
 
+  try {
     // check if record exists before further processing
-    if (
-      record?.exists &&
-      record.data() &&
-      Array.isArray(record?.data()[payloadName])
-    ) {
-      // setup object to catch duplicate record data
-      const duplicateRecord = {};
+    if (record?.exists && record.data() && Array.isArray(record?.data()[payloadName])) {
       // loop through all records within vendor array
-      record?.data()[payloadName]?.forEach((record) => {
+      const hasDuplicateRecord = record?.data()[payloadName]?.find((record) => {
         // if record exist and payload id is equal to previous
-        if (record.adAccountId === payload.adAccountId) {
-          duplicateRecord.warnMsg =
-            'The record cannot be added because a record using this ad account already exists.';
-          duplicateRecord.adAcctInUse = record.adAccountId;
-        }
+        return record.adAccountId === payload.adAccountId;
       });
-      if (Object.keys(duplicateRecord).length > 0) return duplicateRecord;
-      // vendor document ref in firestore
-      return await db
+      if (hasDuplicateRecord) return [null, FIREBASE_ERROR.FIRESTORE.GENERIC.DUPLICATE_RECORD];
+
+      // if record exist, push new payload into array
+      await db
         .collection(collection1)
         .doc(uid)
         .collection(collection2)
@@ -105,9 +54,11 @@ const addRecordToFirestore = async (
         .update({
           [payloadName]: Firebase.firestore.FieldValue.arrayUnion(payload),
         });
+      return [FIREBASE.FIRESTORE.GENERIC.UNION_ADDED, null];
     }
   } catch (error) {
-    console.error('Error getting document: ', error);
+    console.error(FIREBASE_ERROR.FIRESTORE.GENERIC.FAILED_TO_UNION_TO_ARRAY);
+    return [null, error];
   }
 
   // if record does not exist, create new record in firestore
@@ -121,47 +72,23 @@ const addRecordToFirestore = async (
         [payloadName]: [payload],
       });
 
-    return 'Document written with ID: ' + uid;
+    return [FIREBASE.FIRESTORE.GENERIC.RECORD_CREATED, null];
   } catch (error) {
-    console.error('Error adding document: ', error);
+    console.error(FIREBASE_ERROR.FIRESTORE.GENERIC.FAILED_TO_CREATE_NEW_RECORD);
+    return [null, error];
   }
 };
 
-const removeRecordFromFirestore = async (
-  uid,
-  collections,
-  docs,
-  payloadName,
-  removalRecordPropertyId
-) => {
-  // validate types of params and check for falsy values
-  if (!uid) return console.error({ Error: `uid is null or undefined: ${uid}` });
-  if (!payloadName)
-    return console.error({
-      Error: `payloadName is null or undefined: ${payloadName}`,
-    });
-  if (!Array.isArray(collections) && !Array.isArray(docs)) {
-    return console.error({
-      Error1: `collections is not type array: ${collections}`,
-      Error2: `docs is not type array: ${docs}`,
-    });
-  }
-
+const removeRecordFromFirestore = async (uid, collections, docs, payloadName, removalRecordPropertyId) => {
   // destructure collection and doc lists
   const [collection1, collection2] = collections;
   const [doc1] = docs;
 
   // read record to check if uid exists in database, return without doing anything
-  const [record, error] = await readUserRecordFromFirestore(
-    uid,
-    [collection1, collection2],
-    [doc1]
-  );
+  const [record, error] = await readUserRecordFromFirestore(uid, [collection1, collection2], [doc1]);
   if (error) {
-    return console.error({
-      errMsg: 'Err: there was an err getting data from firestore',
-      errVar: error,
-    });
+    console.error(FIREBASE_ERROR.FIRESTORE.GENERIC.FAILED_READING_DATA);
+    return [null, error];
   }
 
   if (record?.exists) {
@@ -171,10 +98,10 @@ const removeRecordFromFirestore = async (
       // reload page as fail safe
       window.location.reload();
     }
-    const selectedRecord = record?.data()[payloadName].filter((record) => {
+    const selectedRecord = record?.data()[payloadName].find((record) => {
       return record.businessAcctId === removalRecordPropertyId;
     });
-    if (selectedRecord.length === 0) {
+    if (!selectedRecord) {
       // if this error occurs, most likely caused by db getting unsynced with app
       // reload page as fail safe
       window.location.reload();
@@ -186,14 +113,13 @@ const removeRecordFromFirestore = async (
         .collection(collection2)
         .doc(doc1)
         .update({
-          [payloadName]: Firebase.firestore.FieldValue.arrayRemove(
-            selectedRecord[0]
-          ),
+          [payloadName]: Firebase.firestore.FieldValue.arrayRemove(selectedRecord[0]),
         });
-
-      return { msg: 'firestore record removed', record: selectedRecord[0] };
+      return [selectedRecord, null];
     } catch (error) {
-      console.error('Error removing record: ', error);
+      console.error(FIREBASE_ERROR.FIRESTORE.GENERIC.FAILED_REMOVING_DATA);
+      console.error(error);
+      return [null, error];
     }
   }
 };

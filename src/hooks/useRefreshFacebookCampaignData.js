@@ -1,5 +1,3 @@
-import { useRefreshFacebookAccessToken } from '../hooks/useRefreshFacebookAccessToken';
-import { useUnlinkProvider } from '../hooks/useUnlinkProvider';
 import fetchData from '../services/fetch/fetch';
 import firestoreHandlers from '../services/firebase/data/firestore';
 import { FACEBOOK_API } from '../services/facebook/constants';
@@ -7,20 +5,9 @@ import { HTTP_METHODS } from '../services/fetch/constants';
 
 export const useRefreshFacebookCampaignData = (setProviderType) => {
   const { GET } = HTTP_METHODS;
-  const { handleRefreshFacebookAccessToken } = useRefreshFacebookAccessToken();
-  const { handleUnlinkProvider } = useUnlinkProvider(setProviderType);
-  const {
-    addRecordToFirestore,
-    readUserRecordFromFirestore,
-    removeRecordFromFirestore,
-  } = firestoreHandlers;
+  const { addRecordToFirestore, readUserRecordFromFirestore, removeRecordFromFirestore } = firestoreHandlers;
 
-  const handleRefreshFacebookCampaignData = async (
-    provider,
-    facebookRecord,
-    setIntegrationRecord,
-    setLoading
-  ) => {
+  const handleRefreshFacebookCampaignData = async (provider, facebookRecord, setIntegrationRecord, setLoading) => {
     // set loading to true to trigger loader component
     setLoading(true);
     // fetch list of ad campaigns to render refreshed facebook ad campaign data
@@ -39,12 +26,8 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
         let stopDate;
         try {
           if (campaign.start_time && campaign.stop_time) {
-            const startFormattedDate = new Date(campaign.start_time)
-              .toISOString()
-              .slice(0, 10);
-            const stopFormattedDate = new Date(campaign.stop_time)
-              .toISOString()
-              .slice(0, 10);
+            const startFormattedDate = new Date(campaign.start_time).toISOString().slice(0, 10);
+            const stopFormattedDate = new Date(campaign.stop_time).toISOString().slice(0, 10);
             const startFormattedDateList = startFormattedDate.split('-');
             const stopFormattedDateList = stopFormattedDate.split('-');
             const startFormattedDateLastItem = startFormattedDateList.shift();
@@ -66,11 +49,10 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
       });
     };
 
-    const [adCampaignListResult, adCampaignListError] =
-      await getFacebookCampaignData(
-        facebookRecord.adAccountId,
-        facebookRecord.userAccessToken
-      );
+    const [adCampaignListResult, adCampaignListError] = await getFacebookCampaignData(
+      facebookRecord.adAccountId,
+      facebookRecord.userAccessToken
+    );
 
     // setup state for refresh token campign data fetch call
     let refreshTokenAdCampaignResult = null;
@@ -82,19 +64,16 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
           errMsg: providerUnlinked,
         });
       }
-      const refreshedAccessUserToken = await handleRefreshFacebookAccessToken(
-        provider
-      );
+      const refreshedAccessUserToken = await handleRefreshFacebookAccessToken(provider);
       if (!refreshedAccessUserToken) {
         return console.error(
           '[line 45: refreshedAccessToken] Err failed to refresh facebook user access token, see useRefreshFacebookCampaignData for details'
         );
       }
-      const [adCampaignListResult, adCampaignListError] =
-        await getFacebookCampaignData(
-          facebookRecord.adAccountId,
-          refreshedAccessUserToken
-        );
+      const [adCampaignListResult, adCampaignListError] = await getFacebookCampaignData(
+        facebookRecord.adAccountId,
+        refreshedAccessUserToken
+      );
       if (adCampaignListError) {
         return console.error(
           '[line: 58 adCampaignListError]: fetch err has occured, fetch facebook campaign data with refreshed fb token has failed. see useRefreshFacebookCampaignData for details'
@@ -110,15 +89,10 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
     // if adCampaignList is valid, saved fb user token is valid and was able to fetch fb campaign data
     // if adCampaignList is falsey, use refreshed fb token, meaning that the saved fb user token had been expired
     const adCampaignList = generateAdCampaignPayload(
-      !adCampaignListResult
-        ? refreshTokenAdCampaignResult
-        : adCampaignListResult
+      !adCampaignListResult ? refreshTokenAdCampaignResult : adCampaignListResult
     );
 
-    if (
-      adCampaignList.length === 0 ||
-      (!adCampaignListResult && !refreshTokenAdCampaignResult)
-    ) {
+    if (adCampaignList.length === 0 || (!adCampaignListResult && !refreshTokenAdCampaignResult)) {
       return console.error(
         '[Line 106: adCampaignList.length === 0] Err failed to fetch fb ad campaign data using saved fb user token or refreshed fb user token. See useRefreshFacebookCampaignData for details.'
       );
@@ -149,9 +123,7 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
         facebookRecord?.businessAcctId
       );
       if (!removedRecord) {
-        console.error(
-          '[line 86: removedRecordFromFirestore] Err firestore record not removed'
-        );
+        console.error('[line 86: removedRecordFromFirestore] Err firestore record not removed');
       }
       // update firestore with copy of old record with the addition of the refreshed fb campaign data
       const addedFirestoreRecord = await addRecordToFirestore(
@@ -173,9 +145,7 @@ export const useRefreshFacebookCampaignData = (setProviderType) => {
 
       if (addedFirestoreRecord?.warnMsg || error) {
         console.error(error);
-        return console.error(
-          '[line 93: useRefreshFacebookCampaigndata] Error: failed to read record from firestore'
-        );
+        return console.error('[line 93: useRefreshFacebookCampaigndata] Error: failed to read record from firestore');
       }
 
       // check if records exists in firestore

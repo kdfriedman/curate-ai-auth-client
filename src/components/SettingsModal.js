@@ -26,17 +26,8 @@ import { MdInfo } from 'react-icons/md';
 import { useRefreshFacebookCampaignData } from '../hooks/useRefreshFacebookCampaignData';
 import { fbProviderPopup } from '../services/firebase/auth/facebook';
 
-export const SettingsModal = ({
-  isOpen,
-  onClose,
-  dbRecord,
-  id,
-  setIntegrationRecord,
-  Loading,
-  setProviderType,
-}) => {
-  const { handleRefreshFacebookCampaignData } =
-    useRefreshFacebookCampaignData(setProviderType);
+export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRecord, Loading, setProviderType }) => {
+  const { handleRefreshFacebookCampaignData } = useRefreshFacebookCampaignData(setProviderType);
 
   const isEqualToOrGreaterThan870 = useMediaQuery('(min-width: 870px)');
   const isEqualToOrLessThan500 = useMediaQuery('(max-width: 500px)');
@@ -51,19 +42,14 @@ export const SettingsModal = ({
   const [campaignStatus, setCampaignStatus] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const { adAccountId, adCampaignList, businessAcctId, businessAcctName } =
-    dbRecord;
+  const { adAccountId, adCampaignList, businessAcctId, businessAcctName } = dbRecord;
 
   const saveModalSettings = async (dbRecord) => {
     // create deep clone to prevent unintentional isActive getting set on array of objects orignal state
-    const cloneAdCampaignList = JSON.parse(
-      JSON.stringify(dbRecord.adCampaignList)
-    );
+    const cloneAdCampaignList = JSON.parse(JSON.stringify(dbRecord.adCampaignList));
     const updatedAdCampaignList = cloneAdCampaignList.map((campaign) => {
       // check if campaign status has changed for each campaign
-      const hasUpdatedCampaign = campaignStatus.find(
-        (campaignObj) => campaignObj.id === campaign.id
-      );
+      const hasUpdatedCampaign = campaignStatus.find((campaignObj) => campaignObj.id === campaign.id);
       // if campaign has associated change stored in state, update record with new state
       if (hasUpdatedCampaign) {
         campaign.isActive = hasUpdatedCampaign.isActive;
@@ -72,15 +58,10 @@ export const SettingsModal = ({
     });
 
     // diffing function to only update db if changes exist between adCampaignLists
-    const diffOfAdCampaignList = dbRecord.adCampaignList.filter(
-      (campaign, i) => {
-        // loop through both arrays and compare the isActive property as type strings
-        return (
-          updatedAdCampaignList[i].isActive.toString() !==
-          campaign.isActive.toString()
-        );
-      }
-    );
+    const diffOfAdCampaignList = dbRecord.adCampaignList.filter((campaign, i) => {
+      // loop through both arrays and compare the isActive property as type strings
+      return updatedAdCampaignList[i].isActive.toString() !== campaign.isActive.toString();
+    });
     //update db record with updated campaign list
     if (diffOfAdCampaignList.length > 0) {
       console.log(
@@ -97,8 +78,7 @@ export const SettingsModal = ({
       );
       if (!removedRecord) {
         console.error({
-          errMsg:
-            'Err: failed to remove record from firestore, check SettingsModal for issues',
+          errMsg: 'Err: failed to remove record from firestore, check SettingsModal for issues',
           errVar: removedRecord,
         });
       }
@@ -123,37 +103,26 @@ export const SettingsModal = ({
     setCampaignStatus((campaignStatusList) => {
       const copiedCampaignStatusList = [...campaignStatusList];
       // if record already exists, replace isActive value only
-      const hasExistingCampaignId = copiedCampaignStatusList.findIndex(
-        (campaign) => {
-          return campaign.id === campaignId;
-        }
-      );
+      const hasExistingCampaignId = copiedCampaignStatusList.findIndex((campaign) => {
+        return campaign.id === campaignId;
+      });
 
       // if state contains existing campaign id, only update isActive property on existing record
       if (hasExistingCampaignId !== -1) {
         // update object
-        copiedCampaignStatusList[hasExistingCampaignId].isActive =
-          e.target.checked;
+        copiedCampaignStatusList[hasExistingCampaignId].isActive = e.target.checked;
         return copiedCampaignStatusList;
       }
 
       // update state with new campaign record
-      return [
-        ...campaignStatusList,
-        { isActive: e.target.checked, id: campaignId },
-      ];
+      return [...campaignStatusList, { isActive: e.target.checked, id: campaignId }];
     });
   };
 
   return (
     <>
       {id === businessAcctId && (
-        <Modal
-          scrollBehavior={'inside'}
-          size={'xl'}
-          isOpen={isOpen}
-          onClose={onClose}
-        >
+        <Modal scrollBehavior={'inside'} size={'xl'} isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />
           <ModalContent
             minWidth={isEqualToOrGreaterThan870[0] ? '53rem' : false}
@@ -185,13 +154,7 @@ export const SettingsModal = ({
                     <Tr>
                       <Th>Campaign ID</Th>
                       <Th>Campaign Name</Th>
-                      <Th
-                        minWidth={
-                          isEqualToOrGreaterThan870[0] ? false : '10rem'
-                        }
-                      >
-                        Campaign Flight
-                      </Th>
+                      <Th minWidth={isEqualToOrGreaterThan870[0] ? false : '10rem'}>Campaign Flight</Th>
                       <Th>Active Status</Th>
                     </Tr>
                   </Thead>
@@ -251,11 +214,7 @@ export const SettingsModal = ({
                   Close
                 </Button>
               </Flex>
-              <Flex
-                marginBottom="1rem"
-                className="settings-modal__btn-wrapper"
-                alignItems="center"
-              >
+              <Flex marginBottom="1rem" className="settings-modal__btn-wrapper" alignItems="center">
                 {/* Tooltip - sync data information*/}
                 <Tooltip
                   label="When selected, the 'Refresh Data' feature will connect with Facebook and retrieve the latest campaign data in your Facebook advertising account. Select this option only if you know that your Facebook campaign data needs to be refreshed."

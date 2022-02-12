@@ -1,6 +1,6 @@
 import { Flex, Box, useMediaQuery } from '@chakra-ui/react';
 
-export const IntegrationDashboard = ({ integrationVendor, children }) => {
+export const IntegrationDashboard = ({ children }) => {
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
 
   return (

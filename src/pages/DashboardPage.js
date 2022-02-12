@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Flex, Button, Box, CircularProgress, useMediaQuery, useDisclosure } from '@chakra-ui/react';
-import { useAuth } from '../contexts/AuthContext';
 import FacebookAppIntegration from '../components/FacebookIntegration';
-import { fbProviderPopup } from '../services/firebase/auth/facebook';
-import firestoreHandlers from '../services/firebase/data/firestore';
 import { Header } from '../components/Header';
 import { IntegrationDashboard } from '../components/IntegrationDashboard';
 import { IntegrationVendor } from '../components/IntegrationVendor';
@@ -16,8 +13,6 @@ import { SettingsModal } from '../components/SettingsModal';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { FaFacebook } from 'react-icons/fa';
 import { useDeleteFacebookSystemUser } from '../hooks/useDeleteFacebookSystemUser';
-import { useRefreshFacebookAccessToken } from '../hooks/useRefreshFacebookAccessToken';
-import { useReadRecordFromFirestore } from '../hooks/useReadRecordFromFirestore';
 import { useRemoveAccount } from '../hooks/useRemoveAccount';
 import { useUpdateStateWithFirestoreRecord } from '../hooks/useUpdateStateWithFirebaseRecord';
 import { useFacebookAuth } from '../contexts/FacebookContext';
@@ -32,13 +27,9 @@ export const DashboardPage = () => {
   const [isIntegrationActiveStatus, setIntegrationActiveStatus] = useState(false);
   const [isUpdateStateWithFirestoreRecord, setUpdateStateWithFirestoreRecord] = useState(true);
   const [settingsModalId, updateSettingsModalId] = useState(null);
-  const { currentUser } = useAuth();
-  const { removeRecordFromFirestore, addRecordToFirestore } = firestoreHandlers;
   const { handleDeleteFacebookSystemUser } = useDeleteFacebookSystemUser();
-  const { handleRefreshFacebookAccessToken } = useRefreshFacebookAccessToken();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { handleRemoveAccount } = useRemoveAccount();
-  const { handleReadFirestoreRecord } = useReadRecordFromFirestore();
   const { facebookAuthChange, loginToFacebook, switchFacebookAdAccounts } = useFacebookAuth();
   const { updateStateWithFirestoreRecord } = useUpdateStateWithFirestoreRecord(
     FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
@@ -54,6 +45,8 @@ export const DashboardPage = () => {
     if (!isUpdateStateWithFirestoreRecord) return setLoading(false);
     updateStateWithFirestoreRecord().catch((err) => console.error(err));
   }, [updateStateWithFirestoreRecord, isUpdateStateWithFirestoreRecord]);
+
+  console.log(hasIntegrationRecord);
 
   return (
     <>
@@ -135,19 +128,13 @@ export const DashboardPage = () => {
                             _hover={{
                               opacity: '.8',
                             }}
-                            onClick={(e) =>
+                            onClick={(event) =>
                               handleRemoveAccount(
-                                e,
+                                event,
                                 setLoading,
                                 setIntegrationRecord,
                                 hasIntegrationRecord,
-                                handleReadFirestoreRecord,
-                                handleDeleteFacebookSystemUser,
-                                handleRefreshFacebookAccessToken,
-                                removeRecordFromFirestore,
-                                addRecordToFirestore,
-                                fbProviderPopup,
-                                currentUser
+                                handleDeleteFacebookSystemUser
                               )
                             }
                             disabled={isLoading ? true : false}
