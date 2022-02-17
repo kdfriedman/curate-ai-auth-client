@@ -38,19 +38,23 @@ export const loadSdkAsynchronously = () => {
   })(document, 'script', 'facebook-jssdk');
 };
 
-export const handleFacebookLogin = (setFacebookAuthChange) => {
-  if (!window.FB?.login) return console.error('window.FB.login is undefined');
-  window.FB.login(
-    (response) => {
-      if (response.status === 'connected') {
-        return setFacebookAuthChange(response);
+export const handleFacebookLogin = async (setFacebookAuthChange) => {
+  return new Promise((resolve, reject) => {
+    if (!window.FB?.login) return console.error('window.FB.login is undefined');
+    window.FB.login(
+      (response) => {
+        if (response.status === 'connected') {
+          setFacebookAuthChange(response);
+          return resolve(response);
+        }
+        console.error('handleFacebookLogin failed to log in user - response', response);
+        reject(response);
+      },
+      {
+        scope: 'business_management,public_profile,email,ads_read ,ads_management',
       }
-      console.error('handleFacebookLogin failed to log in user - response', response);
-    },
-    {
-      scope: 'business_management,public_profile,email,ads_read ,ads_management',
-    }
-  );
+    );
+  });
 };
 
 export const handleSwitchFacebookAdAccounts = (setFacebookAuthChange) => {

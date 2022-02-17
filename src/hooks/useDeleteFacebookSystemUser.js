@@ -8,7 +8,7 @@ export const useDeleteFacebookSystemUser = () => {
     try {
       const [deletedSystemUserData, deletedSystemUserError] = await fetchData({
         method: DELETE,
-        url: `${FACEBOOK_API.GRAPH.HOSTNAME}/${FACEBOOK_API.GRAPH.VERSION}/${FACEBOOK_APP.CURATEAI.BUSINESS_ID}/managed_businesses?existing_client_business_id=${userBusinessId}&access_token=${accessToken}`,
+        url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION}/${FACEBOOK_APP.CURATEAI.BUSINESS_ID}/managed_businesses?existing_client_business_id=${userBusinessId}&access_token=${accessToken}`,
       });
       if (deletedSystemUserError) throw deletedSystemUserError;
       return deletedSystemUserData;

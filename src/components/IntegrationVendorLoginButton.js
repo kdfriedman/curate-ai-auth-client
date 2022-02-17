@@ -12,7 +12,7 @@ export const IntegrationVendorLoginButton = ({
       {!integrationRecord && (
         <Button
           disabled={isLoading}
-          onClick={() => integrationVendorLoginHandler()}
+          onClick={async () => await integrationVendorLoginHandler()}
           _hover={{
             opacity: '.8',
             textDecoration: 'none',

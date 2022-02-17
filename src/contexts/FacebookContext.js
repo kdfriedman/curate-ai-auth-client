@@ -11,10 +11,10 @@ export const useFacebookAuth = () => {
 export const FacebookAuthProvider = ({ children }) => {
   const { facebookInitSDK } = useFacebookSDK();
   const [isFacebookSDKLoaded, setIsFacebookSDKLoaded] = useState(false);
-  const [facebookAuthChange, setFacebookAuthChange] = useState();
+  const [facebookAuthChange, setFacebookAuthChange] = useState(null);
 
-  const loginToFacebook = () => {
-    return handleFacebookLogin(setFacebookAuthChange);
+  const loginToFacebook = async () => {
+    return await handleFacebookLogin(setFacebookAuthChange);
   };
 
   const switchFacebookAdAccounts = () => {

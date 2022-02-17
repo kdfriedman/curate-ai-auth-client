@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import firestoreHandlers from '../services/firebase/data/firestore';
 import { useAuth } from '../contexts/AuthContext';
+import { FIREBASE } from '../services/firebase/constants';
 import {
   Flex,
   Modal,
@@ -24,11 +25,9 @@ import {
 } from '@chakra-ui/react';
 import { MdInfo } from 'react-icons/md';
 import { useRefreshFacebookCampaignData } from '../hooks/useRefreshFacebookCampaignData';
-import { fbProviderPopup } from '../services/firebase/auth/facebook';
 
-export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRecord, Loading, setProviderType }) => {
-  const { handleRefreshFacebookCampaignData } = useRefreshFacebookCampaignData(setProviderType);
-
+export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRecord, Loading }) => {
+  const { handleRefreshFacebookCampaignData } = useRefreshFacebookCampaignData();
   const isEqualToOrGreaterThan870 = useMediaQuery('(min-width: 870px)');
   const isEqualToOrLessThan500 = useMediaQuery('(max-width: 500px)');
   const isEqualToOrLessThan400 = useMediaQuery('(max-width: 400px)');
@@ -37,17 +36,15 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
   const { addRecordToFirestore, removeRecordFromFirestore } = firestoreHandlers;
   // unpack auth context handlers
   const { currentUser } = useAuth();
-
   // set campaign status state (isActive checkbox)
   const [campaignStatus, setCampaignStatus] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const { adAccountId, adCampaignList, businessAcctId, businessAcctName } = dbRecord;
 
-  const saveModalSettings = async (dbRecord) => {
+  const generateUpdatedCampaignData = (dbRecord) => {
     // create deep clone to prevent unintentional isActive getting set on array of objects orignal state
-    const cloneAdCampaignList = JSON.parse(JSON.stringify(dbRecord.adCampaignList));
-    const updatedAdCampaignList = cloneAdCampaignList.map((campaign) => {
+    const deepCloneAdCampaignList = JSON.parse(JSON.stringify(dbRecord.adCampaignList));
+    const updatedAdCampaignList = deepCloneAdCampaignList.map((campaign) => {
       // check if campaign status has changed for each campaign
       const hasUpdatedCampaign = campaignStatus.find((campaignObj) => campaignObj.id === campaign.id);
       // if campaign has associated change stored in state, update record with new state
@@ -56,40 +53,49 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
       }
       return campaign;
     });
+    return updatedAdCampaignList;
+  };
 
+  const hasUpdatedCampaignDiff = (updatedAdCampaignList) => {
     // diffing function to only update db if changes exist between adCampaignLists
     const diffOfAdCampaignList = dbRecord.adCampaignList.filter((campaign, i) => {
       // loop through both arrays and compare the isActive property as type strings
       return updatedAdCampaignList[i].isActive.toString() !== campaign.isActive.toString();
     });
+    return diffOfAdCampaignList;
+  };
+
+  const updateFirestoreWithCampaignDiffs = async (dbRecord) => {
+    // update db with new updated db record
+    const [, removedRecordError] = await removeRecordFromFirestore(
+      currentUser.uid,
+      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
+      FIREBASE.FIRESTORE.FACEBOOK.DOCS,
+      FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME,
+      dbRecord.businessAcctId
+    );
+    if (removedRecordError) throw removedRecordError;
+
+    const [, addedRecordError] = await addRecordToFirestore(
+      currentUser.uid,
+      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
+      FIREBASE.FIRESTORE.FACEBOOK.DOCS,
+      dbRecord,
+      FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME
+    );
+    if (addedRecordError) throw addedRecordError;
+  };
+
+  const saveModalSettings = async (dbRecord) => {
+    const updatedAdCampaignList = generateUpdatedCampaignData(dbRecord);
+    const diffOfAdCampaignList = hasUpdatedCampaignDiff(updatedAdCampaignList);
+
     //update db record with updated campaign list
     if (diffOfAdCampaignList.length > 0) {
-      console.log(
-        '[Campaign Activation]: isActive diff exists, update firestore with campaign activation state change'
-      );
+      console.log('diff exists, update firestore with campaign activation state change');
       dbRecord.adCampaignList = updatedAdCampaignList;
-      // update db with new updated db record
-      const removedRecord = await removeRecordFromFirestore(
-        currentUser.uid,
-        ['clients', 'integrations'],
-        ['facebook'],
-        'facebookBusinessAccts',
-        dbRecord.businessAcctId
-      );
-      if (!removedRecord) {
-        console.error({
-          errMsg: 'Err: failed to remove record from firestore, check SettingsModal for issues',
-          errVar: removedRecord,
-        });
-      }
-      await addRecordToFirestore(
-        currentUser.uid,
-        ['clients', 'integrations'],
-        ['facebook'],
-        dbRecord,
-        'facebookBusinessAccts'
-      );
     }
+    await updateFirestoreWithCampaignDiffs(dbRecord);
   };
 
   // set isActive checkbox value and campaign id in local state
@@ -228,12 +234,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
                   className="settings-modal__refresh-btn"
                   onClick={async () => {
                     // update fb campaign data here
-                    await handleRefreshFacebookCampaignData(
-                      fbProviderPopup,
-                      dbRecord,
-                      setIntegrationRecord,
-                      setLoading
-                    );
+                    await handleRefreshFacebookCampaignData(dbRecord, setIntegrationRecord, setLoading);
                   }}
                   _hover={{
                     opacity: '.8',

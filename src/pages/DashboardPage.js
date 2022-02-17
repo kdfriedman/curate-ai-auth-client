@@ -46,8 +46,6 @@ export const DashboardPage = () => {
     updateStateWithFirestoreRecord().catch((err) => console.error(err));
   }, [updateStateWithFirestoreRecord, isUpdateStateWithFirestoreRecord]);
 
-  console.log(hasIntegrationRecord);
-
   return (
     <>
       <Header />

@@ -15,8 +15,10 @@ export const useUpdateStateWithFirestoreRecord = (
     try {
       const [record, recordError] = await readUserRecordFromFirestore(currentUser.uid, collections, docs);
       if (recordError) throw recordError;
+
+      const { facebookBusinessAccts } = record?.data();
       setIntegrationRecord({
-        facebookBusinessAccts: record.data().facebookBusinessAccts,
+        facebookBusinessAccts,
       });
       setLoading(false);
       setUpdateStateWithFirestoreRecord(false);

@@ -2,6 +2,7 @@ export const FACEBOOK_API = {
   GRAPH: {
     HOSTNAME: 'https://graph.facebook.com/',
     VERSION: 'v12.0',
+    DEBUG_TOKEN: 'debug_token',
   },
 };
 

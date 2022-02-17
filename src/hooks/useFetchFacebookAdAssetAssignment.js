@@ -129,13 +129,15 @@ const generateFacebookFirestorePayload = (
 
 const updateFirestoreWithFacebookUserRecord = async (currentUser, facebookFirebasePayload) => {
   // update firestore with system user access token, auth uid, and email
-  return await addRecordToFirestore(
+  const [addedRecord, addedRecordError] = await addRecordToFirestore(
     currentUser.uid,
     FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
     FIREBASE.FIRESTORE.FACEBOOK.DOCS,
     facebookFirebasePayload,
     FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME
   );
+  if (addedRecordError) return console.error(addedRecordError);
+  return addedRecord;
 };
 
 const validateFacebookUserFirestoreRecord = async (dispatch, currentUser, addedFirestoreRecord) => {
