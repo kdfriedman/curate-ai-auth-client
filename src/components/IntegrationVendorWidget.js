@@ -61,6 +61,7 @@ export const IntegrationVendorWidget = ({
         </Flex>
         {!integrationRecord && (
           <IntegrationVendorLoginButton
+            setIntegrationActiveStatus={setIntegrationActiveStatus}
             integrationRecord={integrationRecord}
             integrationVendorLoginHandler={integrationVendorLoginHandler}
             integrationVendorLoginCTA={integrationVendorLoginCTA}

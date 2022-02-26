@@ -1,6 +1,7 @@
 import { Button } from '@chakra-ui/react';
 
 export const IntegrationVendorLoginButton = ({
+  setIntegrationActiveStatus,
   integrationRecord,
   isLoading,
   integrationVendorLoginHandler,
@@ -12,7 +13,11 @@ export const IntegrationVendorLoginButton = ({
       {!integrationRecord && (
         <Button
           disabled={isLoading}
-          onClick={async () => await integrationVendorLoginHandler()}
+          onClick={async () => {
+            await integrationVendorLoginHandler();
+            // activate integration status to render integration components
+            setIntegrationActiveStatus(true);
+          }}
           _hover={{
             opacity: '.8',
             textDecoration: 'none',

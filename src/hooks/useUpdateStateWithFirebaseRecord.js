@@ -17,9 +17,13 @@ export const useUpdateStateWithFirestoreRecord = (
       if (recordError) throw recordError;
 
       const { facebookBusinessAccts } = record?.data();
-      setIntegrationRecord({
-        facebookBusinessAccts,
-      });
+      if (facebookBusinessAccts) {
+        setIntegrationRecord({
+          facebookBusinessAccts,
+        });
+      } else {
+        setIntegrationRecord(null);
+      }
       setLoading(false);
       setUpdateStateWithFirestoreRecord(false);
     } catch (error) {

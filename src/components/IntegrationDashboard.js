@@ -8,7 +8,6 @@ export const IntegrationDashboard = ({ children }) => {
       gridColumn={isEqualToOrLessThan800[0] ? '1 / span 3' : '3'}
       gridRow={isEqualToOrLessThan800[0] ? '1' : '1 / span 3'}
       className="dashboard__integration-dashboard"
-      minHeight="20rem"
       paddingBottom="2rem"
     >
       <Flex

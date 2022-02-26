@@ -4,15 +4,11 @@ import { useFacebookAuth } from '../contexts/FacebookContext';
 import firestoreHandlers from '../services/firebase/data/firestore';
 import { useValidateFacebookAccessToken } from '../hooks/useValidateFacebookAccessToken';
 
-const findRecordForRemoval = (event, hasIntegrationRecord) => {
+const findRecordForRemoval = (event, integrationRecord) => {
   // reference parent element to scrape business account id
   const facebookBusinessAccountId = event.target.closest('.dashboard__integration-vendor-card-container')?.id;
-
   // filter clicked element parent container, which holds business acct id with business acct being requested to be removed
-  const selectedFacebookBusinessAccount = hasIntegrationRecord?.facebookBusinessAccts?.find((acct) => {
-    return acct.businessAcctId === facebookBusinessAccountId;
-  });
-  return selectedFacebookBusinessAccount;
+  return integrationRecord?.facebookBusinessAccts?.find((acct) => acct.businessAcctId === facebookBusinessAccountId);
 };
 
 const getLastGeneratedRecord = (integrationRecord) => {
@@ -32,33 +28,47 @@ const handleGetFacebookAccessToken = async (
   loginToFacebook,
   handleValidateFacebookAccessToken
 ) => {
-  if (hasIntegrationRecord) {
-    const lastGeneratedRecord = getLastGeneratedRecord(hasIntegrationRecord);
-    console.log(lastGeneratedRecord.userAccessToken);
-    const [validatedLastGenAccessToken, validatedLastGenAccessTokenError] = await handleValidateFacebookAccessToken(
-      lastGeneratedRecord.userAccessToken
-    );
-    console.log(validatedLastGenAccessToken);
-    return;
-    // TODO: create conditional block which checks if DB access token is valid, then if session storage access token, then fetches new one
-  }
-  // get fb access token and return, otherwise refresh token by prompting user login flow
+  // check session storage for valid access token
   if (facebookAuth.authResponse) {
     const [validatedAccessToken, validatedAccessTokenError] = await handleValidateFacebookAccessToken(
       facebookAuth.authResponse?.accessToken
     );
-    if (validatedAccessToken) return facebookAuth.authResponse?.accessToken;
-    console.error('Error validating facebook access token: ', validatedAccessTokenError);
+    if (validatedAccessTokenError) return console.error(validatedAccessTokenError);
+    if (validatedAccessToken.data?.data?.is_valid) return facebookAuth.authResponse?.accessToken;
+  }
+  // check db record for valid access token
+  if (hasIntegrationRecord) {
+    const lastGeneratedRecord = getLastGeneratedRecord(hasIntegrationRecord);
+    const [validatedLastGenAccessToken, validatedLastGenAccessTokenError] = await handleValidateFacebookAccessToken(
+      lastGeneratedRecord.userAccessToken
+    );
+    if (validatedLastGenAccessTokenError) return console.error(validatedLastGenAccessTokenError);
+    if (validatedLastGenAccessToken.data?.data?.is_valid) return lastGeneratedRecord.userAccessToken;
   }
   const loginStatus = await loginToFacebook();
   return loginStatus.authResponse?.accessToken;
+};
+
+const refreshState = (record, error, setLoading, setIntegrationRecord) => {
+  if (error) {
+    setLoading(false);
+    return console.error(error);
+  }
+  // if record is found, update state to render record
+  if (record) {
+    setLoading(false);
+    const { facebookBusinessAccts } = record?.data();
+    return setIntegrationRecord({ facebookBusinessAccts });
+  }
+  // if no record is found, reset dashboard
+  setIntegrationRecord(null);
 };
 
 export const useRemoveAccount = () => {
   const { currentUser } = useAuth();
   const { loginToFacebook, facebookAuthChange } = useFacebookAuth();
   const { handleValidateFacebookAccessToken } = useValidateFacebookAccessToken();
-  const { removeRecordFromFirestore, readUserRecordFromFirestore } = firestoreHandlers;
+  const { removeRecordFromFirestore, readUserRecordFromFirestore, addRecordToFirestore } = firestoreHandlers;
   // remove curateai fb system user from client's business account
   const handleRemoveAccount = async (
     event,
@@ -72,6 +82,8 @@ export const useRemoveAccount = () => {
 
     // check if ui removal selection exists in the current integration records from firestore
     const selectedRecordForRemoval = findRecordForRemoval(event, hasIntegrationRecord);
+    // if record selcted does not exist in current db, state is out of sync wit db and must refresh to reset state
+    if (!selectedRecordForRemoval) return window.location.reload();
 
     const facebookAccessToken = await handleGetFacebookAccessToken(
       facebookAuthChange,
@@ -79,8 +91,6 @@ export const useRemoveAccount = () => {
       loginToFacebook,
       handleValidateFacebookAccessToken
     );
-    console.log(facebookAccessToken);
-    return;
 
     // remove system user from facebook - this will wipe out the curateAi system user from their business account
     const deletedFacebookSystemUser = await handleDeleteFacebookSystemUser(
@@ -106,18 +116,19 @@ export const useRemoveAccount = () => {
       FIREBASE.FIRESTORE.FACEBOOK.DOCS
     );
 
-    if (firestoreError) {
-      setLoading(false);
-      return console.error(firestoreError);
-    }
-    // if record is found, update state to render record
-    if (firestoreRecord) {
-      setLoading(false);
-      const { facebookBusinessAccts } = firestoreRecord?.data();
-      return setIntegrationRecord({ facebookBusinessAccts });
-    }
-    // if no record is found, reset dashboard
-    setIntegrationRecord(null);
+    // update latest firestore record with refreshed access token
+    const lastGeneratedFirestoreRecord = getLastGeneratedRecord(firestoreRecord?.data());
+    lastGeneratedFirestoreRecord.accessToken = facebookAccessToken;
+
+    const [, addedFirebaseRecordError] = await addRecordToFirestore(
+      currentUser.uid,
+      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
+      FIREBASE.FIRESTORE.FACEBOOK.DOCS,
+      lastGeneratedFirestoreRecord,
+      FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME
+    );
+    if (addedFirebaseRecordError) return console.error(addedFirebaseRecordError);
+    return refreshState(firestoreRecord, firestoreError, setLoading, setIntegrationRecord);
   };
 
   return { handleRemoveAccount };

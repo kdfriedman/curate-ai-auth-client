@@ -113,7 +113,7 @@ const removeRecordFromFirestore = async (uid, collections, docs, payloadName, re
         .collection(collection2)
         .doc(doc1)
         .update({
-          [payloadName]: Firebase.firestore.FieldValue.arrayRemove(selectedRecord[0]),
+          [payloadName]: Firebase.firestore.FieldValue.arrayRemove(selectedRecord),
         });
       return [selectedRecord, null];
     } catch (error) {
