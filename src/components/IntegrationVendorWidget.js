@@ -1,18 +1,13 @@
 import { Flex, Box, Text, useMediaQuery } from '@chakra-ui/react';
 
 export const IntegrationVendorWidget = ({
-  integrationRecord,
-  setIntegrationActiveStatus,
+  hasEmptyIntegrationCollection,
   integrationVendorInfo,
-  IntegrationVendorLoginButton,
-  integrationVendorLoginHandler,
-  integrationVendorLoginCTA,
-  IntegrationVendorSwitchAccount,
-  integrationVendorSwitchAccountHandler,
-  IntegrationVendorIcon,
-  isLoading,
+  integrationVendorLoginButton,
+  integrationVendorSwitchAccount,
 }) => {
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
+
   return (
     <>
       <Box
@@ -20,8 +15,8 @@ export const IntegrationVendorWidget = ({
         gridRow={isEqualToOrLessThan800[0] ? 2 : ''}
         className="integration-widget"
         display="flex"
-        maxHeight={!integrationRecord ? '12rem' : '14rem'}
-        minHeight={!integrationRecord ? 0 : '14rem'}
+        maxHeight={hasEmptyIntegrationCollection ? '12rem' : '14rem'}
+        minHeight={hasEmptyIntegrationCollection ? 0 : '14rem'}
         background="#fff"
         boxShadow="0 0.5rem 1rem rgb(0 0 0 / 15%)"
         borderRadius="10px"
@@ -45,7 +40,7 @@ export const IntegrationVendorWidget = ({
             h="10px"
             w="10px"
             borderRadius="50%"
-            backgroundColor={!integrationRecord ? '#dc3545' : '#35b653'}
+            backgroundColor={hasEmptyIntegrationCollection ? '#dc3545' : '#35b653'}
           />
           <Text
             display="flex"
@@ -56,26 +51,11 @@ export const IntegrationVendorWidget = ({
             fontSize="12px"
             padding="10px"
           >
-            Status: {!integrationRecord ? 'Inactive' : 'Active'}
+            Status: {hasEmptyIntegrationCollection ? 'Inactive' : 'Active'}
           </Text>
         </Flex>
-        {!integrationRecord && (
-          <IntegrationVendorLoginButton
-            setIntegrationActiveStatus={setIntegrationActiveStatus}
-            integrationRecord={integrationRecord}
-            integrationVendorLoginHandler={integrationVendorLoginHandler}
-            integrationVendorLoginCTA={integrationVendorLoginCTA}
-            IntegrationVendorIcon={IntegrationVendorIcon}
-            isLoading={isLoading}
-          />
-        )}
-        {integrationRecord && (
-          <IntegrationVendorSwitchAccount
-            isLoading={isLoading}
-            integrationVendorSwitchAccountHandler={integrationVendorSwitchAccountHandler}
-            setIntegrationActiveStatus={setIntegrationActiveStatus}
-          />
-        )}
+        {hasEmptyIntegrationCollection && integrationVendorLoginButton}
+        {!hasEmptyIntegrationCollection && integrationVendorSwitchAccount}
       </Box>
     </>
   );

@@ -5,8 +5,8 @@ export const IntegrationVendorSwitchAccount = ({
   integrationVendorSwitchAccountHandler,
   setIntegrationActiveStatus,
 }) => {
-  const handleIntegrationVendorSwitchAccount = () => {
-    integrationVendorSwitchAccountHandler();
+  const handleIntegrationVendorSwitchAccount = async () => {
+    await integrationVendorSwitchAccountHandler();
     // activate integration status to render integration components
     setIntegrationActiveStatus(true);
   };

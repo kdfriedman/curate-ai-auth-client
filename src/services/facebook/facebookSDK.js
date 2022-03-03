@@ -1,13 +1,68 @@
 import { FACEBOOK_API } from '../facebook/constants';
-const appId = process.env.REACT_APP_FACEBOOK_APP_ID;
+import fetchData from '../fetch/fetch';
+import { HTTP_METHODS } from '../fetch/constants';
+import { FIREBASE } from '../firebase/constants';
+import firestoreHandlers from '../firebase/data/firestore';
 
-export const getFbLoginStatus = (resolve) => {
+const appId = process.env.REACT_APP_FACEBOOK_APP_ID;
+const { readCurateAIRecordFromFirestore } = firestoreHandlers;
+const { GET } = HTTP_METHODS;
+
+const fetchCurateAISystemUserAccessToken = async () => {
+  // read record from firestore to retrieve curateai sys user token
+  const [record, error] = await readCurateAIRecordFromFirestore(
+    FIREBASE.FIRESTORE.CURATEAI.UID,
+    FIREBASE.FIRESTORE.CURATEAI.COLLECTION
+  );
+  if (error || !record?.exists) return console.error('Cannot fetch CurateAI access token');
+  const { curateAiSysUserAccessToken } = record?.data();
+  return curateAiSysUserAccessToken;
+};
+
+export const handleValidateFacebookAccessToken = async (facebookAccessToken) => {
+  const adminToken = await fetchCurateAISystemUserAccessToken();
+  try {
+    const [validatedAccessToken, validatedAccessTokenError] = await fetchData({
+      method: GET,
+      url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.DEBUG_TOKEN}?input_token=${facebookAccessToken}&access_token=${adminToken}`,
+    });
+    if (validatedAccessTokenError) throw validatedAccessTokenError;
+    return [validatedAccessToken, null];
+  } catch (err) {
+    return [null, err];
+  }
+};
+
+const handleValidateFacebookSession = async () => {
+  // reference FB sdk getAccessToken
+  if (window.FB?.getAccessToken && window.FB.getAccessToken()) {
+    // get active session fb payload
+    const loginStatus = await getFacebookLoginStatus();
+    // validate token to ensure it's not expired
+    const [validatedAccessPayload, validatedAccessError] = await handleValidateFacebookAccessToken(
+      loginStatus.authResponse?.accessToken
+    );
+    if (validatedAccessError) return console.error(validatedAccessError);
+    if (validatedAccessPayload.data?.data?.is_valid) {
+      return loginStatus;
+    }
+  }
+};
+
+const getFbLoginStatus = (resolve, reject) => {
   if (!window.FB?.getLoginStatus) {
-    return console.error('window.FB.getLoginStatus is undefined');
+    console.error('window.FB.getLoginStatus is undefined');
+    reject();
   }
   window.FB.getLoginStatus((response) => {
     resolve(response);
   }, true);
+};
+
+export const getFacebookLoginStatus = async () => {
+  return new Promise((resolve, reject) => {
+    getFbLoginStatus(resolve, reject);
+  });
 };
 
 export const setFbAsyncInit = (resolve) => {
@@ -39,8 +94,12 @@ export const loadSdkAsynchronously = () => {
 };
 
 export const handleFacebookLogin = async (setFacebookAuthChange) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     if (!window.FB?.login) return console.error('window.FB.login is undefined');
+    // check if access token exists in session storage
+    const validatedFacebookSession = await handleValidateFacebookSession();
+    if (validatedFacebookSession) return setFacebookAuthChange(validatedFacebookSession);
+    // if session is null or expired re-authenticate user
     window.FB.login(
       (response) => {
         if (response.status === 'connected') {
@@ -57,12 +116,14 @@ export const handleFacebookLogin = async (setFacebookAuthChange) => {
   });
 };
 
-export const handleSwitchFacebookAdAccounts = (setFacebookAuthChange) => {
+export const handleSwitchFacebookAdAccounts = async (setFacebookAuthChange) => {
   if (!window.FB?.logout) return console.error('window.FB.logout is undefined');
-  if (!window.FB?.getAccessToken()) {
-    console.log('facebook access token is null, log in user');
+  const validatedFacebookSession = await handleValidateFacebookSession();
+  // if facebook session is null or expired log in user
+  if (!validatedFacebookSession) {
     return handleFacebookLogin(setFacebookAuthChange);
   }
+  // if session is active first log out user, then re-authenticate
   window.FB.logout((response) => {
     console.log('facebook access token is valid, log out user, then proceed to log them back in');
     handleFacebookLogin(setFacebookAuthChange);

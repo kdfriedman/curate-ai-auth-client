@@ -2,7 +2,7 @@ import { FIREBASE } from '../services/firebase/constants';
 import { useAuth } from '../contexts/AuthContext';
 import { useFacebookAuth } from '../contexts/FacebookContext';
 import firestoreHandlers from '../services/firebase/data/firestore';
-import { useValidateFacebookAccessToken } from '../hooks/useValidateFacebookAccessToken';
+import { handleValidateFacebookAccessToken } from '../services/facebook/facebookSDK';
 
 const findRecordForRemoval = (event, integrationRecord) => {
   // reference parent element to scrape business account id
@@ -54,8 +54,8 @@ const refreshState = (record, error, setLoading, setIntegrationRecord) => {
     setLoading(false);
     return console.error(error);
   }
-  // if record is found, update state to render record
-  if (record) {
+  // if record is found or record has length of other records, update state
+  if (record && record?.data()?.facebookBusinessAccts?.length > 0) {
     setLoading(false);
     const { facebookBusinessAccts } = record?.data();
     return setIntegrationRecord({ facebookBusinessAccts });
@@ -67,7 +67,6 @@ const refreshState = (record, error, setLoading, setIntegrationRecord) => {
 export const useRemoveAccount = () => {
   const { currentUser } = useAuth();
   const { loginToFacebook, facebookAuthChange } = useFacebookAuth();
-  const { handleValidateFacebookAccessToken } = useValidateFacebookAccessToken();
   const { removeRecordFromFirestore, readUserRecordFromFirestore, addRecordToFirestore } = firestoreHandlers;
   // remove curateai fb system user from client's business account
   const handleRemoveAccount = async (
@@ -77,9 +76,6 @@ export const useRemoveAccount = () => {
     hasIntegrationRecord,
     handleDeleteFacebookSystemUser
   ) => {
-    // set loading state to active
-    setLoading(true);
-
     // check if ui removal selection exists in the current integration records from firestore
     const selectedRecordForRemoval = findRecordForRemoval(event, hasIntegrationRecord);
     // if record selcted does not exist in current db, state is out of sync wit db and must refresh to reset state
@@ -116,18 +112,21 @@ export const useRemoveAccount = () => {
       FIREBASE.FIRESTORE.FACEBOOK.DOCS
     );
 
-    // update latest firestore record with refreshed access token
-    const lastGeneratedFirestoreRecord = getLastGeneratedRecord(firestoreRecord?.data());
-    lastGeneratedFirestoreRecord.accessToken = facebookAccessToken;
+    // if facebook db records exist, update previous access token with refreshed token
+    if (firestoreRecord?.data().facebookBusinessAccts.length > 0) {
+      // update latest firestore record with refreshed access token
+      const lastGeneratedFirestoreRecord = getLastGeneratedRecord(firestoreRecord?.data());
+      lastGeneratedFirestoreRecord.accessToken = facebookAccessToken;
 
-    const [, addedFirebaseRecordError] = await addRecordToFirestore(
-      currentUser.uid,
-      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-      FIREBASE.FIRESTORE.FACEBOOK.DOCS,
-      lastGeneratedFirestoreRecord,
-      FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME
-    );
-    if (addedFirebaseRecordError) return console.error(addedFirebaseRecordError);
+      const [, addedFirebaseRecordError] = await addRecordToFirestore(
+        currentUser.uid,
+        FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
+        FIREBASE.FIRESTORE.FACEBOOK.DOCS,
+        lastGeneratedFirestoreRecord,
+        FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME
+      );
+      if (addedFirebaseRecordError) return console.error(addedFirebaseRecordError);
+    }
     return refreshState(firestoreRecord, firestoreError, setLoading, setIntegrationRecord);
   };
 

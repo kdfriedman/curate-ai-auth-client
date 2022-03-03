@@ -16,6 +16,7 @@ import { useDeleteFacebookSystemUser } from '../hooks/useDeleteFacebookSystemUse
 import { useRemoveAccount } from '../hooks/useRemoveAccount';
 import { useUpdateStateWithFirestoreRecord } from '../hooks/useUpdateStateWithFirebaseRecord';
 import { useFacebookAuth } from '../contexts/FacebookContext';
+import { getFacebookLoginStatus } from '../services/facebook/facebookSDK';
 import { ERROR } from '../constants/error';
 import { FIREBASE } from '../services/firebase/constants';
 
@@ -25,6 +26,7 @@ export const DashboardPage = () => {
   const [isLoading, setLoading] = useState(false);
   const [hasIntegrationRecord, setIntegrationRecord] = useState(null);
   const [isIntegrationActiveStatus, setIntegrationActiveStatus] = useState(false);
+  const [hasEmptyIntegrationCollection, setHasEmptyIntegrationCollection] = useState(false);
   const [isUpdateStateWithFirestoreRecord, setUpdateStateWithFirestoreRecord] = useState(true);
   const [settingsModalId, updateSettingsModalId] = useState(null);
   const { handleDeleteFacebookSystemUser } = useDeleteFacebookSystemUser();
@@ -46,6 +48,14 @@ export const DashboardPage = () => {
     updateStateWithFirestoreRecord().catch((err) => console.error(err));
   }, [updateStateWithFirestoreRecord, isUpdateStateWithFirestoreRecord]);
 
+  useEffect(() => {
+    if (!hasIntegrationRecord) return setHasEmptyIntegrationCollection(true);
+    const integrationCollectionKey = Object.keys(hasIntegrationRecord)[0];
+    // convert integration array length into bool to make checking integration status more efficient
+    const integrationCollectionStatus = hasIntegrationRecord[integrationCollectionKey].length === 0 ? true : false;
+    setHasEmptyIntegrationCollection(integrationCollectionStatus);
+  }, [hasIntegrationRecord]);
+
   return (
     <>
       <Header />
@@ -65,22 +75,31 @@ export const DashboardPage = () => {
         <Box maxHeight="100vh" className="dashboard__container">
           <section className="dashboard__integration-container">
             <IntegrationVendorWidget
-              integrationRecord={hasIntegrationRecord}
-              setIntegrationActiveStatus={setIntegrationActiveStatus}
+              hasEmptyIntegrationCollection={hasEmptyIntegrationCollection}
               integrationVendorInfo={'Integrate CurateAI with Facebook'}
-              IntegrationVendorLoginButton={IntegrationVendorLoginButton}
-              integrationVendorLoginHandler={loginToFacebook}
-              integrationVendorLoginCTA={'Login With Facebook'}
-              IntegrationVendorSwitchAccount={IntegrationVendorSwitchAccount}
-              integrationVendorSwitchAccountHandler={switchFacebookAdAccounts}
-              IntegrationVendorIcon={FaFacebook}
-              isLoading={isLoading}
-            />
+              integrationVendorLoginButton={
+                <IntegrationVendorLoginButton
+                  setIntegrationActiveStatus={setIntegrationActiveStatus}
+                  getActiveVendorToken={getFacebookLoginStatus}
+                  authenticateWithVendor={loginToFacebook}
+                  integrationVendorLoginCTA={'Login With Facebook'}
+                  IntegrationVendorIcon={FaFacebook}
+                  isLoading={isLoading}
+                />
+              }
+              integrationVendorSwitchAccount={
+                <IntegrationVendorSwitchAccount
+                  isLoading={isLoading}
+                  integrationVendorSwitchAccountHandler={switchFacebookAdAccounts}
+                  setIntegrationActiveStatus={setIntegrationActiveStatus}
+                />
+              }
+            ></IntegrationVendorWidget>
 
             <IntegrationDashboard>
               <IntegrationVendor vendor={'Facebook'} />
 
-              {!hasIntegrationRecord && hasError && <ErrorMessage errorMessage={ERROR.DASHBOARD.MAIN} />}
+              {hasError && <ErrorMessage errorMessage={ERROR.DASHBOARD.MAIN} />}
 
               {isIntegrationActiveStatus && facebookAuthChange?.authResponse && (
                 <FacebookAppIntegration
@@ -89,11 +108,11 @@ export const DashboardPage = () => {
                 />
               )}
 
-              {!hasIntegrationRecord && (
+              {hasEmptyIntegrationCollection && (
                 <IntegrationVendorTip vendorTipMessage={'Get started now by integrating your Facebook account.'} />
               )}
 
-              {hasIntegrationRecord && (
+              {!hasEmptyIntegrationCollection && (
                 <>
                   {hasIntegrationRecord?.facebookBusinessAccts?.map((record) => {
                     return (
@@ -126,15 +145,16 @@ export const DashboardPage = () => {
                             _hover={{
                               opacity: '.8',
                             }}
-                            onClick={(event) =>
+                            onClick={(event) => {
+                              setLoading(true);
                               handleRemoveAccount(
                                 event,
                                 setLoading,
                                 setIntegrationRecord,
                                 hasIntegrationRecord,
                                 handleDeleteFacebookSystemUser
-                              )
-                            }
+                              );
+                            }}
                             disabled={isLoading ? true : false}
                             alignSelf="center"
                             backgroundColor="#E53E3E"
