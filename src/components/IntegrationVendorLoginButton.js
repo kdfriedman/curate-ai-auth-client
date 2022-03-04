@@ -7,9 +7,11 @@ export const IntegrationVendorLoginButton = ({
   IntegrationVendorIcon,
   content,
   isDisabled,
+  setError,
 }) => {
   const handleVendorAuth = async (authenticateWithVendor, setLoading, setIntegrationActiveStatus) => {
     setLoading(true);
+    setError(false);
     try {
       await authenticateWithVendor();
       // activate integration status to render integration components
@@ -18,6 +20,7 @@ export const IntegrationVendorLoginButton = ({
     } catch (err) {
       console.error(err);
       setLoading(false);
+      setError(true);
     }
   };
   return (

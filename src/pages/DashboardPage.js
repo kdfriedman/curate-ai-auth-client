@@ -83,6 +83,7 @@ export const DashboardPage = () => {
                   IntegrationVendorIcon={FaFacebook}
                   setLoading={setLoading}
                   isDisabled={isIntegrationActiveStatus}
+                  setError={setError}
                 />
               }
               integrationVendorSwitchAccount={
@@ -92,6 +93,7 @@ export const DashboardPage = () => {
                   setIntegrationActiveStatus={setIntegrationActiveStatus}
                   isDisabled={isIntegrationActiveStatus}
                   content={{ cta: 'Add Account' }}
+                  setError={setError}
                 />
               }
             ></IntegrationVendorWidget>
@@ -142,6 +144,7 @@ export const DashboardPage = () => {
                           >
                             Select Campaigns
                           </Button>
+
                           <Button
                             _hover={{
                               opacity: '.8',
@@ -165,6 +168,7 @@ export const DashboardPage = () => {
                           >
                             Remove Account
                           </Button>
+
                           {settingsModalId && (
                             <SettingsModal
                               isOpen={isOpen}

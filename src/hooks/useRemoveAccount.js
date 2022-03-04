@@ -95,7 +95,10 @@ export const useRemoveAccount = () => {
       selectedRecordForRemoval?.businessAcctId,
       facebookAccessToken
     );
-    if (!deletedFacebookSystemUser) return console.error('failed to delete facebook system user onbehalf of client');
+    if (!deletedFacebookSystemUser) {
+      console.error('failed to delete facebook system user onbehalf of client');
+      return setLoading(false);
+    }
 
     // remove selected record from firestore db
     const [, removedRecordError] = await removeRecordFromFirestore(
@@ -105,7 +108,10 @@ export const useRemoveAccount = () => {
       FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME,
       selectedRecordForRemoval?.businessAcctId
     );
-    if (removedRecordError) return console.error(removedRecordError);
+    if (removedRecordError) {
+      console.error(removedRecordError);
+      return setLoading(false);
+    }
 
     // get current list of firestore records to re-render components since removal has occurred
     const [firestoreRecord, firestoreError] = await readUserRecordFromFirestore(
@@ -120,14 +126,24 @@ export const useRemoveAccount = () => {
       const lastGeneratedFirestoreRecord = getLastGeneratedRecord(firestoreRecord?.data());
       lastGeneratedFirestoreRecord.accessToken = facebookAccessToken;
 
-      const [, addedFirebaseRecordError] = await addRecordToFirestore(
-        currentUser.uid,
-        FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-        FIREBASE.FIRESTORE.FACEBOOK.DOCS,
-        lastGeneratedFirestoreRecord,
-        FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME
-      );
-      if (addedFirebaseRecordError) return console.error(addedFirebaseRecordError);
+      // check if fb session token exists, and check if access token is same as saved db record
+      // if different, update most recent record in db with refreshed access token
+      if (
+        facebookAuthChange.authResponse?.accessToken &&
+        lastGeneratedFirestoreRecord.accessToken !== facebookAuthChange.authResponse?.accessToken
+      ) {
+        const [, addedFirebaseRecordError] = await addRecordToFirestore(
+          currentUser.uid,
+          FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
+          FIREBASE.FIRESTORE.FACEBOOK.DOCS,
+          lastGeneratedFirestoreRecord,
+          FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME
+        );
+        if (addedFirebaseRecordError) {
+          console.error(addedFirebaseRecordError);
+          return setLoading(false);
+        }
+      }
     }
     return refreshState(firestoreRecord, firestoreError, setLoading, setIntegrationRecord);
   };
