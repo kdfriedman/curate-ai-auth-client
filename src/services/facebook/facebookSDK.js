@@ -33,6 +33,16 @@ export const handleValidateFacebookAccessToken = async (facebookAccessToken) => 
   }
 };
 
+const getFbLoginStatus = (resolve, reject) => {
+  if (!window.FB?.getLoginStatus) {
+    console.error('window.FB.getLoginStatus is undefined');
+    reject();
+  }
+  window.FB.getLoginStatus((response) => {
+    resolve(response);
+  });
+};
+
 const handleValidateFacebookSession = async () => {
   // reference FB sdk getAccessToken
   if (window.FB?.getAccessToken && window.FB.getAccessToken()) {
@@ -47,16 +57,6 @@ const handleValidateFacebookSession = async () => {
       return loginStatus;
     }
   }
-};
-
-const getFbLoginStatus = (resolve, reject) => {
-  if (!window.FB?.getLoginStatus) {
-    console.error('window.FB.getLoginStatus is undefined');
-    reject();
-  }
-  window.FB.getLoginStatus((response) => {
-    resolve(response);
-  }, true);
 };
 
 export const getFacebookLoginStatus = async () => {
@@ -95,10 +95,16 @@ export const loadSdkAsynchronously = () => {
 
 export const handleFacebookLogin = async (setFacebookAuthChange) => {
   return new Promise(async (resolve, reject) => {
-    if (!window.FB?.login) return console.error('window.FB.login is undefined');
+    if (!window.FB?.login) {
+      console.error('window.FB.login is undefined');
+      reject(null);
+    }
     // check if access token exists in session storage
     const validatedFacebookSession = await handleValidateFacebookSession();
-    if (validatedFacebookSession) return setFacebookAuthChange(validatedFacebookSession);
+    if (validatedFacebookSession) {
+      setFacebookAuthChange(validatedFacebookSession);
+      return resolve(validatedFacebookSession);
+    }
     // if session is null or expired re-authenticate user
     window.FB.login(
       (response) => {
@@ -113,19 +119,5 @@ export const handleFacebookLogin = async (setFacebookAuthChange) => {
         scope: 'business_management,public_profile,email,ads_read ,ads_management',
       }
     );
-  });
-};
-
-export const handleSwitchFacebookAdAccounts = async (setFacebookAuthChange) => {
-  if (!window.FB?.logout) return console.error('window.FB.logout is undefined');
-  const validatedFacebookSession = await handleValidateFacebookSession();
-  // if facebook session is null or expired log in user
-  if (!validatedFacebookSession) {
-    return handleFacebookLogin(setFacebookAuthChange);
-  }
-  // if session is active first log out user, then re-authenticate
-  window.FB.logout((response) => {
-    console.log('facebook access token is valid, log out user, then proceed to log them back in');
-    handleFacebookLogin(setFacebookAuthChange);
   });
 };

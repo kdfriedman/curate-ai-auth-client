@@ -4,16 +4,12 @@ import { ErrorMessage } from '../components/ErrorMessage';
 import { Progress, useMediaQuery } from '@chakra-ui/react';
 import { ERROR } from '../constants/error';
 import { ACTION_TYPES } from '../services/facebook/constants';
-import { useFacebookAuth } from '../contexts/FacebookContext';
 import { useFetchFacebookBusinessAccounts } from '../hooks/useFetchFacebookBusinessAccounts';
 import { useFetchFacebookSystemUserToken } from '../hooks/useFetchFacebookSystemUserToken';
 import { useFetchFacebookAdAssetAssignment } from '../hooks/useFetchFacebookAdAssetAssignment';
 
-const FacebookAppIntegration = ({ setIntegrationRecord, setIntegrationActiveStatus }) => {
+const FacebookAppIntegration = ({ setIntegrationRecord, setIntegrationActiveStatus, setError }) => {
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
-
-  // facebook auth context
-  const { facebookAuthChange } = useFacebookAuth();
 
   // setup useReducer callback function
   const reducer = (state, action) => {
@@ -71,22 +67,45 @@ const FacebookAppIntegration = ({ setIntegrationRecord, setIntegrationActiveStat
   // fetch user business accts list
   useEffect(() => {
     if (!isFetchFacebookBusinessAccounts || hasErrors) return null;
-    handleFetchFacebookBusinessAccounts(dispatch).catch((err) => console.error(err));
-  }, [handleFetchFacebookBusinessAccounts, facebookAuthChange, isFetchFacebookBusinessAccounts, hasErrors]);
+    handleFetchFacebookBusinessAccounts(dispatch).catch((err) => {
+      console.error(err);
+      setIntegrationActiveStatus(false);
+      setError(true);
+    });
+  }, [
+    handleFetchFacebookBusinessAccounts,
+    isFetchFacebookBusinessAccounts,
+    hasErrors,
+    setIntegrationActiveStatus,
+    setError,
+  ]);
 
   // connect partner biz with client biz, create sys user in client biz, fetch client ad account list
   useEffect(() => {
     if (!isFetchFacebookSystemUserToken || hasErrors) return null;
     handleFetchFacebookSystemUserToken(dispatch, userBusinessId).catch((err) => {
       console.error(err);
+      setIntegrationActiveStatus(false);
+      setError(true);
     });
-  }, [handleFetchFacebookSystemUserToken, userBusinessId, isFetchFacebookSystemUserToken, hasErrors]);
+  }, [
+    handleFetchFacebookSystemUserToken,
+    userBusinessId,
+    isFetchFacebookSystemUserToken,
+    hasErrors,
+    setIntegrationActiveStatus,
+    setError,
+  ]);
 
   // add assets to system user within client's facebook business account
   useEffect(() => {
     if (!isFetchFacebookAdAssetAssignment || hasErrors) return null;
     handleFetchFacebookAdAssetAssignment(dispatch, state, setIntegrationRecord, setIntegrationActiveStatus).catch(
-      (err) => console.error(err)
+      (err) => {
+        console.error(err);
+        setIntegrationActiveStatus(false);
+        setError(true);
+      }
     );
   }, [
     handleFetchFacebookAdAssetAssignment,
@@ -95,6 +114,7 @@ const FacebookAppIntegration = ({ setIntegrationRecord, setIntegrationActiveStat
     setIntegrationRecord,
     setIntegrationActiveStatus,
     hasErrors,
+    setError,
   ]);
 
   // handle user business list select element event

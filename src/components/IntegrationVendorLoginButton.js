@@ -2,25 +2,29 @@ import { Button } from '@chakra-ui/react';
 
 export const IntegrationVendorLoginButton = ({
   setIntegrationActiveStatus,
-  isLoading,
-  getActiveVendorToken,
+  setLoading,
   authenticateWithVendor,
   IntegrationVendorIcon,
-  integrationVendorLoginCTA,
+  content,
+  isDisabled,
 }) => {
+  const handleVendorAuth = async (authenticateWithVendor, setLoading, setIntegrationActiveStatus) => {
+    setLoading(true);
+    try {
+      await authenticateWithVendor();
+      // activate integration status to render integration components
+      setIntegrationActiveStatus(true);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
+  };
   return (
     <>
       <Button
-        disabled={isLoading}
-        onClick={async () => {
-          // if (await getActiveVendorToken().authResponse) {
-
-          // } else {
-          // }
-          await authenticateWithVendor();
-          // activate integration status to render integration components
-          setIntegrationActiveStatus(true);
-        }}
+        disabled={isDisabled}
+        onClick={async () => await handleVendorAuth(authenticateWithVendor, setLoading, setIntegrationActiveStatus)}
         _hover={{
           opacity: '.8',
           textDecoration: 'none',
@@ -35,7 +39,7 @@ export const IntegrationVendorLoginButton = ({
       >
         <IntegrationVendorIcon className="login-btn-icon" />{' '}
         <span style={{ margin: '0 0 0 10px', fontWeight: '800' }} className="dashboard__fb-login-btn-text">
-          {integrationVendorLoginCTA}
+          {content.cta}
         </span>
       </Button>
     </>

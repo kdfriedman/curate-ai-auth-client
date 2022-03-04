@@ -92,7 +92,7 @@ const validateFacebookUserBusinessList = (userBusinessList, dispatch) => {
 
 export const useFetchFacebookBusinessAccounts = () => {
   const { facebookAuthChange } = useFacebookAuth();
-  const handleFetchFacebookBusinessAccounts = async (dispatch, catchErrors) => {
+  const handleFetchFacebookBusinessAccounts = async (dispatch) => {
     dispatch({ type: HAS_ERRORS, payload: null });
     const facebookUserData = await fetchFacebookUserData(dispatch, facebookAuthChange);
 

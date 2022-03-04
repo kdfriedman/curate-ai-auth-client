@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { handleFacebookLogin, handleSwitchFacebookAdAccounts } from '../services/facebook/facebookSDK';
+import { handleFacebookLogin } from '../services/facebook/facebookSDK';
 import { useFacebookSDK } from '../hooks/useFacebookSDK';
 
 const FacebookContext = React.createContext();
@@ -15,10 +15,6 @@ export const FacebookAuthProvider = ({ children }) => {
 
   const loginToFacebook = async () => {
     return await handleFacebookLogin(setFacebookAuthChange);
-  };
-
-  const switchFacebookAdAccounts = () => {
-    return handleSwitchFacebookAdAccounts(setFacebookAuthChange);
   };
 
   const handleFacebookAuthResponse = (response) => {
@@ -53,7 +49,6 @@ export const FacebookAuthProvider = ({ children }) => {
   const value = {
     facebookAuthChange,
     loginToFacebook,
-    switchFacebookAdAccounts,
   };
 
   return <FacebookContext.Provider value={value}>{children}</FacebookContext.Provider>;

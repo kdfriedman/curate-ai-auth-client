@@ -61,6 +61,7 @@ const refreshState = (record, error, setLoading, setIntegrationRecord) => {
     return setIntegrationRecord({ facebookBusinessAccts });
   }
   // if no record is found, reset dashboard
+  setLoading(false);
   setIntegrationRecord(null);
 };
 
@@ -76,6 +77,7 @@ export const useRemoveAccount = () => {
     hasIntegrationRecord,
     handleDeleteFacebookSystemUser
   ) => {
+    setLoading(true);
     // check if ui removal selection exists in the current integration records from firestore
     const selectedRecordForRemoval = findRecordForRemoval(event, hasIntegrationRecord);
     // if record selcted does not exist in current db, state is out of sync wit db and must refresh to reset state

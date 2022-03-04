@@ -16,7 +16,6 @@ import { useDeleteFacebookSystemUser } from '../hooks/useDeleteFacebookSystemUse
 import { useRemoveAccount } from '../hooks/useRemoveAccount';
 import { useUpdateStateWithFirestoreRecord } from '../hooks/useUpdateStateWithFirebaseRecord';
 import { useFacebookAuth } from '../contexts/FacebookContext';
-import { getFacebookLoginStatus } from '../services/facebook/facebookSDK';
 import { ERROR } from '../constants/error';
 import { FIREBASE } from '../services/firebase/constants';
 
@@ -32,7 +31,7 @@ export const DashboardPage = () => {
   const { handleDeleteFacebookSystemUser } = useDeleteFacebookSystemUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { handleRemoveAccount } = useRemoveAccount();
-  const { facebookAuthChange, loginToFacebook, switchFacebookAdAccounts } = useFacebookAuth();
+  const { facebookAuthChange, loginToFacebook } = useFacebookAuth();
   const { updateStateWithFirestoreRecord } = useUpdateStateWithFirestoreRecord(
     FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
     FIREBASE.FIRESTORE.FACEBOOK.DOCS,
@@ -43,8 +42,7 @@ export const DashboardPage = () => {
   );
 
   useEffect(() => {
-    setLoading(true);
-    if (!isUpdateStateWithFirestoreRecord) return setLoading(false);
+    if (!isUpdateStateWithFirestoreRecord) return;
     updateStateWithFirestoreRecord().catch((err) => console.error(err));
   }, [updateStateWithFirestoreRecord, isUpdateStateWithFirestoreRecord]);
 
@@ -80,18 +78,20 @@ export const DashboardPage = () => {
               integrationVendorLoginButton={
                 <IntegrationVendorLoginButton
                   setIntegrationActiveStatus={setIntegrationActiveStatus}
-                  getActiveVendorToken={getFacebookLoginStatus}
                   authenticateWithVendor={loginToFacebook}
-                  integrationVendorLoginCTA={'Login With Facebook'}
+                  content={{ cta: 'Login With Facebook' }}
                   IntegrationVendorIcon={FaFacebook}
-                  isLoading={isLoading}
+                  setLoading={setLoading}
+                  isDisabled={isIntegrationActiveStatus}
                 />
               }
               integrationVendorSwitchAccount={
                 <IntegrationVendorSwitchAccount
-                  isLoading={isLoading}
-                  integrationVendorSwitchAccountHandler={switchFacebookAdAccounts}
+                  setLoading={setLoading}
+                  authenticateWithVendor={loginToFacebook}
                   setIntegrationActiveStatus={setIntegrationActiveStatus}
+                  isDisabled={isIntegrationActiveStatus}
+                  content={{ cta: 'Add Account' }}
                 />
               }
             ></IntegrationVendorWidget>
@@ -105,6 +105,7 @@ export const DashboardPage = () => {
                 <FacebookAppIntegration
                   setIntegrationActiveStatus={setIntegrationActiveStatus}
                   setIntegrationRecord={setIntegrationRecord}
+                  setError={setError}
                 />
               )}
 
@@ -145,9 +146,8 @@ export const DashboardPage = () => {
                             _hover={{
                               opacity: '.8',
                             }}
-                            onClick={(event) => {
-                              setLoading(true);
-                              handleRemoveAccount(
+                            onClick={async (event) => {
+                              await handleRemoveAccount(
                                 event,
                                 setLoading,
                                 setIntegrationRecord,

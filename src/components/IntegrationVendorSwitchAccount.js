@@ -1,14 +1,23 @@
 import { Button, Text } from '@chakra-ui/react';
 
 export const IntegrationVendorSwitchAccount = ({
-  isLoading,
-  integrationVendorSwitchAccountHandler,
+  setLoading,
+  authenticateWithVendor,
   setIntegrationActiveStatus,
+  content,
+  isDisabled,
 }) => {
-  const handleIntegrationVendorSwitchAccount = async () => {
-    await integrationVendorSwitchAccountHandler();
-    // activate integration status to render integration components
-    setIntegrationActiveStatus(true);
+  const handleVendorAuth = async (authenticateWithVendor, setLoading, setIntegrationActiveStatus) => {
+    setLoading(true);
+    try {
+      await authenticateWithVendor();
+      // activate integration status to render integration components
+      setIntegrationActiveStatus(true);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
   };
   return (
     <>
@@ -16,8 +25,8 @@ export const IntegrationVendorSwitchAccount = ({
         Add a new ad account.
       </Text>
       <Button
-        disabled={isLoading}
-        onClick={handleIntegrationVendorSwitchAccount}
+        disabled={isDisabled}
+        onClick={async () => await handleVendorAuth(authenticateWithVendor, setLoading, setIntegrationActiveStatus)}
         _hover={{
           opacity: '.8',
           textDecoration: 'none',
@@ -29,7 +38,7 @@ export const IntegrationVendorSwitchAccount = ({
         width="10rem"
         alignSelf="center"
       >
-        Add Account
+        {content.cta}
       </Button>
     </>
   );
