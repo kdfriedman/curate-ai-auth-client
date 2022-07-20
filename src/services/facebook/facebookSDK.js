@@ -87,7 +87,7 @@ export const loadSdkAsynchronously = () => {
     }
     js = d.createElement(s);
     js.id = id;
-    js.src = `https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v12.0&appId=${appId}&autoLogAppEvents=1`;
+    js.src = `https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=${FACEBOOK_API.GRAPH.VERSION}&appId=${appId}&autoLogAppEvents=1`;
     js.nonce = 'mBTlHUSw';
     fjs.parentNode.insertBefore(js, fjs);
   })(document, 'script', 'facebook-jssdk');

@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { auth } from '../services/firebase/firebase';
+import { auth, Firebase } from '../services/firebase/firebase';
 
 const AuthContext = React.createContext();
 
@@ -10,22 +10,6 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState();
   const [loading, setLoading] = useState(true);
-
-  const linkToProviderWithPopup = (provider) => {
-    return auth.currentUser.linkWithPopup(provider);
-  };
-
-  const linkToProvider = (provider) => {
-    return auth.currentUser.linkWithRedirect(provider);
-  };
-
-  const getRedirectResult = () => {
-    return auth.getRedirectResult();
-  };
-
-  const unlinkProvider = (user, providerId) => {
-    return user.unlink(providerId);
-  };
 
   const login = (email, password) => {
     return auth.signInWithEmailAndPassword(email, password);
@@ -63,17 +47,9 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     resetPassword,
-    linkToProvider,
-    linkToProviderWithPopup,
-    getRedirectResult,
-    unlinkProvider,
     verifyPasswordResetRequest,
     confirmPasswordResetRequest,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 };
