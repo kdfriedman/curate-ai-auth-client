@@ -195,7 +195,16 @@ const FacebookAppIntegration = ({ setIntegrationRecord, setIntegrationActiveStat
         />
       )}
 
-      {hasErrors && !isLoading && <ErrorMessage errorMessage={ERROR.DASHBOARD.MAIN} />}
+      {hasErrors && !isLoading && (
+        <ErrorMessage
+          {...(hasErrors.errorUIMessage &&
+            hasErrors.errorMessage && {
+              errorUIMessage: hasErrors.errorUIMessage,
+              errorLogMessage: hasErrors.errorMessage,
+            })}
+          errorMessage={ERROR.DASHBOARD.MAIN}
+        />
+      )}
     </>
   );
 };
