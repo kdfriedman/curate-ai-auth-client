@@ -22,7 +22,7 @@ export const useUpdateStateWithFirestoreRecord = (
       const [record, recordError] = await readUserRecordFromFirestore(currentUser.uid, collections, docs);
       if (recordError) throw recordError;
 
-      const { facebookBusinessAccts } = record?.data();
+      const { facebookBusinessAccts } = record?.data() || {};
       if (facebookBusinessAccts) {
         setIntegrationRecord({
           facebookBusinessAccts,

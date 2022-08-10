@@ -70,7 +70,7 @@ const validateFacebookUserBusinessList = (userBusinessList, dispatch) => {
       type: USER_BUSINESS_LIST,
       payload: userBusinessList?.data?.data,
     });
-    // update local state with async completion update
+    // update local state to kick off next useEffect
     dispatch({
       type: HAS_USER_BUSINESS_LIST,
       payload: true,
