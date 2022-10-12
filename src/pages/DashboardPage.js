@@ -57,6 +57,7 @@ export const DashboardPage = () => {
   return (
     <>
       <Header />
+      {isLoading && <Flex className="loading__message">Loading...</Flex>}
       {isLoading && (
         <CircularProgress
           className="loading__spinner"

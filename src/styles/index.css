@@ -178,6 +178,23 @@ div.chakra-select__wrapper {
   border-radius: 10px;
 }
 
+.loading__message {
+  font-size: 16px;
+  color: #6c757d;
+  font-weight: 800;
+  justify-content: center;
+  margin: 1rem;  
+  animation: opacityPulse 1s ease-out;
+  animation-iteration-count: infinite;
+  opacity: 0; 
+}
+
+@keyframes opacityPulse {
+  0% {opacity: 0.0;}
+  50% {opacity: 1.0;}
+  100% {opacity: 0.0;}
+}
+
 @media (max-width: 450px) {
   div.chakra-select__wrapper {
     margin: 0.5rem 1rem 0 1rem;

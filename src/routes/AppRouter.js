@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { LoginPage } from '../pages/LoginPage';
 import { DashboardPage } from '../pages/DashboardPage';
-import { Profile } from '../pages/Profile';
+import { ProfilePage } from '../pages/ProfilePage';
 import { PasswordResetPage } from '../pages/PasswordResetPage';
 import { NewPasswordPage } from '../pages/NewPasswordPage';
 import { PrivateRoute } from '../pages/PrivateRoute.js';
@@ -18,7 +18,7 @@ const AppRouter = () => (
           {/* Private Dashboard route*/}
           <PrivateRoute exact path="/integrations" component={DashboardPage} />
           {/* Private Profile route*/}
-          <PrivateRoute exact path="/profile" component={Profile} />
+          <PrivateRoute exact path="/profile" component={ProfilePage} />
           {/* Login route*/}
           <Route path="/login" component={LoginPage} />
           {/* password reset route*/}

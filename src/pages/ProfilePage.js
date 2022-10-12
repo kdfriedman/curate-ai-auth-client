@@ -8,7 +8,7 @@ import { errorMap } from '../components/ErrorMap';
 import { FIREBASE } from '../services/firebase/constants';
 import { ERROR } from '../constants/error';
 
-export const Profile = () => {
+export const ProfilePage = () => {
   const [hasError, setError] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [hasIntegrationRecord, setIntegrationRecord] = useState(null);
@@ -65,7 +65,7 @@ export const Profile = () => {
       {isLoading && (
         <CircularProgress
           className="loading__spinner"
-          minHeight="100vh"
+          minHeight="50vh"
           display="flex"
           justifyContent="center"
           alignItems="center"
