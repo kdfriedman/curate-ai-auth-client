@@ -50,7 +50,7 @@ export const DashboardPage = () => {
     if (!hasIntegrationRecord) return setHasEmptyIntegrationCollection(true);
     const integrationCollectionKey = Object.keys(hasIntegrationRecord)[0];
     // convert integration array length into bool to make checking integration status more efficient
-    const integrationCollectionStatus = hasIntegrationRecord[integrationCollectionKey].length === 0 ? true : false;
+    const integrationCollectionStatus = hasIntegrationRecord?.[integrationCollectionKey]?.length === 0;
     setHasEmptyIntegrationCollection(integrationCollectionStatus);
   }, [hasIntegrationRecord]);
 

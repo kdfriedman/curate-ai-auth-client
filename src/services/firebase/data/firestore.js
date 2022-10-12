@@ -1,11 +1,12 @@
-import { db, Firebase } from '../firebase';
+import { db } from '../firebase';
+import { updateDoc, doc, getDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { FIREBASE_ERROR, FIREBASE } from '../constants';
 
 const readUserRecordFromFirestore = async (uid, collections, docs) => {
   const [collection1, collection2] = collections;
   const [doc1] = docs;
   try {
-    const record = await db.collection(collection1).doc(uid).collection(collection2).doc(doc1).get();
+    const record = await getDoc(doc(db, collection1, uid, collection2, doc1));
     return [record, null];
   } catch (error) {
     console.error(FIREBASE_ERROR.FIRESTORE.GENERIC.FAILED_READING_DATA);
@@ -15,7 +16,7 @@ const readUserRecordFromFirestore = async (uid, collections, docs) => {
 
 const readCurateAIRecordFromFirestore = async (uid, collection) => {
   try {
-    const record = await db.collection(collection).doc(uid).get();
+    const record = await getDoc(doc(db, collection, uid));
     return [record, null];
   } catch (error) {
     console.error(FIREBASE_ERROR.FIRESTORE.CURATEAI.SYSTEM_USER_ACCESS_TOKEN_CANNOT_BE_FETCHED);
@@ -46,14 +47,9 @@ const addRecordToFirestore = async (uid, collections, docs, payload, payloadName
       if (hasDuplicateRecord) return [null, FIREBASE_ERROR.FIRESTORE.GENERIC.DUPLICATE_RECORD];
 
       // if record exist, push new payload into array
-      await db
-        .collection(collection1)
-        .doc(uid)
-        .collection(collection2)
-        .doc(doc1)
-        .update({
-          [payloadName]: Firebase.firestore.FieldValue.arrayUnion(payload),
-        });
+      await updateDoc(doc(db, collection1, uid, collection2, doc1), {
+        [payloadName]: arrayUnion(payload),
+      });
       return [FIREBASE.FIRESTORE.GENERIC.UNION_ADDED, null];
     }
   } catch (error) {
@@ -107,14 +103,10 @@ const removeRecordFromFirestore = async (uid, collections, docs, payloadName, re
       window.location.reload();
     }
     try {
-      await db
-        .collection(collection1)
-        .doc(uid)
-        .collection(collection2)
-        .doc(doc1)
-        .update({
-          [payloadName]: Firebase.firestore.FieldValue.arrayRemove(selectedRecord),
-        });
+      // if record exist, push new payload into array
+      await updateDoc(doc(db, collection1, uid, collection2, doc1), {
+        [payloadName]: arrayRemove(selectedRecord),
+      });
       return [selectedRecord, null];
     } catch (error) {
       console.error(FIREBASE_ERROR.FIRESTORE.GENERIC.FAILED_REMOVING_DATA);

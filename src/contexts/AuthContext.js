@@ -1,5 +1,13 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { auth } from '../services/firebase/firebase';
+import {
+  signOut,
+  verifyPasswordResetCode,
+  confirmPasswordReset,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+} from 'firebase/auth';
 
 const AuthContext = React.createContext();
 
@@ -12,29 +20,29 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const login = (email, password) => {
-    return auth.signInWithEmailAndPassword(email, password);
+    return signInWithEmailAndPassword(auth, email, password);
   };
 
   const logout = () => {
-    return auth.signOut();
+    return signOut(auth);
   };
 
   const resetPassword = (email) => {
-    return auth.sendPasswordResetEmail(email);
+    return sendPasswordResetEmail(auth, email);
   };
 
   const verifyPasswordResetRequest = (code) => {
-    return auth.verifyPasswordResetCode(code);
+    return verifyPasswordResetCode(auth, code);
   };
 
   const confirmPasswordResetRequest = (code, newPassword) => {
-    return auth.confirmPasswordReset(code, newPassword);
+    return confirmPasswordReset(auth, code, newPassword);
   };
 
   useEffect(() => {
     // listen for auth changes
     // returns function which can be used to unsubscribe to auth changes on component unmount
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
     });
