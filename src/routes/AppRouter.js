@@ -16,7 +16,7 @@ const AppRouter = () => (
       <FacebookAuthProvider>
         <Switch>
           {/* Private Dashboard route*/}
-          <PrivateRoute exact path="/" component={DashboardPage} />
+          <PrivateRoute exact path="/integrations" component={DashboardPage} />
           {/* Private Profile route*/}
           <PrivateRoute exact path="/profile" component={Profile} />
           {/* Login route*/}

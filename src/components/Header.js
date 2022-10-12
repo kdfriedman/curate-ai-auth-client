@@ -14,53 +14,102 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  Box,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { HiOutlineMenuAlt1 } from 'react-icons/hi';
 import { useAuth } from '../contexts/AuthContext';
+import React from 'react';
 
 export const Header = () => {
-  // destructure logout auth handler from context
   const { logout } = useAuth();
-  // grab history instance from react-router-dom
   const history = useHistory();
-  // set state for log out events
   const [hasLogoutEvent, setLogoutEvent] = useState(false);
-  // use custom hook from Chakra to handle drawer component actions
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
-    let isMounted = true;
-    if (isMounted) {
-      // hide onLoad spinner icon
-      const onLoadSpinner = document.querySelector('[data-on-load-spinner="true"]');
-      onLoadSpinner.style.display = 'none';
-    }
-    return () => {
-      isMounted = false;
-    };
+    // hide onLoad spinner icon
+    const onLoadSpinner = document.querySelector('[data-on-load-spinner="true"]');
+    onLoadSpinner.style.display = 'none';
   });
 
   useEffect(() => {
-    let isMounted = true;
-
     const logoutUser = async () => {
-      // call firebase logout service from authContext
       await logout();
-      if (isMounted) {
-        // update route to login when user logs out
-        history.push('/login');
-      }
+      history.push('/login');
     };
-
     if (hasLogoutEvent) {
-      // call logoutUser wrapper function
       logoutUser();
     }
-    return () => {
-      isMounted = false;
-    };
   }, [logout, hasLogoutEvent, history]);
+
+  const menuItems = [
+    {
+      id: 0,
+      parent: Link,
+      props: {},
+      parentProps: {
+        as: NavLink,
+        to: '/profile',
+        style: { textDecoration: 'none' },
+        className: 'header__nav-menu-item',
+      },
+      item: MenuItem,
+      label: 'Profile',
+    },
+    {
+      id: 1,
+      parent: Link,
+      props: {},
+      parentProps: {
+        as: NavLink,
+        to: '/integrations',
+        style: { textDecoration: 'none' },
+        className: 'header__nav-menu-item',
+      },
+      item: MenuItem,
+      label: 'Integrations',
+    },
+    {
+      id: 2,
+      parent: Box,
+      props: { onClick: () => setLogoutEvent(true) },
+      parentProps: { style: { textDecoration: 'none' }, className: 'header__nav-menu-item' },
+      item: MenuItem,
+      label: 'Logout',
+    },
+  ];
+
+  const generateMenuItems = (menuItems) => {
+    return menuItems.map((item) => {
+      const { parent: Parent, item: Item, id, props, parentProps, label } = item;
+      return (
+        <React.Fragment key={id}>
+          <Parent {...parentProps}>
+            <Item {...props}>{label}</Item>
+          </Parent>
+        </React.Fragment>
+      );
+    });
+  };
+
+  const setMenuListStyles = () => {
+    const menuItemList = document.querySelector('[data-id="menuListItems"]');
+    const menuItems = [...menuItemList.children];
+    menuItems.forEach((menuItem) => {
+      if (menuItem.classList.contains('active')) {
+        return (menuItem.firstElementChild.style.backgroundColor = '#EDF2F7');
+      }
+      menuItem.firstElementChild.style.backgroundColor = '#FFF';
+    });
+  };
+
+  const resetMenuListStyles = (e) => {
+    const menuListItems = [...e.currentTarget.children];
+    menuListItems.forEach((item) => {
+      item.firstElementChild.style.backgroundColor = '#FFF';
+    });
+  };
 
   return (
     <header>
@@ -118,7 +167,7 @@ export const Header = () => {
         </Flex>
 
         <Flex className="header__nav-logo-container">
-          <Link as={NavLink} to="/" style={{ textDecoration: 'none' }}>
+          <Link as={NavLink} to="/integrations" style={{ textDecoration: 'none' }}>
             <svg
               viewBox="0 0 320 185.34639618779255"
               className="header__nav-logo"
@@ -147,21 +196,12 @@ export const Header = () => {
           </Link>
         </Flex>
         <Flex className="header__nav-avatar-container">
-          <Menu>
+          <Menu onOpen={setMenuListStyles}>
             <MenuButton>
               <Avatar bg="rgb(173, 181, 189)" />
             </MenuButton>
-            <MenuList>
-              <Link as={NavLink} to="/profile" style={{ textDecoration: 'none' }}>
-                <MenuItem className="header__nav-menu-item">Profile</MenuItem>
-              </Link>
-              <Link as={NavLink} to="/" style={{ textDecoration: 'none' }}>
-                <MenuItem className="header__nav-menu-item">Integrations</MenuItem>
-              </Link>
-              {/* trigger logout event onClick */}
-              <MenuItem onClick={() => setLogoutEvent(true)} className="header__nav-menu-item">
-                Logout
-              </MenuItem>
+            <MenuList onMouseEnter={resetMenuListStyles} data-id="menuListItems">
+              {generateMenuItems(menuItems)}
             </MenuList>
           </Menu>
         </Flex>

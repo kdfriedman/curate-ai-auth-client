@@ -32,6 +32,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    setTimeout(() => {
+      Firebase.auth()
+        .currentUser.getIdToken(true)
+        .then((idToken) => {
+          console.log(idToken);
+        })
+        .catch((err) => console.error(err));
+    }, 4000);
     // listen for auth changes
     // returns function which can be used to unsubscribe to auth changes on component unmount
     const unsubscribe = auth.onAuthStateChanged((user) => {

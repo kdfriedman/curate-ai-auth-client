@@ -36,21 +36,12 @@ export const LoginPage = () => {
   });
 
   useEffect(() => {
-    let isMounted = true;
-    if (isMounted) {
-      // hide onLoad spinner icon
-      const onLoadSpinner = document.querySelector('[data-on-load-spinner="true"]');
-      onLoadSpinner.style.display = 'none';
-    }
-    return () => {
-      isMounted = false;
-    };
+    // hide onLoad spinner icon
+    const onLoadSpinner = document.querySelector('[data-on-load-spinner="true"]');
+    onLoadSpinner.style.display = 'none';
   });
 
   useEffect(() => {
-    // set mounted state
-    let isMounted = true;
-
     const handleAsyncLogin = async () => {
       const { email, password } = values;
       const { resetForm } = actions;
@@ -65,12 +56,10 @@ export const LoginPage = () => {
         await login(email, password);
 
         // redirect to dashboard page only if component is mounted
-        if (isMounted) {
-          // update loading state back to false
-          setLoading(false);
-          // update route to dashboard
-          history.push('/');
-        }
+        // update loading state back to false
+        setLoading(false);
+        // update route to dashboard
+        history.push('/integrations');
       } catch (error) {
         // Handle Errors here
         const errorCode = error.code;
@@ -86,10 +75,6 @@ export const LoginPage = () => {
     if (values && actions && Object.keys(values).length > 0 && Object.keys(actions).length > 0) {
       handleAsyncLogin();
     }
-    // clean up function to signify when component is unmounted
-    return () => {
-      isMounted = false;
-    };
   }, [values, actions, history, login]);
 
   // password show/hide

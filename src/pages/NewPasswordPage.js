@@ -41,23 +41,12 @@ export const NewPasswordPage = () => {
   errorMap.set('auth/expired-action-code', 'Expired password action code');
 
   useEffect(() => {
-    let isMounted = true;
-    if (isMounted) {
-      // hide onLoad spinner icon
-      const onLoadSpinner = document.querySelector(
-        '[data-on-load-spinner="true"]'
-      );
-      onLoadSpinner.style.display = 'none';
-    }
-    return () => {
-      isMounted = false;
-    };
+    // hide onLoad spinner icon
+    const onLoadSpinner = document.querySelector('[data-on-load-spinner="true"]');
+    onLoadSpinner.style.display = 'none';
   });
 
   useEffect(() => {
-    // set mounted state
-    let isMounted = true;
-
     const initResetPassword = async () => {
       const { password } = values;
       const { resetForm } = actions;
@@ -80,15 +69,13 @@ export const NewPasswordPage = () => {
         await confirmPasswordResetRequest(queryParams.get('oobCode'), password);
 
         // redirect to dashboard page only if component is mounted
-        if (isMounted) {
-          // update passwordResetStatus state
-          updatePasswordResetStatus(true);
-          // update loading state back to false
-          setLoading(false);
-        }
+        // update passwordResetStatus state
+        updatePasswordResetStatus(true);
+        // update loading state back to false
+        setLoading(false);
       } catch (error) {
         // check if error is generic
-        if (!error?.code && isMounted) {
+        if (!error?.code) {
           console.error(error);
           // update error state
           setError('oop code missing');
@@ -97,36 +84,19 @@ export const NewPasswordPage = () => {
           // reset form
           return resetForm();
         }
-        if (isMounted) {
-          // Handle Errors here
-          const errorCode = error?.code;
-          console.error(errorCode);
-          // update error state
-          setError(errorCode);
-          // update loading state back to false
-          setLoading(false);
-        }
+        // Handle Errors here
+        const errorCode = error?.code;
+        console.error(errorCode);
+        // update error state
+        setError(errorCode);
+        // update loading state back to false
+        setLoading(false);
       }
     };
-    if (
-      values &&
-      actions &&
-      Object.keys(values).length > 0 &&
-      Object.keys(actions).length > 0
-    ) {
+    if (values && actions && Object.keys(values).length > 0 && Object.keys(actions).length > 0) {
       initResetPassword();
     }
-    // clean up function to signify when component is unmounted
-    return () => {
-      isMounted = false;
-    };
-  }, [
-    values,
-    actions,
-    verifyPasswordResetRequest,
-    confirmPasswordResetRequest,
-    location,
-  ]);
+  }, [values, actions, verifyPasswordResetRequest, confirmPasswordResetRequest, location]);
 
   const handleSubmit = async (values, actions) => {
     // update state with form submit values (email + password)
@@ -148,13 +118,7 @@ export const NewPasswordPage = () => {
 
   return (
     <>
-      <Flex
-        padding="1rem"
-        margin="1rem"
-        flexDir="column"
-        alignItems="center"
-        className="password-reset__container"
-      >
+      <Flex padding="1rem" margin="1rem" flexDir="column" alignItems="center" className="password-reset__container">
         <Flex>
           <Link as={NavLink} to="/">
             <svg
@@ -196,11 +160,7 @@ export const NewPasswordPage = () => {
           />
         )}
         {passwordResetStatus && !loading && (
-          <Flex
-            margin="2rem 2rem"
-            textAlign="center"
-            className="password-reset__success-msg-container"
-          >
+          <Flex margin="2rem 2rem" textAlign="center" className="password-reset__success-msg-container">
             <Box className="password-reset__success-msg">
               <Text fontSize="16px">
                 We've just reset your password. <br />
@@ -212,31 +172,17 @@ export const NewPasswordPage = () => {
           </Flex>
         )}
         {!passwordResetStatus && !loading && (
-          <Heading
-            textAlign="center"
-            fontWeight="400"
-            margin="2rem 1rem"
-            as="h5"
-            size="sm"
-          >
+          <Heading textAlign="center" fontWeight="400" margin="2rem 1rem" as="h5" size="sm">
             Please choose a new password.
           </Heading>
         )}
         {!passwordResetStatus && !loading && (
-          <Flex
-            flexDirection="column"
-            className="password-reset__form-container"
-          >
+          <Flex flexDirection="column" className="password-reset__form-container">
             {error && (
               <Alert margin="1rem 0" status="error">
                 <AlertIcon />
                 {errorMap.get(error)}
-                <CloseButton
-                  onClick={handleCloseBtnClick}
-                  position="absolute"
-                  right="8px"
-                  top="8px"
-                />
+                <CloseButton onClick={handleCloseBtnClick} position="absolute" right="8px" top="8px" />
               </Alert>
             )}
             <Formik
@@ -248,23 +194,11 @@ export const NewPasswordPage = () => {
             >
               {({ errors, touched }) => (
                 <Form className="password-reset__form" width="330px">
-                  <FormControl
-                    className="form-floating"
-                    isInvalid={errors.password && touched.password}
-                  >
-                    <FormLabel
-                      fontSize="16px"
-                      marginTop="10px"
-                      htmlFor="password"
-                    >
+                  <FormControl className="form-floating" isInvalid={errors.password && touched.password}>
+                    <FormLabel fontSize="16px" marginTop="10px" htmlFor="password">
                       Password
                     </FormLabel>
-                    <Field
-                      className="form-control"
-                      name="password"
-                      type={inputType}
-                      placeholder="Password"
-                    />
+                    <Field className="form-control" name="password" type={inputType} placeholder="Password" />
                     <Checkbox
                       onChange={handleInputTypeChange}
                       colorScheme="brand"
@@ -294,12 +228,7 @@ export const NewPasswordPage = () => {
                     Choose Password
                   </Button>
 
-                  <Box
-                    backgroundColor="#d9d9d9"
-                    height="1px"
-                    margin="2rem 0"
-                    width="100%"
-                  ></Box>
+                  <Box backgroundColor="#d9d9d9" height="1px" margin="2rem 0" width="100%"></Box>
                 </Form>
               )}
             </Formik>
@@ -320,12 +249,7 @@ export const NewPasswordPage = () => {
             </Text>
           </Box>
         </Flex>
-        <Flex
-          margin="1.5rem"
-          className="password-reset__copy-right"
-          color="#6c757d"
-          fontWeight="500"
-        >
+        <Flex margin="1.5rem" className="password-reset__copy-right" color="#6c757d" fontWeight="500">
           © CurateAI {new Date().getFullYear()}
         </Flex>
       </Flex>

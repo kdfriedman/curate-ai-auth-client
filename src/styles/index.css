@@ -112,10 +112,15 @@ svg.header__nav-hamburger-menu {
 }
 
 /* header component nav profile menu items */
-.header__nav-menu-item {
+.header__nav-menu-item button {
   font-weight: 600;
   font-size: 16px;
   text-decoration: none;
+}
+
+/* header component nav profile menu items hover state */
+.header__nav-menu-item button:hover {
+  background-color: #EDF2F7 !important
 }
 
 /* dashboard component integration widget card container */

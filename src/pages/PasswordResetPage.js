@@ -37,23 +37,12 @@ export const PasswordResetPage = () => {
   errorMap.set('auth/user-not-found', 'Invalid email, please try again');
 
   useEffect(() => {
-    let isMounted = true;
-    if (isMounted) {
-      // hide onLoad spinner icon
-      const onLoadSpinner = document.querySelector(
-        '[data-on-load-spinner="true"]'
-      );
-      onLoadSpinner.style.display = 'none';
-    }
-    return () => {
-      isMounted = false;
-    };
+    // hide onLoad spinner icon
+    const onLoadSpinner = document.querySelector('[data-on-load-spinner="true"]');
+    onLoadSpinner.style.display = 'none';
   });
 
   useEffect(() => {
-    // set mounted state
-    let isMounted = true;
-
     const initResetPassword = async () => {
       const { email } = values;
       const { resetForm } = actions;
@@ -68,12 +57,10 @@ export const PasswordResetPage = () => {
         await resetPassword(email);
 
         // redirect to dashboard page only if component is mounted
-        if (isMounted) {
-          // update passwordResetStatus state
-          updatePasswordResetStatus(true);
-          // update loading state back to false
-          setLoading(false);
-        }
+        // update passwordResetStatus state
+        updatePasswordResetStatus(true);
+        // update loading state back to false
+        setLoading(false);
       } catch (error) {
         // Handle Errors here
         const errorCode = error.code;
@@ -86,18 +73,9 @@ export const PasswordResetPage = () => {
         resetForm();
       }
     };
-    if (
-      values &&
-      actions &&
-      Object.keys(values).length > 0 &&
-      Object.keys(actions).length > 0
-    ) {
+    if (values && actions && Object.keys(values).length > 0 && Object.keys(actions).length > 0) {
       initResetPassword();
     }
-    // clean up function to signify when component is unmounted
-    return () => {
-      isMounted = false;
-    };
   }, [values, actions, resetPassword]);
 
   const handleSubmit = async (values, actions) => {
@@ -114,13 +92,7 @@ export const PasswordResetPage = () => {
 
   return (
     <>
-      <Flex
-        padding="1rem"
-        margin="1rem"
-        flexDir="column"
-        alignItems="center"
-        className="password-reset__container"
-      >
+      <Flex padding="1rem" margin="1rem" flexDir="column" alignItems="center" className="password-reset__container">
         <Flex>
           <Link as={NavLink} to="/">
             <svg
@@ -162,45 +134,27 @@ export const PasswordResetPage = () => {
           />
         )}
         {passwordResetStatus && !loading && (
-          <Flex
-            margin="2rem 2rem"
-            textAlign="center"
-            className="password-reset__success-msg-container"
-          >
+          <Flex margin="2rem 2rem" textAlign="center" className="password-reset__success-msg-container">
             <Box className="password-reset__success-msg">
               <Text fontSize="16px">
-                We've just sent you a password reset email. <br /> Please check
-                your inbox on instructions to reset your password.
+                We've just sent you a password reset email. <br /> Please check your inbox on instructions to reset your
+                password.
               </Text>
             </Box>
           </Flex>
         )}
         {!passwordResetStatus && !loading && (
-          <Heading
-            textAlign="center"
-            fontWeight="400"
-            margin="2rem 1rem"
-            as="h5"
-            size="sm"
-          >
+          <Heading textAlign="center" fontWeight="400" margin="2rem 1rem" as="h5" size="sm">
             Please enter your email to reset your password.
           </Heading>
         )}
         {!passwordResetStatus && !loading && (
-          <Flex
-            flexDirection="column"
-            className="password-reset__form-container"
-          >
+          <Flex flexDirection="column" className="password-reset__form-container">
             {error && (
               <Alert margin="1rem 0" status="error">
                 <AlertIcon />
                 {errorMap.get(error)}
-                <CloseButton
-                  onClick={handleCloseBtnClick}
-                  position="absolute"
-                  right="8px"
-                  top="8px"
-                />
+                <CloseButton onClick={handleCloseBtnClick} position="absolute" right="8px" top="8px" />
               </Alert>
             )}
             <Formik
@@ -212,19 +166,11 @@ export const PasswordResetPage = () => {
             >
               {({ errors, touched }) => (
                 <Form className="password-reset__form" width="330px">
-                  <FormControl
-                    className="form-floating"
-                    isInvalid={errors.email && touched.email}
-                  >
+                  <FormControl className="form-floating" isInvalid={errors.email && touched.email}>
                     <FormLabel fontSize="16px" htmlFor="email">
                       Email
                     </FormLabel>
-                    <Field
-                      className="form-control"
-                      name="email"
-                      type="email"
-                      placeholder="name@example.com"
-                    />
+                    <Field className="form-control" name="email" type="email" placeholder="name@example.com" />
                     <FormErrorMessage>{errors.email}</FormErrorMessage>
                   </FormControl>
                   <Button
@@ -245,12 +191,7 @@ export const PasswordResetPage = () => {
                     Reset Password
                   </Button>
 
-                  <Box
-                    backgroundColor="#d9d9d9"
-                    height="1px"
-                    margin="2rem 0"
-                    width="100%"
-                  ></Box>
+                  <Box backgroundColor="#d9d9d9" height="1px" margin="2rem 0" width="100%"></Box>
                 </Form>
               )}
             </Formik>
@@ -271,12 +212,7 @@ export const PasswordResetPage = () => {
             </Text>
           </Box>
         </Flex>
-        <Flex
-          margin="1.5rem"
-          className="password-reset__copy-right"
-          color="#6c757d"
-          fontWeight="500"
-        >
+        <Flex margin="1.5rem" className="password-reset__copy-right" color="#6c757d" fontWeight="500">
           © CurateAI {new Date().getFullYear()}
         </Flex>
       </Flex>

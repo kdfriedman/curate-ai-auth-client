@@ -4,27 +4,13 @@ import { Flex, Link, Text, Box } from '@chakra-ui/react';
 
 export const NotFoundPage = () => {
   useEffect(() => {
-    let isMounted = true;
-    if (isMounted) {
-      // hide onLoad spinner icon
-      const onLoadSpinner = document.querySelector(
-        '[data-on-load-spinner="true"]'
-      );
-      onLoadSpinner.style.display = 'none';
-    }
-    return () => {
-      isMounted = false;
-    };
+    // hide onLoad spinner icon
+    const onLoadSpinner = document.querySelector('[data-on-load-spinner="true"]');
+    onLoadSpinner.style.display = 'none';
   });
   return (
     <>
-      <Flex
-        padding="1rem"
-        margin="1rem"
-        flexDir="column"
-        alignItems="center"
-        className="password-reset__container"
-      >
+      <Flex padding="1rem" margin="1rem" flexDir="column" alignItems="center" className="password-reset__container">
         <Flex>
           <Link as={NavLink} to="/">
             <svg
@@ -55,19 +41,13 @@ export const NotFoundPage = () => {
           </Link>
         </Flex>
 
-        <Flex
-          margin="2rem 2rem"
-          textAlign="center"
-          className="password-reset__success-msg-container"
-        >
+        <Flex margin="2rem 2rem" textAlign="center" className="password-reset__success-msg-container">
           <Box className="password-reset__success-msg">
             <Text fontSize="18px">
               Oops, looks like we couldn't find that page.
               <br />
               <NavLink to="/login">
-                <button style={{ textDecoration: 'underline' }}>
-                  Back to login
-                </button>
+                <button style={{ textDecoration: 'underline' }}>Back to login</button>
               </NavLink>
             </Text>
           </Box>
@@ -87,12 +67,7 @@ export const NotFoundPage = () => {
             </Text>
           </Box>
         </Flex>
-        <Flex
-          margin="1.5rem"
-          className="password-reset__copy-right"
-          color="#6c757d"
-          fontWeight="500"
-        >
+        <Flex margin="1.5rem" className="password-reset__copy-right" color="#6c757d" fontWeight="500">
           © CurateAI {new Date().getFullYear()}
         </Flex>
       </Flex>
