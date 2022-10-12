@@ -1,6 +1,7 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
+import 'firebase/app-check';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -15,6 +16,10 @@ export const Firebase = firebase;
 
 // Initialize Firebase
 export const app = firebase.initializeApp(firebaseConfig);
+
+// Initalize App Check (reCAPTCHA v3)
+const appCheck = firebase.appCheck();
+appCheck.activate(process.env.REACT_APP_CHECK_PUBLIC_KEY, true);
 
 // Intialize firebase auth
 export const auth = app.auth();
