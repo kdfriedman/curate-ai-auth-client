@@ -41,12 +41,12 @@ const addRecordToFirestore = async (uid, collections, docs, payload, payloadName
     if (record?.exists && record.data() && Array.isArray(record?.data()[payloadName])) {
       // loop through all records within vendor array
       const hasDuplicateRecord = record?.data()[payloadName]?.find((record) => {
-        // if record exist and payload ad account id is equal to previous
+        // if record exist and access token is same as prev, return duplicate err
         return record.adAccountId === payload.adAccountId && record.userAccessToken === payload.userAccessToken;
       });
       if (hasDuplicateRecord) return [null, FIREBASE_ERROR.FIRESTORE.GENERIC.DUPLICATE_RECORD];
 
-      // if record exist, push new payload into array
+      // if record exist but new payload has different access token, add payload into arr
       await updateDoc(doc(db, collection1, uid, collection2, doc1), {
         [payloadName]: arrayUnion(payload),
       });

@@ -92,7 +92,6 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
 
     //update db record with updated campaign list
     if (diffOfAdCampaignList.length > 0) {
-      console.log('diff exists, update firestore with campaign activation state change');
       dbRecord.adCampaignList = updatedAdCampaignList;
     }
     await updateFirestoreWithCampaignDiffs(dbRecord);
