@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Header } from '../components/Header';
+import { Loader } from '../components/Loader';
 import { NavLink } from 'react-router-dom';
-import { Flex, Box, Text, useMediaQuery, Link, Button, CircularProgress } from '@chakra-ui/react';
+import { Flex, Box, Text, useMediaQuery, Link, Button } from '@chakra-ui/react';
 import { useAuth } from '../contexts/AuthContext';
 import firestoreHandlers from '../services/firebase/data/firestore';
 import { errorMap } from '../components/ErrorMap';
@@ -62,17 +63,7 @@ export const ProfilePage = () => {
   return (
     <>
       <Header />
-      {isLoading && (
-        <CircularProgress
-          className="loading__spinner"
-          minHeight="50vh"
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          isIndeterminate
-          color="#635bff"
-        />
-      )}
+      <Loader isLoading={isLoading} loadingMessage="Loading..." />
       {hasError && (
         <>
           {errorMap.get(hasError) ? (

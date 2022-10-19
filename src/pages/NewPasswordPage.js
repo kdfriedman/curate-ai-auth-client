@@ -14,11 +14,11 @@ import {
   Alert,
   AlertIcon,
   CloseButton,
-  CircularProgress,
   Checkbox,
 } from '@chakra-ui/react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
+import { Loader } from '../components/Loader';
 
 export const NewPasswordPage = () => {
   const { verifyPasswordResetRequest, confirmPasswordResetRequest } = useAuth();
@@ -148,17 +148,7 @@ export const NewPasswordPage = () => {
             </svg>
           </Link>
         </Flex>
-        {loading && (
-          <CircularProgress
-            className="loading__spinner"
-            minHeight="100vh"
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            isIndeterminate
-            color="#635bff"
-          />
-        )}
+        <Loader isLoading={loading} loadingMessage="Loading..." />
         {passwordResetStatus && !loading && (
           <Flex margin="2rem 2rem" textAlign="center" className="password-reset__success-msg-container">
             <Box className="password-reset__success-msg">

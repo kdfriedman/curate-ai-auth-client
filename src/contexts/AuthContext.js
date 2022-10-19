@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
       const idToken = await getAuthToken(user);
       console.log(idToken);
       const appToken = await getAppToken();
-      console.log(appToken);
+      console.log(appToken.token);
     });
 
     return unsubscribe;

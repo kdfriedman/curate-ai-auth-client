@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { LoginPage } from '../pages/LoginPage';
+import { IntegrationsPage } from '../pages/IntegrationsPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import { PasswordResetPage } from '../pages/PasswordResetPage';
@@ -16,9 +17,11 @@ const AppRouter = () => (
       <FacebookAuthProvider>
         <Switch>
           {/* Private Dashboard route*/}
-          <PrivateRoute exact path="/integrations" component={DashboardPage} />
+          <PrivateRoute exact path="/integrations" component={IntegrationsPage} />
           {/* Private Profile route*/}
           <PrivateRoute exact path="/profile" component={ProfilePage} />
+          {/* Private Dashboard route*/}
+          <PrivateRoute exact path="/dashboard" component={DashboardPage} />
           {/* Login route*/}
           <Route path="/login" component={LoginPage} />
           {/* password reset route*/}

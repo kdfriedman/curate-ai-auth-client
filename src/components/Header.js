@@ -72,6 +72,19 @@ export const Header = () => {
     },
     {
       id: 2,
+      parent: Link,
+      props: {},
+      parentProps: {
+        as: NavLink,
+        to: '/dashboard',
+        style: { textDecoration: 'none' },
+        className: 'header__nav-menu-item',
+      },
+      item: MenuItem,
+      label: 'Dashboard',
+    },
+    {
+      id: 3,
       parent: Box,
       props: { onClick: () => setLogoutEvent(true) },
       parentProps: { style: { textDecoration: 'none' }, className: 'header__nav-menu-item' },
