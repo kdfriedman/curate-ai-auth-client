@@ -71,12 +71,10 @@ export const NewPasswordPage = () => {
         // redirect to dashboard page only if component is mounted
         // update passwordResetStatus state
         updatePasswordResetStatus(true);
-        // update loading state back to false
         setLoading(false);
       } catch (error) {
         // check if error is generic
         if (!error?.code) {
-          console.error(error);
           // update error state
           setError('oop code missing');
           // update loading state back to false
@@ -86,7 +84,6 @@ export const NewPasswordPage = () => {
         }
         // Handle Errors here
         const errorCode = error?.code;
-        console.error(errorCode);
         // update error state
         setError(errorCode);
         // update loading state back to false
@@ -120,7 +117,7 @@ export const NewPasswordPage = () => {
     <>
       <Flex padding="1rem" margin="1rem" flexDir="column" alignItems="center" className="password-reset__container">
         <Flex>
-          <Link as={NavLink} to="/">
+          <Link as={NavLink} to="/integrations">
             <svg
               style={{ width: '15rem', height: 'auto' }}
               viewBox="0 0 320 185.34639618779255"

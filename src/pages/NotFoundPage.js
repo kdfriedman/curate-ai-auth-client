@@ -12,7 +12,7 @@ export const NotFoundPage = () => {
     <>
       <Flex padding="1rem" margin="1rem" flexDir="column" alignItems="center" className="password-reset__container">
         <Flex>
-          <Link as={NavLink} to="/">
+          <Link as={NavLink} to="/integrations">
             <svg
               style={{ width: '15rem', height: 'auto' }}
               viewBox="0 0 320 185.34639618779255"

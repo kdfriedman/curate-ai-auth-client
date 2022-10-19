@@ -63,9 +63,7 @@ export const LoginPage = () => {
       } catch (error) {
         // Handle Errors here
         const errorCode = error.code;
-        console.error(errorCode);
         setError(errorCode);
-
         // update loading state back to false
         setLoading(false);
         // reset form
