@@ -1,14 +1,14 @@
 import { useEffect, useReducer } from 'react';
-import AcctSelector from './AcctSelector';
-import { ErrorMessage } from '../components/ErrorMessage';
+import AcctSelector from '../AcctSelector';
+import { ErrorMessage } from '../ErrorMessage';
 import { Progress, useMediaQuery } from '@chakra-ui/react';
-import { ERROR } from '../constants/error';
-import { ACTION_TYPES } from '../services/facebook/constants';
-import { useFetchFacebookBusinessAccounts } from '../hooks/useFetchFacebookBusinessAccounts';
-import { useFetchFacebookSystemUserToken } from '../hooks/useFetchFacebookSystemUserToken';
-import { useFetchFacebookAdAssetAssignment } from '../hooks/useFetchFacebookAdAssetAssignment';
+import { ERROR } from '../../constants/error';
+import { ACTION_TYPES } from '../../services/facebook/constants';
+import { useFetchFacebookBusinessAccounts } from '../../hooks/useFetchFacebookBusinessAccounts';
+import { useFetchFacebookSystemUserToken } from '../../hooks/useFetchFacebookSystemUserToken';
+import { useFetchFacebookAdAssetAssignment } from '../../hooks/useFetchFacebookAdAssetAssignment';
 
-const FacebookAppIntegration = ({ setIntegrationRecord, setIntegrationActiveStatus, setError }) => {
+export const FacebookAppIntegration = ({ setIntegrationRecord, setIntegrationActiveStatus, setError }) => {
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
 
   // setup useReducer callback function
@@ -208,5 +208,3 @@ const FacebookAppIntegration = ({ setIntegrationRecord, setIntegrationActiveStat
     </>
   );
 };
-
-export default FacebookAppIntegration;
