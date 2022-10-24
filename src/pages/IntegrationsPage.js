@@ -61,8 +61,8 @@ export const IntegrationsPage = () => {
       <Loader isLoading={isLoading} loadingMessage="Loading..." />
 
       {!isLoading && (
-        <Box maxHeight="100vh" className="dashboard__container">
-          <section className="dashboard__integration-container">
+        <Box maxHeight="100vh" className="container">
+          <section className="integrations__container">
             <IntegrationVendorWidget
               hasEmptyIntegrationCollection={hasEmptyIntegrationCollection}
               integrationVendorInfo={'Integrate CurateAI with Facebook'}
@@ -111,13 +111,11 @@ export const IntegrationsPage = () => {
                   {hasIntegrationRecord?.facebookBusinessAccts?.map((record) => {
                     return (
                       <IntegrationVendorCard key={record.id} record={record}>
-                        <Flex flexDir="column" className="dashboard__integration-vendor-card-btn-container">
+                        <Flex flexDir="column" className="integrations__vendor-card-btn-container">
                           <Button
                             onClick={(e) => {
                               // get parent container element with business acct id as dom id
-                              const vendorCardParentElement = e.target.closest(
-                                '.dashboard__integration-vendor-card-container'
-                              );
+                              const vendorCardParentElement = e.target.closest('[data-vendor-card-id]');
                               // check if parent element exists, then open modal
                               if (vendorCardParentElement) {
                                 updateSettingsModalId(vendorCardParentElement.id);
@@ -127,7 +125,7 @@ export const IntegrationsPage = () => {
                             _hover={{
                               opacity: '.8',
                             }}
-                            className="dashboard__integration-vendor-card-btn"
+                            className="integrations__vendor-card-btn"
                             margin={isEqualToOrLessThan950[0] ? '0 1rem 1rem' : '1rem'}
                             minWidth="11rem"
                             border="1px solid #ece9e9"
@@ -153,7 +151,7 @@ export const IntegrationsPage = () => {
                             alignSelf="center"
                             backgroundColor="#E53E3E"
                             color="#fff"
-                            className="dashboard__integration-vendor-card-btn"
+                            className="integrations__vendor-card-btn"
                             margin={isEqualToOrLessThan950[0] ? '0 1rem 1rem' : '0 0 1rem'}
                             minWidth="11rem"
                           >

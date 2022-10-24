@@ -9,16 +9,17 @@ export const IntegrationVendorCard = ({ record, children }) => {
       id={record.businessAcctId}
       flexDir={isEqualToOrLessThan950[0] ? 'column' : 'row'}
       maxWidth={isEqualToOrLessThan450[0] ? '20rem' : '750px'}
-      className="dashboard__integration-vendor-card-container"
+      className="integrations__vendor-card-container"
       boxShadow="0 0.5rem 1rem rgb(0 0 0 / 15%)"
       margin="1rem 2rem"
       borderRadius="10px"
       border="1px solid #f0f0f0"
       alignItems="center"
       justifyContent="space-between"
+      data-vendor-card-id
     >
       <Box
-        className="dashboard__integration-vendor-card"
+        className="integrations__vendor-card"
         key={`vendor-card-${record.id}`}
         fontWeight="800"
         fontSize="14px"

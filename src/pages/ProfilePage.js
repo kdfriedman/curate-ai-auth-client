@@ -13,10 +13,8 @@ export const ProfilePage = () => {
   const [hasError, setError] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [hasIntegrationRecord, setIntegrationRecord] = useState(null);
-
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
-
   const { currentUser } = useAuth();
   const { readUserRecordFromFirestore } = firestoreHandlers;
 
@@ -121,7 +119,7 @@ export const ProfilePage = () => {
               borderRadius="10px"
               border="1px solid #f0f0f0"
               alignItems="center"
-              justifyContent="space-between"
+              justifyContent={isEqualToOrLessThan800[0] ? 'center' : 'space-between'}
             >
               <Box
                 className="profile__dashboard-card"
@@ -131,10 +129,10 @@ export const ProfilePage = () => {
                 minWidth={isEqualToOrLessThan450[0] ? 0 : '25rem'}
                 padding="1rem 2rem"
               >
-                <Text>
+                <Text textAlign={isEqualToOrLessThan800[0] ? 'center' : 'start'}>
                   Email: <span style={{ fontWeight: '500' }}>{currentUser.email}</span>
                 </Text>
-                <Text>
+                <Text textAlign={isEqualToOrLessThan800[0] ? 'center' : 'start'}>
                   Integrations:{' '}
                   {hasIntegrationRecord?.facebookBusinessAccts?.length ? (
                     <span style={{ fontWeight: '500' }}>Facebook</span>
@@ -142,7 +140,15 @@ export const ProfilePage = () => {
                     'N/A'
                   )}
                 </Text>
-                <Link as={NavLink} to="/password-reset" style={{ textDecoration: 'none' }}>
+                <Link
+                  as={NavLink}
+                  to="/password-reset"
+                  style={{
+                    textDecoration: 'none',
+                    display: 'flex',
+                    justifyContent: `${isEqualToOrLessThan800[0] ? 'center' : 'start'}`,
+                  }}
+                >
                   <Button
                     _hover={{
                       opacity: '.8',
@@ -156,6 +162,7 @@ export const ProfilePage = () => {
                     backgroundColor="#635bff"
                     type="submit"
                     fontSize="16px"
+                    textAlign={isEqualToOrLessThan800[0] ? 'center' : 'start'}
                   >
                     Reset Password
                   </Button>

@@ -5,7 +5,7 @@ export const IntegrationVendorTip = ({ vendorTipMessage }) => {
 
   return (
     <Box
-      className="dashboard__integration-dashboard-tip"
+      className="integrations__dashboard-tip"
       fontSize="13px"
       fontWeight="500"
       color="rgb(26, 32, 44)"

@@ -4,7 +4,7 @@ export const IntegrationVendor = ({ vendor }) => {
 
   return (
     <Box
-      className="dashboard__integration-dashboard-vendor"
+      className="integrations__dashboard-vendor"
       padding={isEqualToOrLessThan800[0] ? '1rem 1rem 0 1rem' : '2rem 0 0 2rem'}
       fontSize="16px"
       color="#6c757d"

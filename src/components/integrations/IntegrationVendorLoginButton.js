@@ -41,7 +41,7 @@ export const IntegrationVendorLoginButton = ({
         alignSelf="center"
       >
         <IntegrationVendorIcon className="login-btn-icon" />{' '}
-        <span style={{ margin: '0 0 0 10px', fontWeight: '800' }} className="dashboard__fb-login-btn-text">
+        <span style={{ margin: '0 0 0 10px', fontWeight: '800' }} className="integrations__fb-login-btn-text">
           {content.cta}
         </span>
       </Button>

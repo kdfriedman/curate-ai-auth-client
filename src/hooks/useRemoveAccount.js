@@ -6,7 +6,7 @@ import { handleValidateFacebookAccessToken } from '../services/facebook/facebook
 
 const findRecordForRemoval = (event, integrationRecord) => {
   // reference parent element to scrape business account id
-  const facebookBusinessAccountId = event.target.closest('.dashboard__integration-vendor-card-container')?.id;
+  const facebookBusinessAccountId = event.target.closest('[data-vendor-card-id]')?.id;
   // filter clicked element parent container, which holds business acct id with business acct being requested to be removed
   return integrationRecord?.facebookBusinessAccts?.find((acct) => acct.businessAcctId === facebookBusinessAccountId);
 };
