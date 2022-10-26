@@ -5,10 +5,11 @@ export const IntegrationDashboard = ({ children }) => {
 
   return (
     <Box
-      gridColumn={isEqualToOrLessThan800[0] ? '1 / span 3' : '3'}
+      gridColumn={isEqualToOrLessThan800[0] ? '1 / span 4' : '3'}
       gridRow={isEqualToOrLessThan800[0] ? '1' : '1 / span 3'}
       className="integrations__dashboard"
       paddingBottom="2rem"
+      marginBottom={isEqualToOrLessThan800[0] ? '0' : '.5rem'}
     >
       <Flex
         boxShadow="0 0.125rem 0.25rem rgb(0 0 0 / 8%)"

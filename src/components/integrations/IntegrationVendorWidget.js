@@ -11,7 +11,7 @@ export const IntegrationVendorWidget = ({
   return (
     <>
       <Box
-        gridColumn={isEqualToOrLessThan800[0] ? '1 / span 3' : '1 / span 2'}
+        gridColumn={isEqualToOrLessThan800[0] ? '1 / span 4' : '1 / span 2'}
         gridRow={isEqualToOrLessThan800[0] ? 2 : ''}
         className="integration-widget"
         display="flex"
@@ -22,6 +22,7 @@ export const IntegrationVendorWidget = ({
         borderRadius="10px"
         height="100%"
         flexDirection="column"
+        marginBottom=".5rem"
       >
         <Text
           className="integration-info"

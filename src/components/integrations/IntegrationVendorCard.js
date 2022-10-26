@@ -2,6 +2,7 @@ import { Box, Text, Flex, useMediaQuery } from '@chakra-ui/react';
 
 export const IntegrationVendorCard = ({ record, children }) => {
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
+  const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
   const isEqualToOrLessThan950 = useMediaQuery('(max-width: 950px)');
   return (
     <Flex
@@ -26,6 +27,9 @@ export const IntegrationVendorCard = ({ record, children }) => {
         color="rgb(26, 32, 44)"
         minWidth={isEqualToOrLessThan450[0] ? 0 : '25rem'}
         padding="1rem 2rem"
+        display={isEqualToOrLessThan800[0] ? 'flex' : ''}
+        flexFlow={isEqualToOrLessThan800[0] ? 'column' : ''}
+        alignItems={isEqualToOrLessThan800[0] ? 'center' : ''}
       >
         <Text key={`user-email-${record.id}`}>
           User Email: <span style={{ fontWeight: '500' }}>{record.email ?? 'N/A'}</span>

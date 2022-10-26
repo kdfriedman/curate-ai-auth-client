@@ -125,10 +125,11 @@ svg.header__nav-hamburger-menu {
 
 @media (max-width: 800px) {
   .integrations__container {
-    grid-gap: 10px;
-    grid-template-rows: 1fr 1fr;
+    row-gap: 10px;
+    grid-template-rows: auto 1fr;
     justify-content: center;
     height: 100%;
+    grid-template-columns: repeat(4, 1fr)
   }
 }
 
