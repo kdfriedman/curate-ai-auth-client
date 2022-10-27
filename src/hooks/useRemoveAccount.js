@@ -29,7 +29,7 @@ const handleGetFacebookAccessToken = async (
   handleValidateFacebookAccessToken
 ) => {
   // check session storage for valid access token
-  if (facebookAuth.authResponse) {
+  if (facebookAuth?.authResponse) {
     const [validatedAccessToken, validatedAccessTokenError] = await handleValidateFacebookAccessToken(
       facebookAuth.authResponse?.accessToken
     );

@@ -9,6 +9,11 @@ export const FIREBASE = {
       DOCS: ['facebook'],
       PAYLOAD_NAME: 'facebookBusinessAccts',
     },
+    MODELS: {
+      COLLECTIONS: ['clients', 'models'],
+      DOCS: ['image-and-video'],
+      PAYLOAD_NAME: 'output',
+    },
     GENERIC: {
       UNION_ADDED: 'New union has been added to firestore',
       RECORD_CREATED: 'New firestore record has been created',

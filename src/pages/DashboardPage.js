@@ -1,21 +1,71 @@
+import { useState, useMemo } from 'react';
 import { Header } from '../components/Header';
 import { Loader } from '../components/Loader';
-import { useEffect, useState } from 'react';
-import { Flex, Button, Box, useMediaQuery, Text } from '@chakra-ui/react';
 import { ErrorMessage } from '../components/ErrorMessage';
+import {
+  Flex,
+  Button,
+  Box,
+  useMediaQuery,
+  Text,
+  Table,
+  Thead,
+  Tbody,
+  Tfoot,
+  Tr,
+  Th,
+  Td,
+  TableCaption,
+  TableContainer,
+} from '@chakra-ui/react';
 import { useAuth } from '../contexts/AuthContext';
-import firestoreHandlers from '../services/firebase/data/firestore';
-import { FIREBASE } from '../services/firebase/constants';
+import { useFirestoreStore } from '../contexts/FirestoreContext';
 import { ERROR } from '../constants/error';
+import { FIREBASE } from '../services/firebase/constants';
+import { useUpdateStateWithFirestoreRecord } from '../hooks/useUpdateStateWithFirebaseRecord';
 
 export const DashboardPage = () => {
   const [hasError, setError] = useState(false);
   const [isLoading, setLoading] = useState(false);
-  const [hasModelOutputs, setModelOutputs] = useState(null);
+  const { modelsStore, setModelsStore } = useFirestoreStore();
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
-  const { currentUser } = useAuth();
-  const { readUserRecordFromFirestore } = firestoreHandlers;
+  useUpdateStateWithFirestoreRecord(
+    FIREBASE.FIRESTORE.MODELS.COLLECTIONS,
+    FIREBASE.FIRESTORE.MODELS.DOCS,
+    setLoading,
+    setError,
+    setModelsStore,
+    FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME
+  );
+  const hasEmptyModelCollection = !modelsStore
+    ? true
+    : modelsStore?.[FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME]?.length === 0;
+
+  const consolidateTableData = (modelOutput) => {
+    if (!modelOutput) return;
+    const consolidatedTableData = [];
+    modelOutput.forEach((output) => {
+      const data = JSON.parse(output?.data);
+      const labels = Object.entries(data[0]);
+      const coefs = Object.entries(data.Coefs);
+      consolidatedTableData.push(...labels.map((label, i) => [...label, coefs[i]?.[1]]));
+    });
+    return consolidatedTableData;
+  };
+
+  const renderTable = (tableData) => {
+    if (!tableData) return;
+    return tableData?.map((data) => {
+      const [index, label, coef] = data;
+      return (
+        <Tr key={index}>
+          <Td>{label}</Td>
+          <Td isNumeric>{coef}</Td>
+        </Tr>
+      );
+    });
+  };
 
   return (
     <>
@@ -24,7 +74,7 @@ export const DashboardPage = () => {
       {hasError && <ErrorMessage errorMessage={ERROR.DASHBOARD.MAIN} />}
 
       <section className="profile__section">
-        <Box gridColumn="1 / 5" gridRow="1" className="profile__dashboard" minHeight="20rem" paddingBottom="2rem">
+        <Box gridColumn="1 / span 4" gridRow="1" className="profile__dashboard" minHeight="20rem" paddingBottom="2rem">
           <Flex
             boxShadow="0 0.125rem 0.25rem rgb(0 0 0 / 8%)"
             padding="2rem"
@@ -68,9 +118,24 @@ export const DashboardPage = () => {
                 minWidth={isEqualToOrLessThan450[0] ? 0 : '25rem'}
                 padding="1rem 2rem"
               >
-                <Text textAlign={isEqualToOrLessThan800[0] ? 'center' : 'start'}>
-                  Email: <span style={{ fontWeight: '500' }}>{currentUser.email}</span>
-                </Text>
+                <TableContainer>
+                  <Table variant="simple">
+                    <TableCaption>Model output for ad account: {true}</TableCaption>
+                    <Thead>
+                      <Tr>
+                        <Th>Labels</Th>
+                        <Th isNumeric>Coefs</Th>
+                      </Tr>
+                    </Thead>
+                    {!hasEmptyModelCollection && <Tbody></Tbody>}
+                    <Tfoot>
+                      <Tr>
+                        <Th>Labels</Th>
+                        <Th isNumeric>Coefs</Th>
+                      </Tr>
+                    </Tfoot>
+                  </Table>
+                </TableContainer>
               </Box>
             </Flex>
           </Flex>

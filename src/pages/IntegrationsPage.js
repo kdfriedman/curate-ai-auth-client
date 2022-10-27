@@ -17,6 +17,7 @@ import { useDeleteFacebookSystemUser } from '../hooks/useDeleteFacebookSystemUse
 import { useRemoveAccount } from '../hooks/useRemoveAccount';
 import { useUpdateStateWithFirestoreRecord } from '../hooks/useUpdateStateWithFirebaseRecord';
 import { useFacebookAuth } from '../contexts/FacebookContext';
+import { useFirestoreStore } from '../contexts/FirestoreContext';
 import { ERROR } from '../constants/error';
 import { FIREBASE } from '../services/firebase/constants';
 
@@ -24,36 +25,24 @@ export const IntegrationsPage = () => {
   const isEqualToOrLessThan950 = useMediaQuery('(max-width: 950px)');
   const [hasError, setError] = useState(false);
   const [isLoading, setLoading] = useState(false);
-  const [hasIntegrationRecord, setIntegrationRecord] = useState(null);
   const [isIntegrationActiveStatus, setIntegrationActiveStatus] = useState(false);
-  const [hasEmptyIntegrationCollection, setHasEmptyIntegrationCollection] = useState(false);
-  const [isUpdateStateWithFirestoreRecord, setUpdateStateWithFirestoreRecord] = useState(true);
   const [settingsModalId, updateSettingsModalId] = useState(null);
   const { handleDeleteFacebookSystemUser } = useDeleteFacebookSystemUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { handleRemoveAccount } = useRemoveAccount();
   const { facebookAuthChange, loginToFacebook } = useFacebookAuth();
-  const { updateStateWithFirestoreRecord } = useUpdateStateWithFirestoreRecord(
+  const { setIntegrationsStore, integrationsStore } = useFirestoreStore();
+  useUpdateStateWithFirestoreRecord(
     FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
     FIREBASE.FIRESTORE.FACEBOOK.DOCS,
     setLoading,
     setError,
-    setIntegrationRecord,
-    setUpdateStateWithFirestoreRecord
+    setIntegrationsStore,
+    FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME
   );
-
-  useEffect(() => {
-    if (!isUpdateStateWithFirestoreRecord) return;
-    updateStateWithFirestoreRecord().catch((err) => console.error(err));
-  }, [updateStateWithFirestoreRecord, isUpdateStateWithFirestoreRecord]);
-
-  useEffect(() => {
-    if (!hasIntegrationRecord) return setHasEmptyIntegrationCollection(true);
-    const integrationCollectionKey = Object.keys(hasIntegrationRecord)[0];
-    // convert integration array length into bool to make checking integration status more efficient
-    const integrationCollectionStatus = hasIntegrationRecord?.[integrationCollectionKey]?.length === 0;
-    setHasEmptyIntegrationCollection(integrationCollectionStatus);
-  }, [hasIntegrationRecord]);
+  const hasEmptyIntegrationCollection = !integrationsStore
+    ? true
+    : integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.length === 0;
 
   return (
     <>
@@ -97,7 +86,7 @@ export const IntegrationsPage = () => {
               {isIntegrationActiveStatus && facebookAuthChange?.authResponse && (
                 <FacebookAppIntegration
                   setIntegrationActiveStatus={setIntegrationActiveStatus}
-                  setIntegrationRecord={setIntegrationRecord}
+                  setIntegrationRecord={setIntegrationsStore}
                   setError={setError}
                 />
               )}
@@ -108,7 +97,7 @@ export const IntegrationsPage = () => {
 
               {!hasEmptyIntegrationCollection && (
                 <>
-                  {hasIntegrationRecord?.facebookBusinessAccts?.map((record) => {
+                  {integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.map((record) => {
                     return (
                       <IntegrationVendorCard key={record.id} record={record}>
                         <Flex flexDir="column" className="integrations__vendor-card-btn-container">
@@ -142,8 +131,8 @@ export const IntegrationsPage = () => {
                               await handleRemoveAccount(
                                 event,
                                 setLoading,
-                                setIntegrationRecord,
-                                hasIntegrationRecord,
+                                setIntegrationsStore,
+                                integrationsStore,
                                 handleDeleteFacebookSystemUser
                               );
                             }}
@@ -164,7 +153,7 @@ export const IntegrationsPage = () => {
                               onClose={onClose}
                               dbRecord={record}
                               id={settingsModalId}
-                              setIntegrationRecord={setIntegrationRecord}
+                              setIntegrationRecord={setIntegrationsStore}
                               Loading={CircularProgress}
                             />
                           )}

@@ -7,6 +7,7 @@ const readUserRecordFromFirestore = async (uid, collections, docs) => {
   const [doc1] = docs;
   try {
     const record = await getDoc(doc(db, collection1, uid, collection2, doc1));
+
     return [record, null];
   } catch (error) {
     console.error(FIREBASE_ERROR.FIRESTORE.GENERIC.FAILED_READING_DATA);
