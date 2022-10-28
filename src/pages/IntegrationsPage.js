@@ -38,7 +38,8 @@ export const IntegrationsPage = () => {
     setLoading,
     setError,
     setIntegrationsStore,
-    FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME
+    FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME,
+    true
   );
   const hasEmptyIntegrationCollection = !integrationsStore
     ? true

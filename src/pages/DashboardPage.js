@@ -33,22 +33,23 @@ export const DashboardPage = () => {
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
   useUpdateStateWithFirestoreRecord(
-    FIREBASE.FIRESTORE.MODELS.COLLECTIONS,
-    FIREBASE.FIRESTORE.MODELS.DOCS,
-    setLoading,
-    setError,
-    setModelsStore,
-    FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME
-  );
-
-  useUpdateStateWithFirestoreRecord(
     FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
     FIREBASE.FIRESTORE.FACEBOOK.DOCS,
     setLoading,
     setError,
     setIntegrationsStore,
     FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME,
-    integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.length > 0
+    integrationsStore === null
+  );
+
+  useUpdateStateWithFirestoreRecord(
+    FIREBASE.FIRESTORE.MODELS.COLLECTIONS,
+    FIREBASE.FIRESTORE.MODELS.DOCS,
+    setLoading,
+    setError,
+    setModelsStore,
+    FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME,
+    true
   );
 
   const hasEmptyModelCollection = !modelsStore
@@ -79,8 +80,6 @@ export const DashboardPage = () => {
       );
     });
   };
-
-  console.log(modelsStore, integrationsStore);
 
   return (
     <>
@@ -133,15 +132,30 @@ export const DashboardPage = () => {
                 minWidth={isEqualToOrLessThan450[0] ? 0 : '25rem'}
                 padding="1rem 2rem"
               >
-                <Select onChange={() => setModelId()} placeholder="Please select an option" size="lg">
-                  {/* {integrationsStore.map((acct) => {
-                        return (
-                          <option key={acct.id} value={acct.id}>
-                            {acct.name}
-                          </option>
-                        );
-                      })} */}
-                </Select>
+                {!hasEmptyModelCollection && (
+                  <Select
+                    onChange={(e) => {
+                      console.log(e);
+                    }}
+                    placeholder="Please select an option"
+                    size="lg"
+                  >
+                    {modelsStore?.[FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME]?.map((model, i) => {
+                      //TODO: replace value with id of model to store in state
+                      // this will allow the component to render correct model table data
+                      // look into sub menu within select, if not possible look to replace select with menu or list all models with associated business acct name e.g. {business name}-{Model Name}
+                      return (
+                        <option key={i} value={i}>
+                          {
+                            integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.find((integration) => {
+                              return integration.adAccountId === model.ad_account_id;
+                            }).businessAcctName
+                          }
+                        </option>
+                      );
+                    })}
+                  </Select>
+                )}
                 <TableContainer>
                   <Table variant="simple">
                     <TableCaption>Model output for ad account: {true}</TableCaption>
