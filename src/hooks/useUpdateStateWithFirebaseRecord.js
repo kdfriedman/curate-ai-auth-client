@@ -2,7 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import firestoreHandlers from '../services/firebase/data/firestore';
 
-export const useUpdateStateWithFirestoreRecord = (collections, docs, setLoading, setError, setRecord, recordKey) => {
+export const useUpdateStateWithFirestoreRecord = (
+  collections,
+  docs,
+  setLoading,
+  setError,
+  setRecord,
+  recordKey,
+  shouldFetchRecord = false
+) => {
   const { currentUser } = useAuth();
   const { readUserRecordFromFirestore } = firestoreHandlers;
 
@@ -14,8 +22,7 @@ export const useUpdateStateWithFirestoreRecord = (collections, docs, setLoading,
 
       const { [recordKey]: recordCollection } = record?.data() || {};
       if (Array.isArray(recordCollection) && recordCollection.length > 0) {
-        const recordCollectionWithIds = recordCollection.map((record, i) => ({ ...record, id: (record.id = i + 1) }));
-        setRecord((prev) => [...prev, { [recordKey]: recordCollectionWithIds }]);
+        setRecord({ [recordKey]: recordCollection });
         setLoading(false);
       } else {
         setLoading(false);
@@ -27,6 +34,7 @@ export const useUpdateStateWithFirestoreRecord = (collections, docs, setLoading,
   }, [collections, currentUser.uid, readUserRecordFromFirestore, docs, recordKey, setError, setLoading, setRecord]);
 
   useEffect(() => {
+    if (!shouldFetchRecord) return;
     updateStateWithFirestoreRecord().catch((err) => console.error(err));
-  }, [updateStateWithFirestoreRecord]);
+  }, [updateStateWithFirestoreRecord, shouldFetchRecord]);
 };

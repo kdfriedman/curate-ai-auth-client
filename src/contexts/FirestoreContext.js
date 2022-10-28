@@ -7,7 +7,7 @@ export const useFirestoreStore = () => {
 };
 
 export const FirestoreProvider = ({ children }) => {
-  const [modelsStore, setModelsStore] = useState([]);
+  const [modelsStore, setModelsStore] = useState(null);
   const [integrationsStore, setIntegrationsStore] = useState(null);
 
   const value = {

@@ -17,6 +17,7 @@ import {
   Td,
   TableCaption,
   TableContainer,
+  Select,
 } from '@chakra-ui/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useFirestoreStore } from '../contexts/FirestoreContext';
@@ -27,7 +28,8 @@ import { useUpdateStateWithFirestoreRecord } from '../hooks/useUpdateStateWithFi
 export const DashboardPage = () => {
   const [hasError, setError] = useState(false);
   const [isLoading, setLoading] = useState(false);
-  const { modelsStore, setModelsStore } = useFirestoreStore();
+  const [modelId, setModelId] = useState(null);
+  const { modelsStore, setModelsStore, setIntegrationsStore, integrationsStore } = useFirestoreStore();
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
   useUpdateStateWithFirestoreRecord(
@@ -38,6 +40,17 @@ export const DashboardPage = () => {
     setModelsStore,
     FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME
   );
+
+  useUpdateStateWithFirestoreRecord(
+    FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
+    FIREBASE.FIRESTORE.FACEBOOK.DOCS,
+    setLoading,
+    setError,
+    setIntegrationsStore,
+    FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME,
+    integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.length > 0
+  );
+
   const hasEmptyModelCollection = !modelsStore
     ? true
     : modelsStore?.[FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME]?.length === 0;
@@ -66,6 +79,8 @@ export const DashboardPage = () => {
       );
     });
   };
+
+  console.log(modelsStore, integrationsStore);
 
   return (
     <>
@@ -118,6 +133,15 @@ export const DashboardPage = () => {
                 minWidth={isEqualToOrLessThan450[0] ? 0 : '25rem'}
                 padding="1rem 2rem"
               >
+                <Select onChange={() => setModelId()} placeholder="Please select an option" size="lg">
+                  {/* {integrationsStore.map((acct) => {
+                        return (
+                          <option key={acct.id} value={acct.id}>
+                            {acct.name}
+                          </option>
+                        );
+                      })} */}
+                </Select>
                 <TableContainer>
                   <Table variant="simple">
                     <TableCaption>Model output for ad account: {true}</TableCaption>

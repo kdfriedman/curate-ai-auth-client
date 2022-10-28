@@ -43,7 +43,6 @@ export const IntegrationsPage = () => {
   const hasEmptyIntegrationCollection = !integrationsStore
     ? true
     : integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.length === 0;
-
   return (
     <>
       <Header />
