@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Header } from '../components/Header';
 import { Loader } from '../components/Loader';
 import { ErrorMessage } from '../components/ErrorMessage';
@@ -7,7 +7,6 @@ import {
   Button,
   Box,
   useMediaQuery,
-  Text,
   Table,
   Thead,
   Tbody,
@@ -17,8 +16,14 @@ import {
   Td,
   TableCaption,
   TableContainer,
-  Select,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItemOption,
+  MenuOptionGroup,
 } from '@chakra-ui/react';
+import { ChevronDownIcon } from '@chakra-ui/icons';
+
 import { useAuth } from '../contexts/AuthContext';
 import { useFirestoreStore } from '../contexts/FirestoreContext';
 import { ERROR } from '../constants/error';
@@ -29,6 +34,7 @@ export const DashboardPage = () => {
   const [hasError, setError] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [modelId, setModelId] = useState(null);
+  const [integrationId, setIntegrationId] = useState(null);
   const { modelsStore, setModelsStore, setIntegrationsStore, integrationsStore } = useFirestoreStore();
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
@@ -55,6 +61,21 @@ export const DashboardPage = () => {
   const hasEmptyModelCollection = !modelsStore
     ? true
     : modelsStore?.[FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME]?.length === 0;
+
+  const setMenuListStyles = () => {
+    const menuItemList = document.querySelector('[data-id="modelListItems"]');
+    const menuItems = [...menuItemList.children];
+    menuItems.forEach((menuItemGroup) => {
+      const models = menuItemGroup.querySelectorAll('[data-model-id]');
+      [...models].forEach((model) => {
+        if (model.dataset.modelId === modelId) {
+          console.log('model should be highlighted', model);
+          return (model.style.backgroundColor = '#EDF2F7');
+        }
+        model.style.backgroundColor = '#FFF';
+      });
+    });
+  };
 
   const consolidateTableData = (modelOutput) => {
     if (!modelOutput) return;
@@ -86,7 +107,6 @@ export const DashboardPage = () => {
       <Header />
       <Loader isLoading={isLoading} loadingMessage="Loading..." />
       {hasError && <ErrorMessage errorMessage={ERROR.DASHBOARD.MAIN} />}
-
       <section className="profile__section">
         <Box gridColumn="1 / span 4" gridRow="1" className="profile__dashboard" minHeight="20rem" paddingBottom="2rem">
           <Flex
@@ -113,7 +133,6 @@ export const DashboardPage = () => {
             >
               Model Analysis
             </Box>
-
             <Flex
               maxWidth={isEqualToOrLessThan450[0] ? '20rem' : '750px'}
               className="profile__dashboard-card-container"
@@ -132,33 +151,40 @@ export const DashboardPage = () => {
                 minWidth={isEqualToOrLessThan450[0] ? 0 : '25rem'}
                 padding="1rem 2rem"
               >
-                {!hasEmptyModelCollection && (
-                  <Select
-                    onChange={(e) => {
-                      console.log(e);
-                    }}
-                    placeholder="Please select an option"
-                    size="lg"
-                  >
-                    {modelsStore?.[FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME]?.map((model, i) => {
-                      //TODO: replace value with id of model to store in state
-                      // this will allow the component to render correct model table data
-                      // look into sub menu within select, if not possible look to replace select with menu or list all models with associated business acct name e.g. {business name}-{Model Name}
+                <Menu onOpen={setMenuListStyles}>
+                  <MenuButton minWidth="20rem" as={Button} rightIcon={<ChevronDownIcon />}>
+                    Completed Models
+                  </MenuButton>
+                  <MenuList minWidth="240px" data-id="modelListItems">
+                    {integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.map((integration, i) => {
                       return (
-                        <option key={i} value={i}>
-                          {
-                            integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.find((integration) => {
-                              return integration.adAccountId === model.ad_account_id;
-                            }).businessAcctName
-                          }
-                        </option>
+                        <MenuOptionGroup key={integration.adAccountId} title={integration.businessAcctName}>
+                          {modelsStore?.output?.map((model) => {
+                            return (
+                              <React.Fragment key={model.id}>
+                                {model.ad_account_id === integration.adAccountId && (
+                                  <MenuItemOption
+                                    onClick={() => {
+                                      setModelId(model.id);
+                                      setIntegrationId(integration.adAccountId);
+                                    }}
+                                    key={model.id}
+                                    data-model-id={model.id}
+                                  >
+                                    {model.name}
+                                  </MenuItemOption>
+                                )}
+                              </React.Fragment>
+                            );
+                          })}
+                        </MenuOptionGroup>
                       );
                     })}
-                  </Select>
-                )}
+                  </MenuList>
+                </Menu>
                 <TableContainer>
                   <Table variant="simple">
-                    <TableCaption>Model output for ad account: {true}</TableCaption>
+                    <TableCaption>Model output for ad account: {integrationId}</TableCaption>
                     <Thead>
                       <Tr>
                         <Th>Labels</Th>
