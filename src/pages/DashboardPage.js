@@ -7,6 +7,7 @@ import {
   Button,
   Box,
   useMediaQuery,
+  Heading,
   Table,
   Thead,
   Tbody,
@@ -90,11 +91,9 @@ export const DashboardPage = () => {
     });
   };
 
-  const sortTableData = () => {
-    setIsSorted((prev) => !prev);
-  };
+  const sortTableData = () => setIsSorted((prev) => !prev);
 
-  const consolidatedTableData = useMemo(() => {
+  const consolidateTableData = () => {
     if (!modelId) return;
     const consolidatedTableData = [];
     const filteredTableData = modelsStore?.output?.filter((model) => model.id === modelId);
@@ -107,7 +106,8 @@ export const DashboardPage = () => {
     // if sort exists, sort coefs descendingly
     if (isSorted) return consolidatedTableData.sort((a, b) => b[2] - a[2]);
     return consolidatedTableData;
-  }, [modelId, modelsStore?.output, isSorted]);
+  };
+  const consolidatedTableData = consolidateTableData();
 
   return (
     <>
@@ -159,6 +159,30 @@ export const DashboardPage = () => {
                 padding="1rem 2rem"
                 width="100%"
               >
+                {hasEmptyModelCollection && (
+                  <>
+                    <Flex flexFlow="column" justifyContent={isEqualToOrLessThan800[0] ? 'center' : 'start'}>
+                      <Heading as="h4" size="md">
+                        You currently have {modelsStore?.output?.length ?? 0} model outputs to view.
+                      </Heading>
+                      <Flex marginTop="1rem">
+                        If you'd like to generate a new model, please select the button below and complete the model
+                        details form.
+                      </Flex>
+                      <Button
+                        _hover={{
+                          opacity: '.8',
+                          textDecoration: 'none',
+                        }}
+                        colorScheme="brand"
+                        margin={isEqualToOrLessThan800[0] ? '.5rem 0' : '1rem 0'}
+                        width="20rem"
+                      >
+                        Generate Model
+                      </Button>
+                    </Flex>
+                  </>
+                )}
                 {!hasEmptyModelCollection && !consolidatedTableData && (
                   <Flex justifyContent={isEqualToOrLessThan450[0] ? 'center' : 'start'}>
                     Please select a model from the dropdown to view your data.
@@ -177,7 +201,6 @@ export const DashboardPage = () => {
                           textDecoration: 'none',
                         }}
                         colorScheme="brand"
-                        background="#635bff"
                         margin={isEqualToOrLessThan800[0] ? '.5rem 0' : '1rem 0'}
                         minWidth={isEqualToOrLessThan800[0] ? '0' : '20rem'}
                         as={Button}
@@ -194,6 +217,9 @@ export const DashboardPage = () => {
                                   <React.Fragment key={model.id}>
                                     {model.ad_account_id === integration.adAccountId && (
                                       <MenuItemOption
+                                        _hover={{
+                                          backgroundColor: '#EDF2F7 !important',
+                                        }}
                                         onClick={() => {
                                           setModelId(model.id);
                                           setIntegrationId(integration.adAccountId);
@@ -229,7 +255,7 @@ export const DashboardPage = () => {
                   </Flex>
                 )}
 
-                {consolidatedTableData && (
+                {!hasEmptyModelCollection && consolidatedTableData && (
                   <>
                     <TableContainer>
                       <Table marginTop="2rem" variant="simple">
