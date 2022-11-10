@@ -90,6 +90,10 @@ export const DashboardPage = () => {
     });
   };
 
+  const sortTableData = () => {
+    setIsSorted((prev) => !prev);
+  };
+
   const consolidatedTableData = useMemo(() => {
     if (!modelId) return;
     const consolidatedTableData = [];
@@ -100,8 +104,10 @@ export const DashboardPage = () => {
     const coefs = Object.entries(tableData.Coefs);
 
     consolidatedTableData.push(...labels.map((label, i) => [...label, coefs[i]?.[1]]));
+    // if sort exists, sort coefs descendingly
+    if (isSorted) return consolidatedTableData.sort((a, b) => b[2] - a[2]);
     return consolidatedTableData;
-  }, [modelId, modelsStore?.output]);
+  }, [modelId, modelsStore?.output, isSorted]);
 
   return (
     <>
@@ -154,10 +160,16 @@ export const DashboardPage = () => {
                 width="100%"
               >
                 {!hasEmptyModelCollection && !consolidatedTableData && (
-                  <Flex>Please select a model from the dropdown to view your data.</Flex>
+                  <Flex justifyContent={isEqualToOrLessThan450[0] ? 'center' : 'start'}>
+                    Please select a model from the dropdown to view your data.
+                  </Flex>
                 )}
                 {!hasEmptyModelCollection && (
-                  <Flex>
+                  <Flex
+                    flexDir={isEqualToOrLessThan800[0] ? 'column' : 'row'}
+                    columnGap="1rem"
+                    justifyContent={isEqualToOrLessThan800[0] ? 'center' : ''}
+                  >
                     <Menu onOpen={setMenuListStyles}>
                       <MenuButton
                         _hover={{
@@ -166,8 +178,8 @@ export const DashboardPage = () => {
                         }}
                         colorScheme="brand"
                         background="#635bff"
-                        margin="1rem 0 2rem 0"
-                        minWidth="20rem"
+                        margin={isEqualToOrLessThan800[0] ? '.5rem 0' : '1rem 0'}
+                        minWidth={isEqualToOrLessThan800[0] ? '0' : '20rem'}
                         as={Button}
                         rightIcon={<ChevronDownIcon />}
                       >
@@ -200,31 +212,36 @@ export const DashboardPage = () => {
                         })}
                       </MenuList>
                     </Menu>
-                    <Button
-                      onClick={() => setModelId(null)}
-                      _hover={{
-                        opacity: '.8',
-                      }}
-                      minWidth="11rem"
-                      border="1px solid #ece9e9"
-                      backgroundColor="#dadada"
-                      margin="1rem 0 2rem 0"
-                    >
-                      Clear Model
-                    </Button>
+                    {consolidatedTableData && (
+                      <Button
+                        onClick={() => setModelId(null)}
+                        _hover={{
+                          opacity: '.8',
+                        }}
+                        minWidth={isEqualToOrLessThan800[0] ? '0' : '11rem'}
+                        border="1px solid #ece9e9"
+                        backgroundColor="#dadada"
+                        margin={isEqualToOrLessThan800[0] ? '.5rem 0' : '1rem 0'}
+                      >
+                        Clear Model
+                      </Button>
+                    )}
                   </Flex>
                 )}
 
                 {consolidatedTableData && (
                   <>
                     <TableContainer>
-                      <Table variant="simple">
+                      <Table marginTop="2rem" variant="simple">
                         <TableCaption>Model output for ad account: {integrationId}</TableCaption>
                         <Thead>
                           <Tr>
                             <Th>Labels</Th>
                             <Th onClick={() => {}} isNumeric>
-                              Coefs
+                              <Flex cursor="pointer" justifyContent="end" alignItems="center" onClick={sortTableData}>
+                                Coefs
+                                <ChevronDownIcon w={4} h={4} />
+                              </Flex>
                             </Th>
                           </Tr>
                         </Thead>
