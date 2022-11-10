@@ -34,6 +34,7 @@ export const DashboardPage = () => {
   const [hasError, setError] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [modelId, setModelId] = useState(null);
+  const [isSorted, setIsSorted] = useState(false);
   const [integrationId, setIntegrationId] = useState(null);
   const { modelsStore, setModelsStore, setIntegrationsStore, integrationsStore } = useFirestoreStore();
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
@@ -69,24 +70,11 @@ export const DashboardPage = () => {
       const models = menuItemGroup.querySelectorAll('[data-model-id]');
       [...models].forEach((model) => {
         if (model.dataset.modelId === modelId) {
-          console.log('model should be highlighted', model);
           return (model.style.backgroundColor = '#EDF2F7');
         }
         model.style.backgroundColor = '#FFF';
       });
     });
-  };
-
-  const consolidateTableData = (modelOutput) => {
-    if (!modelOutput) return;
-    const consolidatedTableData = [];
-    modelOutput.forEach((output) => {
-      const data = JSON.parse(output?.data);
-      const labels = Object.entries(data[0]);
-      const coefs = Object.entries(data.Coefs);
-      consolidatedTableData.push(...labels.map((label, i) => [...label, coefs[i]?.[1]]));
-    });
-    return consolidatedTableData;
   };
 
   const renderTable = (tableData) => {
@@ -101,6 +89,19 @@ export const DashboardPage = () => {
       );
     });
   };
+
+  const consolidatedTableData = useMemo(() => {
+    if (!modelId) return;
+    const consolidatedTableData = [];
+    const filteredTableData = modelsStore?.output?.filter((model) => model.id === modelId);
+
+    const tableData = JSON.parse(filteredTableData[0]?.data);
+    const labels = Object.entries(tableData[0]);
+    const coefs = Object.entries(tableData.Coefs);
+
+    consolidatedTableData.push(...labels.map((label, i) => [...label, coefs[i]?.[1]]));
+    return consolidatedTableData;
+  }, [modelId, modelsStore?.output]);
 
   return (
     <>
@@ -134,7 +135,7 @@ export const DashboardPage = () => {
               Model Analysis
             </Box>
             <Flex
-              maxWidth={isEqualToOrLessThan450[0] ? '20rem' : '750px'}
+              maxWidth={isEqualToOrLessThan450[0] ? '20rem' : ''}
               className="profile__dashboard-card-container"
               boxShadow="0 0.5rem 1rem rgb(0 0 0 / 15%)"
               margin="1rem 2rem"
@@ -150,56 +151,94 @@ export const DashboardPage = () => {
                 color="rgb(26, 32, 44)"
                 minWidth={isEqualToOrLessThan450[0] ? 0 : '25rem'}
                 padding="1rem 2rem"
+                width="100%"
               >
-                <Menu onOpen={setMenuListStyles}>
-                  <MenuButton minWidth="20rem" as={Button} rightIcon={<ChevronDownIcon />}>
-                    Completed Models
-                  </MenuButton>
-                  <MenuList minWidth="240px" data-id="modelListItems">
-                    {integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.map((integration, i) => {
-                      return (
-                        <MenuOptionGroup key={integration.adAccountId} title={integration.businessAcctName}>
-                          {modelsStore?.output?.map((model) => {
-                            return (
-                              <React.Fragment key={model.id}>
-                                {model.ad_account_id === integration.adAccountId && (
-                                  <MenuItemOption
-                                    onClick={() => {
-                                      setModelId(model.id);
-                                      setIntegrationId(integration.adAccountId);
-                                    }}
-                                    key={model.id}
-                                    data-model-id={model.id}
-                                  >
-                                    {model.name}
-                                  </MenuItemOption>
-                                )}
-                              </React.Fragment>
-                            );
-                          })}
-                        </MenuOptionGroup>
-                      );
-                    })}
-                  </MenuList>
-                </Menu>
-                <TableContainer>
-                  <Table variant="simple">
-                    <TableCaption>Model output for ad account: {integrationId}</TableCaption>
-                    <Thead>
-                      <Tr>
-                        <Th>Labels</Th>
-                        <Th isNumeric>Coefs</Th>
-                      </Tr>
-                    </Thead>
-                    {!hasEmptyModelCollection && <Tbody></Tbody>}
-                    <Tfoot>
-                      <Tr>
-                        <Th>Labels</Th>
-                        <Th isNumeric>Coefs</Th>
-                      </Tr>
-                    </Tfoot>
-                  </Table>
-                </TableContainer>
+                {!hasEmptyModelCollection && !consolidatedTableData && (
+                  <Flex>Please select a model from the dropdown to view your data.</Flex>
+                )}
+                {!hasEmptyModelCollection && (
+                  <Flex>
+                    <Menu onOpen={setMenuListStyles}>
+                      <MenuButton
+                        _hover={{
+                          opacity: '.8',
+                          textDecoration: 'none',
+                        }}
+                        colorScheme="brand"
+                        background="#635bff"
+                        margin="1rem 0 2rem 0"
+                        minWidth="20rem"
+                        as={Button}
+                        rightIcon={<ChevronDownIcon />}
+                      >
+                        Completed Models
+                      </MenuButton>
+                      <MenuList minWidth="240px" data-id="modelListItems">
+                        {integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.map((integration, i) => {
+                          return (
+                            <MenuOptionGroup key={integration.adAccountId} title={integration.businessAcctName}>
+                              {modelsStore?.output?.map((model) => {
+                                return (
+                                  <React.Fragment key={model.id}>
+                                    {model.ad_account_id === integration.adAccountId && (
+                                      <MenuItemOption
+                                        onClick={() => {
+                                          setModelId(model.id);
+                                          setIntegrationId(integration.adAccountId);
+                                        }}
+                                        key={model.id}
+                                        data-model-id={model.id}
+                                      >
+                                        {model.name}
+                                      </MenuItemOption>
+                                    )}
+                                  </React.Fragment>
+                                );
+                              })}
+                            </MenuOptionGroup>
+                          );
+                        })}
+                      </MenuList>
+                    </Menu>
+                    <Button
+                      onClick={() => setModelId(null)}
+                      _hover={{
+                        opacity: '.8',
+                      }}
+                      minWidth="11rem"
+                      border="1px solid #ece9e9"
+                      backgroundColor="#dadada"
+                      margin="1rem 0 2rem 0"
+                    >
+                      Clear Model
+                    </Button>
+                  </Flex>
+                )}
+
+                {consolidatedTableData && (
+                  <>
+                    <TableContainer>
+                      <Table variant="simple">
+                        <TableCaption>Model output for ad account: {integrationId}</TableCaption>
+                        <Thead>
+                          <Tr>
+                            <Th>Labels</Th>
+                            <Th onClick={() => {}} isNumeric>
+                              Coefs
+                            </Th>
+                          </Tr>
+                        </Thead>
+                        {!hasEmptyModelCollection && <Tbody>{renderTable(consolidatedTableData)}</Tbody>}
+                        <Tfoot>
+                          <Tr>
+                            <Th>Labels</Th>
+                            <Th isNumeric>Coefs</Th>
+                          </Tr>
+                        </Tfoot>
+                      </Table>
+                    </TableContainer>
+                  </>
+                )}
               </Box>
             </Flex>
           </Flex>

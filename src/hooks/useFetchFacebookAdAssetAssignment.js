@@ -86,8 +86,8 @@ const formatFacebookUserAdCampaignList = (adCampaignListResult) => {
         const stopFormattedDateLastItem = stopFormattedDateList.shift();
         startFormattedDateList.push(startFormattedDateLastItem);
         stopFormattedDateList.push(stopFormattedDateLastItem);
-        startDate = startFormattedDateList.join('-');
-        stopDate = stopFormattedDateList.join('-');
+        startDate = startFormattedDateList.join('/');
+        stopDate = stopFormattedDateList.join('/');
       }
     } catch (err) {
       console.error(err);
