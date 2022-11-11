@@ -1,9 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Loader } from '../components/Loader';
 import { ErrorMessage } from '../components/ErrorMessage';
 import {
   Flex,
+  Tooltip,
+  Text,
   Button,
   Box,
   useMediaQuery,
@@ -22,24 +25,52 @@ import {
   MenuList,
   MenuItemOption,
   MenuOptionGroup,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
+  FormControl,
+  FormLabel,
+  FormErrorMessage,
+  Alert,
+  AlertIcon,
+  CloseButton,
+  Link,
 } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
-
 import { useAuth } from '../contexts/AuthContext';
 import { useFirestoreStore } from '../contexts/FirestoreContext';
 import { ERROR } from '../constants/error';
 import { FIREBASE } from '../services/firebase/constants';
 import { useUpdateStateWithFirestoreRecord } from '../hooks/useUpdateStateWithFirebaseRecord';
+import { errorMap } from '../components/ErrorMap';
+import { Formik, Form, Field } from 'formik';
+import * as Yup from 'yup';
 
 export const DashboardPage = () => {
   const [hasError, setError] = useState(false);
   const [isLoading, setLoading] = useState(false);
+  const [hasModelCreationErr, setModelCreationErr] = useState(false);
+  const [isModelCreationLoading, setModelCreationLoading] = useState(false);
   const [modelId, setModelId] = useState(null);
   const [isSorted, setIsSorted] = useState(false);
   const [integrationId, setIntegrationId] = useState(null);
   const { modelsStore, setModelsStore, setIntegrationsStore, integrationsStore } = useFirestoreStore();
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [values, setValues] = useState();
+  const [actions, setActions] = useState();
+
+  // form validation schema
+  const LoginSchema = Yup.object().shape({
+    name: Yup.string().required('Required'),
+  });
+
   useUpdateStateWithFirestoreRecord(
     FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
     FIREBASE.FIRESTORE.FACEBOOK.DOCS,
@@ -59,6 +90,25 @@ export const DashboardPage = () => {
     FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME,
     true
   );
+
+  useEffect(() => {
+    if (values?.name) {
+      // TODO: create real createModel api call here
+      // createModel()
+      //   .then((response) => {
+      //     // make state updates with response data
+      //     onClose();
+      //   })
+      //   .catch((err) => {
+      //     console.error(err);
+      //     setModelCreationErr('failed to create model');
+      //   });
+      onClose();
+    }
+  }, [values, actions, onClose]);
+
+  const handleCloseBtnClick = () => setModelCreationErr(null);
+  const handleSubmit = async (values) => setValues(values);
 
   const hasEmptyModelCollection = !modelsStore
     ? true
@@ -109,6 +159,7 @@ export const DashboardPage = () => {
   };
   const consolidatedTableData = consolidateTableData();
 
+  console.log(integrationsStore);
   return (
     <>
       <Header />
@@ -165,24 +216,116 @@ export const DashboardPage = () => {
                       <Heading as="h4" size="md">
                         You currently have {modelsStore?.output?.length ?? 0} model outputs to view.
                       </Heading>
-                      <Flex marginTop="1rem">
-                        If you'd like to generate a new model, please select the button below and complete the model
-                        details form.
+                      <Flex fontSize="14px" fontWeight="600" marginTop="1rem">
+                        If you'd like to generate a new model, please select the Generate Model button below and provide
+                        a unique name for your model.
                       </Flex>
-                      <Button
-                        _hover={{
-                          opacity: '.8',
-                          textDecoration: 'none',
-                        }}
-                        colorScheme="brand"
-                        margin={isEqualToOrLessThan800[0] ? '.5rem 0' : '1rem 0'}
-                        width="20rem"
-                      >
-                        Generate Model
-                      </Button>
+
+                      {!integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME] ? (
+                        <Tooltip
+                          label="You currently do not have any integrations. To generate a model, you must have at least one integration."
+                          fontSize="sm"
+                        >
+                          <Button
+                            disabled={!integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]}
+                            _hover={{
+                              textDecoration: 'none',
+                            }}
+                            colorScheme="brand"
+                            margin={isEqualToOrLessThan800[0] ? '.5rem 0' : '1rem 0'}
+                            width="20rem"
+                          >
+                            Generate Model
+                          </Button>
+                        </Tooltip>
+                      ) : (
+                        <Button
+                          onClick={onOpen}
+                          _hover={{
+                            opacity: '.8',
+                            textDecoration: 'none',
+                          }}
+                          colorScheme="brand"
+                          margin={isEqualToOrLessThan800[0] ? '.5rem 0' : '1rem 0'}
+                          width="20rem"
+                        >
+                          Generate Model
+                        </Button>
+                      )}
                     </Flex>
+                    <Modal scrollBehavior={'inside'} size={'xl'} isOpen={isOpen} onClose={onClose}>
+                      <ModalOverlay />
+                      <ModalContent>
+                        <ModalHeader textAlign="center" margin="1rem 0 0">
+                          New Model
+                          <Heading as="h6" size="xs">
+                            Please provide a name for your model.
+                          </Heading>
+                        </ModalHeader>
+                        <ModalCloseButton />
+                        <ModalBody>
+                          <Flex flexDirection="column">
+                            {hasModelCreationErr && (
+                              <Alert margin="1rem 0" status="error">
+                                <AlertIcon />
+                                {errorMap.get(hasModelCreationErr)}
+                                <CloseButton onClick={handleCloseBtnClick} position="absolute" right="8px" top="8px" />
+                              </Alert>
+                            )}
+                            <Formik
+                              initialValues={{
+                                name: '',
+                              }}
+                              validationSchema={LoginSchema}
+                              onSubmit={handleSubmit}
+                            >
+                              {({ errors, touched }) => (
+                                <Form width="330px">
+                                  <FormControl className="form-floating" isInvalid={errors.name && touched.name}>
+                                    <FormLabel fontSize="16px" marginTop="10px" htmlFor="name">
+                                      Name
+                                    </FormLabel>
+                                    <Field
+                                      style={{ height: 'calc(2.5rem + 2px' }}
+                                      className="form-control"
+                                      name="name"
+                                      type="text"
+                                      placeholder="Name"
+                                    />
+                                    <FormErrorMessage>{errors.name}</FormErrorMessage>
+                                  </FormControl>
+                                  <Button
+                                    disabled={isModelCreationLoading}
+                                    _hover={{
+                                      opacity: '.8',
+                                    }}
+                                    _focus={{
+                                      outline: 0,
+                                      boxShadow: 'none',
+                                    }}
+                                    mt={4}
+                                    color="#fff"
+                                    backgroundColor="#635bff"
+                                    type="submit"
+                                    fontSize="16px"
+                                  >
+                                    Run Model
+                                  </Button>
+                                </Form>
+                              )}
+                            </Formik>
+                          </Flex>
+                        </ModalBody>
+
+                        <ModalFooter
+                          flexDir={isEqualToOrLessThan450[0] ? 'column' : 'row'}
+                          justifyContent="space-evenly"
+                        ></ModalFooter>
+                      </ModalContent>
+                    </Modal>
                   </>
                 )}
+
                 {!hasEmptyModelCollection && !consolidatedTableData && (
                   <Flex justifyContent={isEqualToOrLessThan450[0] ? 'center' : 'start'}>
                     Please select a model from the dropdown to view your data.

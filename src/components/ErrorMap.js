@@ -11,5 +11,6 @@ errorMap.set('failed to read record from firestore', ErrorHandler);
 errorMap.set('auth/email-already-in-use', ErrorHandler);
 errorMap.set('auth/user-not-found', ERROR.AUTH.INVALID_EMAIL);
 errorMap.set('auth/wrong-password', ERROR.AUTH.INVALID_PASSWORD);
+errorMap.set('failed to create model', ERROR.MODEL.FAILED_TO_CREATE_MODEL);
 
 export { errorMap };

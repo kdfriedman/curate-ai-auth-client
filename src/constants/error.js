@@ -9,4 +9,7 @@ export const ERROR = {
     INVALID_EMAIL: 'Invalid email, please try again',
     INVALID_PASSWORD: 'Invalid password, please try again',
   },
+  MODEL: {
+    FAILED_TO_CREATE_MODEL: 'Failed to create a model. Please reach out to the CurateAi team for assistance',
+  },
 };
