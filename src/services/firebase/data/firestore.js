@@ -1,5 +1,5 @@
 import { db } from '../firebase';
-import { updateDoc, doc, getDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { updateDoc, doc, getDoc, arrayUnion, arrayRemove, setDoc } from 'firebase/firestore';
 import { FIREBASE_ERROR, FIREBASE } from '../constants';
 
 const readUserRecordFromFirestore = async (uid, collections, docs) => {
@@ -60,15 +60,9 @@ const addRecordToFirestore = async (uid, collections, docs, payload, payloadName
 
   // if record does not exist, create new record in firestore
   try {
-    await db
-      .collection(collection1)
-      .doc(uid)
-      .collection(collection2)
-      .doc(doc1)
-      .set({
-        [payloadName]: [payload],
-      });
-
+    await setDoc(doc(db, collection1, uid, collection2, doc1), {
+      [payloadName]: [payload],
+    });
     return [FIREBASE.FIRESTORE.GENERIC.RECORD_CREATED, null];
   } catch (error) {
     console.error(FIREBASE_ERROR.FIRESTORE.GENERIC.FAILED_TO_CREATE_NEW_RECORD);

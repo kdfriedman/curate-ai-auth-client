@@ -179,7 +179,7 @@ const validateFacebookUserFirestoreRecord = async (dispatch, currentUser, addedF
 
 const updateStateWithFacebookFirestoreRecord = (dispatch, record, setIntegrationRecord, setIntegrationActiveStatus) => {
   if (record?.exists) {
-    const { facebookBusinessAccts } = record?.data();
+    const { facebookBusinessAccts } = record?.data() ?? {};
     // update parent component with firestore new record data
     setIntegrationRecord({
       facebookBusinessAccts,

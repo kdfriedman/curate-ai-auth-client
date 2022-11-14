@@ -32,7 +32,7 @@ export const LoginPage = () => {
   // form validation schema
   const LoginSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Required'),
-    password: Yup.string().required('Required'),
+    password: Yup.string().min(1).max(20).required('Required'),
   });
 
   useEffect(() => {

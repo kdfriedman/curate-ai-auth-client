@@ -7,6 +7,7 @@ import {
   Flex,
   Tooltip,
   Text,
+  Select,
   Button,
   Box,
   useMediaQuery,
@@ -68,7 +69,15 @@ export const DashboardPage = () => {
 
   // form validation schema
   const LoginSchema = Yup.object().shape({
-    name: Yup.string().required('Required'),
+    name: Yup.string()
+      .min(2)
+      .max(60)
+      .matches(
+        /^[^@$%^&*()[\]~`"';:+<>=?,.]+$/,
+        'Please use only letters, numbers, dashes, or underscores in your model name.'
+      )
+      .required('Providing a name is required.'),
+    adAccountSelect: Yup.string().required('Selecting an ad account is required.'),
   });
 
   useUpdateStateWithFirestoreRecord(
@@ -93,6 +102,7 @@ export const DashboardPage = () => {
 
   useEffect(() => {
     if (values?.name) {
+      console.log(values);
       // TODO: create real createModel api call here
       // createModel()
       //   .then((response) => {
@@ -159,7 +169,6 @@ export const DashboardPage = () => {
   };
   const consolidatedTableData = consolidateTableData();
 
-  console.log(integrationsStore);
   return (
     <>
       <Header />
@@ -259,7 +268,7 @@ export const DashboardPage = () => {
                         <ModalHeader textAlign="center" margin="1rem 0 0">
                           New Model
                           <Heading as="h6" size="xs">
-                            Please provide a name for your model.
+                            Please complete the details below to run your model.
                           </Heading>
                         </ModalHeader>
                         <ModalCloseButton />
@@ -275,6 +284,7 @@ export const DashboardPage = () => {
                             <Formik
                               initialValues={{
                                 name: '',
+                                adAccountSelect: '',
                               }}
                               validationSchema={LoginSchema}
                               onSubmit={handleSubmit}
@@ -294,6 +304,37 @@ export const DashboardPage = () => {
                                     />
                                     <FormErrorMessage>{errors.name}</FormErrorMessage>
                                   </FormControl>
+
+                                  <Field>
+                                    {({ field, form }) => (
+                                      <FormControl
+                                        className="form-floating"
+                                        isInvalid={errors.adAccountSelect && touched.adAccountSelect}
+                                        name="adAccountSelect"
+                                        id="adAccountSelect"
+                                      >
+                                        <FormLabel fontSize="16px" marginTop="10px" htmlFor="name">
+                                          Account
+                                        </FormLabel>
+                                        <Select
+                                          margin="0"
+                                          onChange={field.onChange}
+                                          name="adAccountSelect"
+                                          placeholder="Select an ad account"
+                                        >
+                                          {integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.map(
+                                            (integration, i) => (
+                                              <option key={integration.id} value={integration.adAccountId}>
+                                                {integration.adAccountId + ' | ' + integration.businessAcctName}
+                                              </option>
+                                            )
+                                          )}
+                                        </Select>
+                                        <FormErrorMessage>{errors.adAccountSelect}</FormErrorMessage>
+                                      </FormControl>
+                                    )}
+                                  </Field>
+
                                   <Button
                                     disabled={isModelCreationLoading}
                                     _hover={{

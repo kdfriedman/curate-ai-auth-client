@@ -66,7 +66,7 @@ export const FacebookAppIntegration = ({ setIntegrationRecord, setIntegrationAct
 
   // fetch user business accts list
   useEffect(() => {
-    if (!isFetchFacebookBusinessAccounts || hasErrors) return null;
+    if (!isFetchFacebookBusinessAccounts || hasErrors) return;
     handleFetchFacebookBusinessAccounts(dispatch).catch((err) => {
       console.error(err);
       setIntegrationActiveStatus(false);
@@ -82,7 +82,7 @@ export const FacebookAppIntegration = ({ setIntegrationRecord, setIntegrationAct
 
   // connect partner biz with client biz, create sys user in client biz, fetch client ad account list
   useEffect(() => {
-    if (!isFetchFacebookSystemUserToken || hasErrors) return null;
+    if (!isFetchFacebookSystemUserToken || hasErrors) return;
     handleFetchFacebookSystemUserToken(dispatch, userBusinessId).catch((err) => {
       console.error(err);
       setIntegrationActiveStatus(false);
@@ -99,7 +99,7 @@ export const FacebookAppIntegration = ({ setIntegrationRecord, setIntegrationAct
 
   // add assets to system user within client's facebook business account
   useEffect(() => {
-    if (!isFetchFacebookAdAssetAssignment || hasErrors) return null;
+    if (!isFetchFacebookAdAssetAssignment || hasErrors) return;
     handleFetchFacebookAdAssetAssignment(dispatch, state, setIntegrationRecord, setIntegrationActiveStatus).catch(
       (err) => {
         console.error(err);
