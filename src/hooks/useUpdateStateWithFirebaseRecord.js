@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import firestoreHandlers from '../services/firebase/data/firestore';
 

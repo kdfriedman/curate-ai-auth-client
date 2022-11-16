@@ -1,11 +1,11 @@
 import { Flex, Tooltip, Button, Heading, useMediaQuery } from '@chakra-ui/react';
 
 export const ModelCreationCard = ({
-  integrationsStore = {},
-  integrationsPayloadName,
+  hasNoIntegrations,
   onOpen,
   modelCardHeading,
   modelCardDesc,
+  createModelBtnTxt,
 }) => {
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
   return (
@@ -17,13 +17,13 @@ export const ModelCreationCard = ({
         {modelCardDesc}
       </Flex>
 
-      {!integrationsStore?.[integrationsPayloadName] ? (
+      {hasNoIntegrations ? (
         <Tooltip
           label="You currently do not have any integrations. To generate a model, you must have at least one integration."
           fontSize="sm"
         >
           <Button
-            disabled={!integrationsStore?.[integrationsPayloadName]}
+            disabled={hasNoIntegrations}
             _hover={{
               textDecoration: 'none',
             }}
@@ -31,7 +31,7 @@ export const ModelCreationCard = ({
             margin={isEqualToOrLessThan800[0] ? '.5rem 0' : '1rem 0'}
             width="20rem"
           >
-            Create Model
+            {createModelBtnTxt}
           </Button>
         </Tooltip>
       ) : (
@@ -45,7 +45,7 @@ export const ModelCreationCard = ({
           margin={isEqualToOrLessThan800[0] ? '.5rem 0' : '1rem 0'}
           width="20rem"
         >
-          Create Model
+          {createModelBtnTxt}
         </Button>
       )}
     </Flex>

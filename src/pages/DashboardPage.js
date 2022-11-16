@@ -7,7 +7,7 @@ import { ModelCreationCard } from '../components/dashboard/ModelCreationCard';
 import { ModelMenuSelect } from '../components/dashboard/ModelMenuSelect';
 import { ModelTable } from '../components/dashboard/ModelTable';
 import { ErrorMessage } from '../components/ErrorMessage';
-import { Flex, Box, useMediaQuery, useDisclosure } from '@chakra-ui/react';
+import { Flex, Box, useMediaQuery, useDisclosure, Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useFirestoreStore } from '../contexts/FirestoreContext';
 import { ERROR } from '../constants/error';
@@ -48,6 +48,10 @@ export const DashboardPage = () => {
   const hasEmptyModelCollection = !modelsStore
     ? true
     : modelsStore?.[FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME]?.length === 0;
+
+  const hasNoIntegrations = !integrationsStore
+    ? true
+    : integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.length === 0;
 
   const consolidateTableData = () => {
     if (!modelId) return;
@@ -110,58 +114,65 @@ export const DashboardPage = () => {
               padding="1rem 2rem"
               width="100%"
             >
-              {hasEmptyModelCollection && (
-                <>
-                  <ModelCreationCard
-                    modelsStore={modelsStore}
-                    integrationsStore={integrationsStore}
-                    integrationsPayloadName={FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME}
-                    onOpen={onOpen}
-                    modelCardHeading={`You currently have ${modelsStore?.output?.length ?? 0} model outputs to view.`}
-                    modelCardDesc="If you'd like to generate a new model, please select the Create Model button below, provide a unique name and
+              <Tabs isFitted variant="enclosed">
+                <TabList mb="1em">
+                  <Tab isDisabled={hasNoIntegrations}>Create Models</Tab>
+                  <Tab isDisabled={hasEmptyModelCollection}>Completed Models</Tab>
+                </TabList>
+                <TabPanels>
+                  <TabPanel>
+                    <ModelCreationCard
+                      modelsStore={modelsStore}
+                      hasNoIntegrations={hasNoIntegrations}
+                      onOpen={onOpen}
+                      modelCardHeading={`You currently have ${modelsStore?.output?.length ?? 0} model outputs to view.`}
+                      modelCardDesc="If you'd like to generate a new model, please select the Create Model button below, provide a unique name and
                     select the associated ad account for your model."
-                  />
-                </>
-              )}
+                      createModelBtnTxt="Create Model"
+                    />
 
-              {integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME] && (
-                <ModelCreationModal
-                  modalTitle="New Model"
-                  modalHeader=" Please complete the details below to run your model."
-                  isOpen={isOpen}
-                  onClose={onClose}
-                >
-                  <ModelCreationForm
-                    onClose={onClose}
-                    integrationsStore={integrationsStore}
-                    integrationsPayloadName={FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME}
-                    formSingleLabel="Name"
-                    formSelectLabel="Account"
-                    formSubmitBtn="Run Model"
-                  />
-                </ModelCreationModal>
-              )}
+                    {!hasNoIntegrations && (
+                      <ModelCreationModal
+                        modalTitle="New Model"
+                        modalHeader=" Please complete the details below to run your model."
+                        isOpen={isOpen}
+                        onClose={onClose}
+                      >
+                        <ModelCreationForm
+                          onClose={onClose}
+                          integrationsStore={integrationsStore}
+                          integrationsPayloadName={FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME}
+                          formSingleLabel="Name"
+                          formSelectLabel="Account"
+                          formSubmitBtn="Run Model"
+                        />
+                      </ModelCreationModal>
+                    )}
+                  </TabPanel>
+                  <TabPanel>
+                    <ModelMenuSelect
+                      consolidatedTableData={consolidatedTableData}
+                      modelId={modelId}
+                      setModelId={setModelId}
+                      modelsStore={modelsStore}
+                      integrationsStore={integrationsStore}
+                      integrationsStorePayload={FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME}
+                      setIntegrationId={setIntegrationId}
+                      openMenuBtnTxt="Completed Models"
+                      closeMenuBtnTxt="Clear Model"
+                    />
 
-              <ModelMenuSelect
-                consolidatedTableData={consolidatedTableData}
-                modelId={modelId}
-                setModelId={setModelId}
-                modelsStore={modelsStore}
-                integrationsStore={integrationsStore}
-                integrationsStorePayload={FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME}
-                setIntegrationId={setIntegrationId}
-                openMenuBtnTxt="Completed Models"
-                closeMenuBtnTxt="Clear Model"
-              />
-
-              <ModelTable
-                hasEmptyModelCollection={hasEmptyModelCollection}
-                consolidatedTableData={consolidatedTableData}
-                integrationId={integrationId}
-                setIsSorted={setIsSorted}
-                tableHeaders={['Labels', 'Coefs']}
-                tableCaption={`Model output for ad account: ${integrationId}`}
-              />
+                    <ModelTable
+                      hasEmptyModelCollection={hasEmptyModelCollection}
+                      consolidatedTableData={consolidatedTableData}
+                      integrationId={integrationId}
+                      setIsSorted={setIsSorted}
+                      tableHeaders={['Labels', 'Coefs']}
+                      tableCaption={`Model output for ad account: ${integrationId}`}
+                    />
+                  </TabPanel>
+                </TabPanels>
+              </Tabs>
             </Box>
           </Flex>
         </Flex>
