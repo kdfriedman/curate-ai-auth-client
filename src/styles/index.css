@@ -165,6 +165,12 @@ div.chakra-select__wrapper {
   border-radius: 10px;
 }
 
+.dashboard {
+  background: #fff;
+  box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 15%);
+  border-radius: 10px;
+}
+
 .loading__message {
   font-size: 16px;
   color: #6c757d;
