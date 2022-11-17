@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Flex, Button, Box, CircularProgress, useMediaQuery, useDisclosure } from '@chakra-ui/react';
 import { FacebookAppIntegration } from '../components/integrations/FacebookIntegration';
 import { Header } from '../components/Header';

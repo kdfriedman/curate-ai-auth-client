@@ -11,7 +11,7 @@ export const FIREBASE = {
     },
     MODELS: {
       COLLECTIONS: ['clients', 'models'],
-      DOCS: ['image-and-video'],
+      DOCS: ['image-and-video', 'modelState'],
       PAYLOAD_NAME: 'output',
     },
     GENERIC: {

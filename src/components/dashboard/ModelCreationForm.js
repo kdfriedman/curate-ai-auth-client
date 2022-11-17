@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useRunModel } from '../../hooks/useRunModel';
 import {
   Flex,
   Select,
@@ -10,9 +11,9 @@ import {
   AlertIcon,
   CloseButton,
 } from '@chakra-ui/react';
-import { errorMap } from '../ErrorMap';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const ModelCreationForm = ({
   onClose,
@@ -22,26 +23,10 @@ export const ModelCreationForm = ({
   formSelectLabel,
   formSubmitBtn,
 }) => {
-  const [hasModelCreationErr, setModelCreationErr] = useState(false);
+  const [hasModelCreationErr, setModelCreationErr] = useState(null);
   const [isModelCreationLoading, setModelCreationLoading] = useState(false);
-  const [values, setValues] = useState();
-
-  useEffect(() => {
-    if (values?.name) {
-      console.log(values);
-      // TODO: create real createModel api call here
-      // createModel()
-      //   .then((response) => {
-      //     // make state updates with response data
-      //     onClose();
-      //   })
-      //   .catch((err) => {
-      //     console.error(err);
-      //     setModelCreationErr('failed to create model');
-      //   });
-      onClose();
-    }
-  }, [values, onClose]);
+  const { getAuthToken, getAppToken, currentUser } = useAuth();
+  const { handleRunModel } = useRunModel();
 
   // form validation schema
   const LoginSchema = Yup.object().shape({
@@ -57,7 +42,44 @@ export const ModelCreationForm = ({
   });
 
   const handleCloseBtnClick = () => setModelCreationErr(null);
-  const handleSubmit = async (values) => setValues(values);
+  const handleSubmit = async (values) => {
+    const integrationPayload = integrationsStore[integrationsPayloadName].find(
+      (integration) => integration.adAccountId === values.adAccountSelect
+    );
+
+    if (!integrationPayload) {
+      return setModelCreationErr('You must have at least (1) matching integration id to run a model');
+    }
+
+    const { token: appCheckToken } = (await getAppToken(currentUser)) ?? {};
+    const authToken = await getAuthToken(currentUser);
+    const activeCampaigns = integrationPayload.adCampaignList.filter((adCampaign) => adCampaign.isActive);
+
+    if (activeCampaigns.length === 0) {
+      return setModelCreationErr('You must select at least (1) campaign to run a model.');
+    }
+
+    const activeCampaignIds = activeCampaigns.map((activeCampaign) => activeCampaign.id);
+    setModelCreationLoading(true);
+
+    const [completedModel, modelState] = await handleRunModel(
+      {
+        FIREBASE_ID_TOKEN: authToken,
+        UID: integrationPayload.uid,
+        AD_ACCOUNT_ID: integrationPayload.adAccountId,
+        FB_CAMPAIGN_IDS: activeCampaignIds,
+        SYSTEM_USER_ACCESS_TOKEN: integrationPayload.sysUserAccessToken,
+        MODEL_NAME: values.name,
+      },
+      appCheckToken
+    );
+
+    console.log(modelState);
+    console.log(completedModel);
+
+    setModelCreationLoading(false);
+    onClose();
+  };
 
   return (
     <>
@@ -65,7 +87,7 @@ export const ModelCreationForm = ({
         {hasModelCreationErr && (
           <Alert margin="1rem 0" status="error">
             <AlertIcon />
-            {errorMap.get(hasModelCreationErr)}
+            {hasModelCreationErr}
             <CloseButton onClick={handleCloseBtnClick} position="absolute" right="8px" top="8px" />
           </Alert>
         )}
@@ -130,7 +152,7 @@ export const ModelCreationForm = ({
                   outline: 0,
                   boxShadow: 'none',
                 }}
-                mt={4}
+                mt="2rem"
                 color="#fff"
                 backgroundColor="#635bff"
                 type="submit"

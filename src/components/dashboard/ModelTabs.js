@@ -10,9 +10,27 @@ export const ModelTabs = ({
 }) => {
   return (
     <Tabs isFitted variant="enclosed">
-      <TabList mb="1em">
-        <Tab isDisabled={hasNoIntegrations}>Create Models</Tab>
-        <Tab isDisabled={hasEmptyModelCollection}>Completed Models</Tab>
+      <TabList mb="2em">
+        <Tab
+          pt="1rem"
+          fontWeight="700"
+          fontSize="1.25rem"
+          lineHeight="1.2"
+          color="rgb(26, 32, 44) !important"
+          isDisabled={hasNoIntegrations}
+        >
+          Create Models
+        </Tab>
+        <Tab
+          pt="1rem"
+          fontWeight="700"
+          fontSize="1.25rem"
+          lineHeight="1.2"
+          color="rgb(26, 32, 44) !important"
+          isDisabled={hasEmptyModelCollection}
+        >
+          Completed Models
+        </Tab>
       </TabList>
       <TabPanels>
         <TabPanel>

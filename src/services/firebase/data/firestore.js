@@ -1,5 +1,5 @@
 import { db } from '../firebase';
-import { updateDoc, doc, getDoc, arrayUnion, arrayRemove, setDoc } from 'firebase/firestore';
+import { updateDoc, doc, getDoc, arrayUnion, arrayRemove, setDoc, increment } from 'firebase/firestore';
 import { FIREBASE_ERROR, FIREBASE } from '../constants';
 
 const readUserRecordFromFirestore = async (uid, collections, docs) => {
@@ -23,6 +23,15 @@ const readCurateAIRecordFromFirestore = async (uid, collection) => {
     console.error(FIREBASE_ERROR.FIRESTORE.CURATEAI.SYSTEM_USER_ACCESS_TOKEN_CANNOT_BE_FETCHED);
     return [null, error];
   }
+};
+
+const incrementFirebaseRecord = async (uid, collections, doc, keyToIncrement, valueToIncrement, moreProps) => {
+  const [collection1, collection2] = collections;
+
+  await updateDoc(doc(db, collection1, uid, collection2, doc), {
+    [keyToIncrement]: increment(valueToIncrement),
+    ...moreProps,
+  });
 };
 
 const addRecordToFirestore = async (uid, collections, docs, payload, payloadName) => {
@@ -116,6 +125,7 @@ const firestoreHandlers = {
   removeRecordFromFirestore,
   readUserRecordFromFirestore,
   readCurateAIRecordFromFirestore,
+  incrementFirebaseRecord,
 };
 
 export default firestoreHandlers;

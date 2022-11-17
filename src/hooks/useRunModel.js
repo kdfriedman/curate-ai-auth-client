@@ -1,0 +1,47 @@
+import fetchData from '../services/fetch/fetch';
+import { HTTP_METHODS } from '../services/fetch/constants';
+import firestoreHandlers from '../services/firebase/data/firestore';
+import { FIREBASE } from '../services/firebase/constants';
+import { useAuth } from '../contexts/AuthContext';
+const { incrementFirebaseRecord } = firestoreHandlers;
+const { POST } = HTTP_METHODS;
+
+const setModelState = async (currentUser, valueToIncrement, moreProps) => {
+  // update firestore with system user access token, auth uid, and email
+  const [modelState, modelStateErr] = await incrementFirebaseRecord(
+    currentUser.uid,
+    FIREBASE.FIRESTORE.MODELS.COLLECTIONS,
+    FIREBASE.FIRESTORE.MODELS.DOCS[1],
+    FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME,
+    valueToIncrement,
+    moreProps
+  );
+  return [modelState, modelStateErr];
+};
+
+export const useRunModel = () => {
+  const { currentUser } = useAuth();
+  const handleRunModel = async (payload, appCheckId) => {
+    const MODEL_STATE_VALUE_TO_INCREMENT = 1;
+    const moreProps = { isModelLoading: true };
+    try {
+      const [modelState, modelStateErr] = await setModelState(currentUser, MODEL_STATE_VALUE_TO_INCREMENT, moreProps);
+      if (modelStateErr) throw modelStateErr;
+
+      const [modelSuccess, modelErr] = await fetchData({
+        method: POST,
+        url:
+          process.env.NODE_ENV === 'development'
+            ? `${process.env.REACT_APP_MODELS_CREATE_HOST_DEV}${process.env.REACT_APP_MODELS_CREATE_PATH}`
+            : `${process.env.REACT_APP_MODELS_CREATE_HOST_PROD}${process.env.REACT_APP_MODELS_CREATE_PATH}`,
+        data: payload,
+        headers: { [process.env.REACT_APP_FIREBASE_APP_CHECK_CUSTOM_HEADER]: appCheckId },
+      });
+      if (modelErr) throw modelErr;
+      return [modelSuccess, modelState];
+    } catch (err) {
+      return err;
+    }
+  };
+  return { handleRunModel };
+};
