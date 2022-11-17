@@ -17,6 +17,7 @@ export const FIREBASE = {
     GENERIC: {
       UNION_ADDED: 'New union has been added to firestore',
       RECORD_CREATED: 'New firestore record has been created',
+      RECORD_UPDATED: 'Firestore record has been updated',
     },
   },
 };

@@ -25,13 +25,19 @@ const readCurateAIRecordFromFirestore = async (uid, collection) => {
   }
 };
 
-const incrementFirebaseRecord = async (uid, collections, doc, keyToIncrement, valueToIncrement, moreProps) => {
+// TODO: add single record method so that we can update modelState on first model creation and use incrementFirebaseRecord on subsequent calls
+const incrementFirebaseRecord = async (uid, collections, document, keyToIncrement, valueToIncrement, moreProps) => {
   const [collection1, collection2] = collections;
 
-  await updateDoc(doc(db, collection1, uid, collection2, doc), {
-    [keyToIncrement]: increment(valueToIncrement),
-    ...moreProps,
-  });
+  try {
+    await updateDoc(doc(db, collection1, uid, collection2, document), {
+      [keyToIncrement]: increment(valueToIncrement),
+      ...moreProps,
+    });
+    return [FIREBASE.FIRESTORE.GENERIC.UNION_ADDED, null];
+  } catch (error) {
+    return [null, error];
+  }
 };
 
 const addRecordToFirestore = async (uid, collections, docs, payload, payloadName) => {

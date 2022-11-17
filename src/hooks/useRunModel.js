@@ -8,7 +8,7 @@ const { POST } = HTTP_METHODS;
 
 const setModelState = async (currentUser, valueToIncrement, moreProps) => {
   // update firestore with system user access token, auth uid, and email
-  const [modelState, modelStateErr] = await incrementFirebaseRecord(
+  return await incrementFirebaseRecord(
     currentUser.uid,
     FIREBASE.FIRESTORE.MODELS.COLLECTIONS,
     FIREBASE.FIRESTORE.MODELS.DOCS[1],
@@ -16,11 +16,11 @@ const setModelState = async (currentUser, valueToIncrement, moreProps) => {
     valueToIncrement,
     moreProps
   );
-  return [modelState, modelStateErr];
 };
 
 export const useRunModel = () => {
   const { currentUser } = useAuth();
+
   const handleRunModel = async (payload, appCheckId) => {
     const MODEL_STATE_VALUE_TO_INCREMENT = 1;
     const moreProps = { isModelLoading: true };
@@ -40,7 +40,7 @@ export const useRunModel = () => {
       if (modelErr) throw modelErr;
       return [modelSuccess, modelState];
     } catch (err) {
-      return err;
+      return [err, null];
     }
   };
   return { handleRunModel };
