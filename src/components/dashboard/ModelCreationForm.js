@@ -10,10 +10,12 @@ import {
   Alert,
   AlertIcon,
   CloseButton,
+  useToast,
 } from '@chakra-ui/react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { useAuth } from '../../contexts/AuthContext';
+import { errorMap } from '../ErrorMap';
 
 export const ModelCreationForm = ({
   onClose,
@@ -27,6 +29,7 @@ export const ModelCreationForm = ({
   const [isModelCreationLoading, setModelCreationLoading] = useState(false);
   const { getAuthToken, getAppToken, currentUser } = useAuth();
   const { handleRunModel } = useRunModel();
+  const toast = useToast();
 
   // form validation schema
   const LoginSchema = Yup.object().shape({
@@ -42,6 +45,24 @@ export const ModelCreationForm = ({
   });
 
   const handleCloseBtnClick = () => setModelCreationErr(null);
+  const showToastMessage = (modelResponse) => {
+    if (!modelResponse) {
+      return toast({
+        title: 'Model Creation Error',
+        description: errorMap.get('failed to create model'),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+    toast({
+      title: 'Model Creation Success',
+      description: 'Your model was successfully initiated. We will email you when it ready for viewing',
+      status: 'success',
+      duration: 5000,
+      isClosable: true,
+    });
+  };
   const handleSubmit = async (values) => {
     const integrationPayload = integrationsStore[integrationsPayloadName].find(
       (integration) => integration.adAccountId === values.adAccountSelect
@@ -62,6 +83,7 @@ export const ModelCreationForm = ({
     const activeCampaignIds = activeCampaigns.map((activeCampaign) => activeCampaign.id);
     setModelCreationLoading(true);
 
+    // initaite model creation
     const [completedModel, modelState] = await handleRunModel(
       {
         FIREBASE_ID_TOKEN: authToken,
@@ -73,12 +95,11 @@ export const ModelCreationForm = ({
       },
       appCheckToken
     );
-
-    console.log(modelState);
-    console.log(completedModel);
-
     setModelCreationLoading(false);
+    // close modal form
     onClose();
+    // show success or err toast depending on model creation response
+    showToastMessage(completedModel);
   };
 
   return (
