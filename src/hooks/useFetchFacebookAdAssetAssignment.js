@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '../contexts/AuthContext';
 
 // firestore db functions
-const { addRecordToFirestore, readUserRecordFromFirestore } = firestoreHandlers;
+const { addListOfRecordsToFirestore, readUserRecordFromFirestore } = firestoreHandlers;
 
 // Constants
 const { GET, POST } = HTTP_METHODS;
@@ -129,7 +129,7 @@ const generateFacebookFirestorePayload = (
 
 const updateFirestoreWithFacebookUserRecord = async (currentUser, facebookFirebasePayload) => {
   // update firestore with system user access token, auth uid, and email
-  const [addedRecord, addedRecordError] = await addRecordToFirestore(
+  const [addedRecord, addedRecordError] = await addListOfRecordsToFirestore(
     currentUser.uid,
     FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
     FIREBASE.FIRESTORE.FACEBOOK.DOCS,

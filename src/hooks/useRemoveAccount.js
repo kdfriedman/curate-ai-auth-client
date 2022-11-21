@@ -68,7 +68,7 @@ const refreshState = (record, error, setLoading, setIntegrationRecord) => {
 export const useRemoveAccount = () => {
   const { currentUser } = useAuth();
   const { loginToFacebook, facebookAuthChange } = useFacebookAuth();
-  const { removeRecordFromFirestore, readUserRecordFromFirestore, addRecordToFirestore } = firestoreHandlers;
+  const { removeRecordFromFirestore, readUserRecordFromFirestore, addListOfRecordsToFirestore } = firestoreHandlers;
   // remove curateai fb system user from client's business account
   const handleRemoveAccount = async (
     event,
@@ -132,7 +132,7 @@ export const useRemoveAccount = () => {
         facebookAuthChange.authResponse?.accessToken &&
         lastGeneratedFirestoreRecord.accessToken !== facebookAuthChange.authResponse?.accessToken
       ) {
-        const [, addedFirebaseRecordError] = await addRecordToFirestore(
+        const [, addedFirebaseRecordError] = await addListOfRecordsToFirestore(
           currentUser.uid,
           FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
           FIREBASE.FIRESTORE.FACEBOOK.DOCS,

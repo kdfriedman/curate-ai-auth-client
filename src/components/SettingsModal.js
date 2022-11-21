@@ -33,7 +33,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
   const isEqualToOrLessThan400 = useMediaQuery('(max-width: 400px)');
 
   // upack firestore handlers
-  const { addRecordToFirestore, removeRecordFromFirestore } = firestoreHandlers;
+  const { addListOfRecordsToFirestore, removeRecordFromFirestore } = firestoreHandlers;
   // unpack auth context handlers
   const { currentUser } = useAuth();
   // set campaign status state (isActive checkbox)
@@ -76,7 +76,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     );
     if (removedRecordError) throw removedRecordError;
 
-    const [, addedRecordError] = await addRecordToFirestore(
+    const [, addedRecordError] = await addListOfRecordsToFirestore(
       currentUser.uid,
       FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
       FIREBASE.FIRESTORE.FACEBOOK.DOCS,

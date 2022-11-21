@@ -46,7 +46,7 @@ const generateAdCampaignPayload = (adCampaignListResult) => {
 };
 
 export const useRefreshFacebookCampaignData = () => {
-  const { addRecordToFirestore, readUserRecordFromFirestore, removeRecordFromFirestore } = firestoreHandlers;
+  const { addListOfRecordsToFirestore, readUserRecordFromFirestore, removeRecordFromFirestore } = firestoreHandlers;
   const { loginToFacebook } = useFacebookAuth();
 
   const handleRefreshFacebookCampaignData = async (facebookRecord, setIntegrationRecord, setLoading) => {
@@ -110,7 +110,7 @@ export const useRefreshFacebookCampaignData = () => {
     // TODO: figure out why arrayUnion call is failing with undefined value when this below func is called
 
     // update firestore with copy of old record with the addition of the refreshed fb campaign data
-    const [, addedRecordError] = await addRecordToFirestore(
+    const [, addedRecordError] = await addListOfRecordsToFirestore(
       facebookRecord?.uid,
       FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
       FIREBASE.FIRESTORE.FACEBOOK.DOCS,

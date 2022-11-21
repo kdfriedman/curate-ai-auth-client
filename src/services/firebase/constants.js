@@ -13,6 +13,8 @@ export const FIREBASE = {
       COLLECTIONS: ['clients', 'models'],
       DOCS: ['image-and-video', 'modelState'],
       PAYLOAD_NAME: 'output',
+      CREATION_LIMIT: 'modelCreationLimit',
+      IS_MODEL_LOADING: 'isModelLoading',
     },
     GENERIC: {
       UNION_ADDED: 'New union has been added to firestore',
