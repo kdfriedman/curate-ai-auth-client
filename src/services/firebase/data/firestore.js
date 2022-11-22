@@ -59,7 +59,7 @@ const hasFirestoreRecord = async (uid, collections, docs) => {
     console.error(FIREBASE_ERROR.FIRESTORE.GENERIC.FAILED_READING_DATA);
     return [null, error];
   }
-  if (record?.exists) return [true, record];
+  if (record?.exists()) return [true, record];
   return [false, null];
 };
 

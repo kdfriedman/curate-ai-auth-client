@@ -14,7 +14,7 @@ const fetchCurateAISystemUserAccessToken = async () => {
     FIREBASE.FIRESTORE.CURATEAI.UID,
     FIREBASE.FIRESTORE.CURATEAI.COLLECTION
   );
-  if (error || !record?.exists) return console.error('Cannot fetch CurateAI access token');
+  if (error || !record?.exists()) return console.error('Cannot fetch CurateAI access token');
   const { curateAiSysUserAccessToken } = record?.data();
   return curateAiSysUserAccessToken;
 };

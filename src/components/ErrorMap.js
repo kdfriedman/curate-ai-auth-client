@@ -7,10 +7,10 @@ const errorMap = new Map();
 const ErrorHandler = () => {
   return <ErrorMessage errorMessage={ERROR.DASHBOARD.MAIN} />;
 };
-errorMap.set('failed to read record from firestore', ErrorHandler);
-errorMap.set('auth/email-already-in-use', ErrorHandler);
-errorMap.set('auth/user-not-found', ERROR.AUTH.INVALID_EMAIL);
-errorMap.set('auth/wrong-password', ERROR.AUTH.INVALID_PASSWORD);
-errorMap.set('failed to create model', ERROR.MODEL.FAILED_TO_CREATE_MODEL);
+errorMap.set(ERROR.ERROR_MAP.GET.FAILED_TO_READ_FIRESTORE, ErrorHandler);
+errorMap.set(ERROR.ERROR_MAP.GET.AUTH_EMAIL_ALREADY_IN_USE, ErrorHandler);
+errorMap.set(ERROR.ERROR_MAP.GET.AUTH_USER_NOT_FOUND, ERROR.AUTH.INVALID_EMAIL);
+errorMap.set(ERROR.ERROR_MAP.GET.AUTH_WRONG_PWD, ERROR.AUTH.INVALID_PASSWORD);
+errorMap.set(ERROR.ERROR_MAP.GET.FAILED_TO_CREATE_MODEL, ERROR.MODEL.FAILED_TO_CREATE_MODEL);
 
 export { errorMap };

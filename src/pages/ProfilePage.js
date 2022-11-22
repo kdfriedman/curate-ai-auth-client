@@ -42,7 +42,7 @@ export const ProfilePage = () => {
       }
 
       // if record exists, update state with firestore integration record
-      if (record && record?.exists && record?.data()?.facebookBusinessAccts?.length > 0) {
+      if (record?.exists() && record?.data()?.facebookBusinessAccts?.length > 0) {
         const { facebookBusinessAccts } = record?.data();
         // update firestore integration record state
         setIntegrationRecord({

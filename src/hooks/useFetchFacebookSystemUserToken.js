@@ -57,7 +57,7 @@ const fetchCurateAISystemUserAccessToken = async (dispatch) => {
     FIREBASE.FIRESTORE.CURATEAI.UID,
     FIREBASE.FIRESTORE.CURATEAI.COLLECTION
   );
-  if (error || !record?.exists) {
+  if (error || !record?.exists()) {
     dispatch({
       type: HAS_ERRORS,
       payload: {

@@ -107,8 +107,6 @@ export const useRefreshFacebookCampaignData = () => {
       return setLoading(false);
     }
 
-    // TODO: figure out why arrayUnion call is failing with undefined value when this below func is called
-
     // update firestore with copy of old record with the addition of the refreshed fb campaign data
     const [, addedRecordError] = await addListOfRecordsToFirestore(
       facebookRecord?.uid,
@@ -135,7 +133,7 @@ export const useRefreshFacebookCampaignData = () => {
     }
 
     // check if records exists in firestore
-    if (readRecord && readRecord?.exists) {
+    if (readRecord && readRecord?.exists()) {
       const { facebookBusinessAccts } = readRecord?.data();
       // update parent state with firestore record update
       setIntegrationRecord({

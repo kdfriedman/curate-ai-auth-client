@@ -84,7 +84,7 @@ export const ModelCreationForm = ({
     setModelCreationLoading(true);
 
     // initaite model creation
-    const [completedModel, modelState] = await handleRunModel(
+    const runModelResponse = await handleRunModel(
       {
         FIREBASE_ID_TOKEN: authToken,
         UID: integrationPayload.uid,
@@ -99,7 +99,7 @@ export const ModelCreationForm = ({
     // close modal form
     onClose();
     // show success or err toast depending on model creation response
-    showToastMessage(completedModel);
+    showToastMessage(runModelResponse);
   };
 
   return (

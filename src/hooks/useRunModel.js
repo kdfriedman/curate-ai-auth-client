@@ -38,7 +38,7 @@ export const useRunModel = () => {
     const MODEL_STATE_VALUE_TO_INCREMENT = 1;
     const moreProps = { [FIREBASE.FIRESTORE.MODELS.IS_MODEL_LOADING]: true };
     try {
-      const [modelState, modelStateErr] = await setModelState(currentUser, MODEL_STATE_VALUE_TO_INCREMENT, moreProps);
+      const [, modelStateErr] = await setModelState(currentUser, MODEL_STATE_VALUE_TO_INCREMENT, moreProps);
       if (modelStateErr) throw modelStateErr;
 
       const [modelSuccess, modelErr] = await fetchData({
@@ -51,9 +51,9 @@ export const useRunModel = () => {
         headers: { [process.env.REACT_APP_FIREBASE_APP_CHECK_CUSTOM_HEADER]: appCheckId },
       });
       if (modelErr) throw modelErr;
-      return [modelSuccess, modelState];
+      return modelSuccess;
     } catch (err) {
-      return [null, err];
+      return null;
     }
   };
   return { handleRunModel };
