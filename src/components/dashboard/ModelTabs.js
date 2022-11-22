@@ -7,6 +7,8 @@ export const ModelTabs = ({
   modelCreationModal,
   modelMenuSelect,
   modelTable,
+  modelBanner,
+  isModelLoading,
 }) => {
   return (
     <Tabs isFitted variant="enclosed">
@@ -34,6 +36,7 @@ export const ModelTabs = ({
       </TabList>
       <TabPanels>
         <TabPanel>
+          {isModelLoading && <>{modelBanner}</>}
           {modelCreationCard}
           {!hasNoIntegrations && <>{modelCreationModal}</>}
         </TabPanel>

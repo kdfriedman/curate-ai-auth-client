@@ -6,6 +6,7 @@ export const ModelCreationCard = ({
   modelCardHeading,
   modelCardDesc,
   createModelBtnTxt,
+  isModelLoading,
 }) => {
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
   return (
@@ -35,18 +36,25 @@ export const ModelCreationCard = ({
           </Button>
         </Tooltip>
       ) : (
-        <Button
-          onClick={onOpen}
-          _hover={{
-            opacity: '.8',
-            textDecoration: 'none',
-          }}
-          colorScheme="brand"
-          margin={isEqualToOrLessThan800[0] ? '.5rem 0' : '1rem 0'}
-          width="20rem"
+        <Tooltip
+          label="You cannot create new models while you have a model currently loading. Please wait until your model has finished processing."
+          fontSize="sm"
+          isDisabled={!isModelLoading}
         >
-          {createModelBtnTxt}
-        </Button>
+          <Button
+            disabled={isModelLoading}
+            onClick={onOpen}
+            _hover={{
+              opacity: '.8',
+              textDecoration: 'none',
+            }}
+            colorScheme="brand"
+            margin={isEqualToOrLessThan800[0] ? '.5rem 0' : '1rem 0'}
+            width="20rem"
+          >
+            {createModelBtnTxt}
+          </Button>
+        </Tooltip>
       )}
     </Flex>
   );

@@ -16,6 +16,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { useAuth } from '../../contexts/AuthContext';
 import { errorMap } from '../ErrorMap';
+import { Loader } from '../../components/Loader';
 
 export const ModelCreationForm = ({
   onClose,
@@ -105,6 +106,7 @@ export const ModelCreationForm = ({
   return (
     <>
       <Flex flexDirection="column">
+        <Loader isLoading={isModelCreationLoading} loadingMessage="Loading..." minHeight="28vh" />
         {hasModelCreationErr && (
           <Alert margin="1rem 0" status="error">
             <AlertIcon />
@@ -112,78 +114,80 @@ export const ModelCreationForm = ({
             <CloseButton onClick={handleCloseBtnClick} position="absolute" right="8px" top="8px" />
           </Alert>
         )}
-        <Formik
-          initialValues={{
-            name: '',
-            adAccountSelect: '',
-          }}
-          validationSchema={LoginSchema}
-          onSubmit={handleSubmit}
-        >
-          {({ errors, touched }) => (
-            <Form width="330px">
-              <FormControl className="form-floating" isInvalid={errors.name && touched.name}>
-                <FormLabel fontSize="16px" marginTop="10px" htmlFor="name">
-                  {formSingleLabel}
-                </FormLabel>
-                <Field
-                  style={{ height: 'calc(2.5rem + 2px' }}
-                  className="form-control"
-                  name="name"
-                  type="text"
-                  placeholder="Name"
-                />
-                <FormErrorMessage>{errors.name}</FormErrorMessage>
-              </FormControl>
+        {!isModelCreationLoading && (
+          <Formik
+            initialValues={{
+              name: '',
+              adAccountSelect: '',
+            }}
+            validationSchema={LoginSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ errors, touched }) => (
+              <Form width="330px">
+                <FormControl className="form-floating" isInvalid={errors.name && touched.name}>
+                  <FormLabel fontSize="16px" marginTop="10px" htmlFor="name">
+                    {formSingleLabel}
+                  </FormLabel>
+                  <Field
+                    style={{ height: 'calc(2.5rem + 2px' }}
+                    className="form-control"
+                    name="name"
+                    type="text"
+                    placeholder="Name"
+                  />
+                  <FormErrorMessage>{errors.name}</FormErrorMessage>
+                </FormControl>
 
-              <Field>
-                {({ field, form }) => (
-                  <FormControl
-                    className="form-floating"
-                    isInvalid={errors.adAccountSelect && touched.adAccountSelect}
-                    name="adAccountSelect"
-                    id="adAccountSelect"
-                  >
-                    <FormLabel fontSize="16px" marginTop="10px" htmlFor="name">
-                      {formSelectLabel}
-                    </FormLabel>
-                    <Select
-                      margin="0"
-                      onChange={field.onChange}
+                <Field>
+                  {({ field, form }) => (
+                    <FormControl
+                      className="form-floating"
+                      isInvalid={errors.adAccountSelect && touched.adAccountSelect}
                       name="adAccountSelect"
-                      placeholder="Select an ad account"
+                      id="adAccountSelect"
                     >
-                      {integrationsStore?.[integrationsPayloadName]?.map((integration, i) => (
-                        <option key={integration.id} value={integration.adAccountId}>
-                          {integration.adAccountId + ' | ' + integration.businessAcctName}
-                        </option>
-                      ))}
-                    </Select>
-                    <FormErrorMessage>{errors.adAccountSelect}</FormErrorMessage>
-                  </FormControl>
-                )}
-              </Field>
+                      <FormLabel fontSize="16px" marginTop="10px" htmlFor="name">
+                        {formSelectLabel}
+                      </FormLabel>
+                      <Select
+                        margin="0"
+                        onChange={field.onChange}
+                        name="adAccountSelect"
+                        placeholder="Select an ad account"
+                      >
+                        {integrationsStore?.[integrationsPayloadName]?.map((integration, i) => (
+                          <option key={integration.id} value={integration.adAccountId}>
+                            {integration.adAccountId + ' | ' + integration.businessAcctName}
+                          </option>
+                        ))}
+                      </Select>
+                      <FormErrorMessage>{errors.adAccountSelect}</FormErrorMessage>
+                    </FormControl>
+                  )}
+                </Field>
 
-              <Button
-                disabled={isModelCreationLoading}
-                _hover={{
-                  opacity: '.8',
-                }}
-                _focus={{
-                  outline: 0,
-                  boxShadow: 'none',
-                }}
-                mt="2rem"
-                color="#fff"
-                backgroundColor="#635bff"
-                type="submit"
-                fontSize="16px"
-              >
-                {formSubmitBtn}
-              </Button>
-            </Form>
-          )}
-        </Formik>
+                <Button
+                  disabled={isModelCreationLoading}
+                  _hover={{
+                    opacity: '.8',
+                  }}
+                  _focus={{
+                    outline: 0,
+                    boxShadow: 'none',
+                  }}
+                  mt="2rem"
+                  color="#fff"
+                  backgroundColor="#635bff"
+                  type="submit"
+                  fontSize="16px"
+                >
+                  {formSubmitBtn}
+                </Button>
+              </Form>
+            )}
+          </Formik>
+        )}
       </Flex>
     </>
   );

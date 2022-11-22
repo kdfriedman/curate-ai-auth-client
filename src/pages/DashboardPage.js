@@ -5,6 +5,7 @@ import { ModelCreationModal } from '../components/dashboard/ModelCreationModal';
 import { ModelCreationForm } from '../components/dashboard/ModelCreationForm';
 import { ModelCreationCard } from '../components/dashboard/ModelCreationCard';
 import { ModelMenuSelect } from '../components/dashboard/ModelMenuSelect';
+import { ModelBanner } from '../components/dashboard/ModelBanner';
 import { ModelTable } from '../components/dashboard/ModelTable';
 import { ModelTabs } from '../components/dashboard/ModelTabs';
 import { ErrorMessage } from '../components/ErrorMessage';
@@ -117,6 +118,7 @@ export const DashboardPage = () => {
               <ModelTabs
                 hasNoIntegrations={hasNoIntegrations}
                 hasEmptyModelCollection={hasEmptyModelCollection}
+                modelBanner={<ModelBanner />}
                 modelCreationCard={
                   <ModelCreationCard
                     modelsStore={modelsStore}
