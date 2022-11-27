@@ -117,7 +117,7 @@ export const useRemoveAccount = () => {
     const [firestoreRecord, firestoreError] = await readUserRecordFromFirestore(
       currentUser.uid,
       FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-      FIREBASE.FIRESTORE.FACEBOOK.DOCS
+      FIREBASE.FIRESTORE.FACEBOOK.DOCS[0]
     );
 
     // if facebook db records exist, update previous access token with refreshed token

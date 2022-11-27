@@ -140,7 +140,7 @@ export const ModelCreationForm = ({
                 </FormControl>
 
                 <Field>
-                  {({ field, form }) => (
+                  {({ field }) => (
                     <FormControl
                       className="form-floating"
                       isInvalid={errors.adAccountSelect && touched.adAccountSelect}

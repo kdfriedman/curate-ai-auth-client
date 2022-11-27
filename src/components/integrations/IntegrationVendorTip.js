@@ -10,6 +10,7 @@ export const IntegrationVendorTip = ({ vendorTipMessage }) => {
       fontWeight="500"
       color="rgb(26, 32, 44)"
       padding={isEqualToOrLessThan800[0] ? '1rem 1rem 0 1rem' : '.5rem 0 0 2rem'}
+      textAlign={isEqualToOrLessThan800[0] ? 'center' : 'left'}
     >
       <span
         style={{

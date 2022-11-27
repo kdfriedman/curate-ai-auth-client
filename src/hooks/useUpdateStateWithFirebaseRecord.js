@@ -4,7 +4,7 @@ import firestoreHandlers from '../services/firebase/data/firestore';
 
 export const useUpdateStateWithFirestoreRecord = (
   collections,
-  docs,
+  doc,
   setLoading,
   setError,
   setRecord,
@@ -17,8 +17,17 @@ export const useUpdateStateWithFirestoreRecord = (
   const updateStateWithFirestoreRecord = useCallback(async () => {
     setLoading(true);
     try {
-      const [record, recordError] = await readUserRecordFromFirestore(currentUser.uid, collections, docs);
+      setLoading(false);
+
+      const [record, recordError] = await readUserRecordFromFirestore(currentUser.uid, collections, doc);
       if (recordError) throw recordError;
+
+      // recordKey will be false if updating single object record vs array of objects
+      if (!recordKey) {
+        const data = record.data() || null;
+        setRecord(data);
+        return setLoading(false);
+      }
 
       const { [recordKey]: recordCollection } = record?.data() || {};
       if (Array.isArray(recordCollection) && recordCollection.length > 0) {
@@ -31,7 +40,7 @@ export const useUpdateStateWithFirestoreRecord = (
       setError(error);
       setLoading(false);
     }
-  }, [collections, currentUser.uid, readUserRecordFromFirestore, docs, recordKey, setError, setLoading, setRecord]);
+  }, [collections, currentUser.uid, readUserRecordFromFirestore, doc, recordKey, setError, setLoading, setRecord]);
 
   useEffect(() => {
     if (!shouldFetchRecord) return;

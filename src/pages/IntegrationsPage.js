@@ -34,12 +34,12 @@ export const IntegrationsPage = () => {
   const { setIntegrationsStore, integrationsStore } = useFirestoreStore();
   useUpdateStateWithFirestoreRecord(
     FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-    FIREBASE.FIRESTORE.FACEBOOK.DOCS,
+    FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
     setLoading,
     setError,
     setIntegrationsStore,
     FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME,
-    true
+    !integrationsStore
   );
   const hasEmptyIntegrationCollection = !integrationsStore
     ? true

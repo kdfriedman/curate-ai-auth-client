@@ -1,5 +1,5 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import './styles/index.css';
 import AppRouter from './routes/AppRouter';
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
@@ -26,11 +26,13 @@ const GlobalStyles = css`
   }
 `;
 
-const container = document.getElementById('app');
-const root = createRoot(container);
-root.render(
-  <ChakraProvider theme={theme}>
-    <Global styles={GlobalStyles} />
-    <AppRouter />
-  </ChakraProvider>
+ReactDOM.render(
+  <React.StrictMode>
+    <ChakraProvider theme={theme}>
+      <Global styles={GlobalStyles} />
+      <AppRouter />
+    </ChakraProvider>
+  </React.StrictMode>,
+
+  document.getElementById('app')
 );

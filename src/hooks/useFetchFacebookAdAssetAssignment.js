@@ -142,10 +142,11 @@ const updateFirestoreWithFacebookUserRecord = async (currentUser, facebookFireba
 
 const validateFacebookUserFirestoreRecord = async (dispatch, currentUser, addedFirestoreRecord) => {
   // read facebook record from firestore to validate if integration exists
+
   const [record, error] = await readUserRecordFromFirestore(
     currentUser.uid,
     FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-    FIREBASE.FIRESTORE.FACEBOOK.DOCS
+    FIREBASE.FIRESTORE.FACEBOOK.DOCS[0]
   );
 
   if (addedFirestoreRecord?.warnMsg || error) {

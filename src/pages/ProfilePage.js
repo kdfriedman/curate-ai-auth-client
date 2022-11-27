@@ -29,7 +29,7 @@ export const ProfilePage = () => {
       const [record, error] = await readUserRecordFromFirestore(
         currentUser.uid,
         FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-        FIREBASE.FIRESTORE.FACEBOOK.DOCS
+        FIREBASE.FIRESTORE.FACEBOOK.DOCS[0]
       );
 
       // log out any errors from firestore fetch

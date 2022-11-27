@@ -21,29 +21,40 @@ export const DashboardPage = () => {
   const [modelId, setModelId] = useState(null);
   const [isSorted, setIsSorted] = useState(false);
   const [integrationId, setIntegrationId] = useState(null);
-  const { modelsStore, setModelsStore, setIntegrationsStore, integrationsStore } = useFirestoreStore();
+  const { modelsStore, setModelsStore, setIntegrationsStore, integrationsStore, modelState, setModelState } =
+    useFirestoreStore();
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   useUpdateStateWithFirestoreRecord(
     FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-    FIREBASE.FIRESTORE.FACEBOOK.DOCS,
+    FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
     setLoading,
     setError,
     setIntegrationsStore,
     FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME,
-    integrationsStore === null
+    !integrationsStore
   );
 
   useUpdateStateWithFirestoreRecord(
     FIREBASE.FIRESTORE.MODELS.COLLECTIONS,
-    FIREBASE.FIRESTORE.MODELS.DOCS,
+    FIREBASE.FIRESTORE.MODELS.DOCS[0],
     setLoading,
     setError,
     setModelsStore,
     FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME,
-    true
+    !modelsStore
+  );
+
+  useUpdateStateWithFirestoreRecord(
+    FIREBASE.FIRESTORE.MODELS.COLLECTIONS,
+    FIREBASE.FIRESTORE.MODELS.DOCS[1],
+    setLoading,
+    setError,
+    setModelState,
+    null,
+    !modelState
   );
 
   const hasEmptyModelCollection = !modelsStore
@@ -122,6 +133,7 @@ export const DashboardPage = () => {
                 modelCreationCard={
                   <ModelCreationCard
                     modelsStore={modelsStore}
+                    modelState={modelState}
                     hasNoIntegrations={hasNoIntegrations}
                     onOpen={onOpen}
                     modelCardHeading={`You currently have ${modelsStore?.output?.length ?? 0} model outputs to view.`}

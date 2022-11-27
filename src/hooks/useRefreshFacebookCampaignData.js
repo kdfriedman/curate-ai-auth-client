@@ -125,7 +125,7 @@ export const useRefreshFacebookCampaignData = () => {
       // user id
       facebookRecord?.uid,
       FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-      FIREBASE.FIRESTORE.FACEBOOK.DOCS
+      FIREBASE.FIRESTORE.FACEBOOK.DOCS[0]
     );
     if (readRecordError) {
       console.error(readRecordError);
