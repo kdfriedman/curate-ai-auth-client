@@ -17,8 +17,6 @@ export const useUpdateStateWithFirestoreRecord = (
   const updateStateWithFirestoreRecord = useCallback(async () => {
     setLoading(true);
     try {
-      setLoading(false);
-
       const [record, recordError] = await readUserRecordFromFirestore(currentUser.uid, collections, doc);
       if (recordError) throw recordError;
 

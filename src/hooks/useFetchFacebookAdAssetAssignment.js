@@ -225,6 +225,8 @@ export const useFetchFacebookAdAssetAssignment = () => {
     // find facebook business acct name from user business list chosen with user selected id
     const facebookBusinessAccountName = userBusinessList.find((businessObject) => businessObject.id === userBusinessId);
     const formattedFacebookUserAdCampaignList = formatFacebookUserAdCampaignList(facebooUserAdCampaignData);
+
+    // create payload to store in db
     const facebookFirestorePayload = generateFacebookFirestorePayload(
       sysUserAccessToken,
       userBusinessId,
@@ -234,17 +236,20 @@ export const useFetchFacebookAdAssetAssignment = () => {
       currentUser,
       facebookAuthChange
     );
+    // update db
     const facebookFirestoreAddedRecord = await updateFirestoreWithFacebookUserRecord(
       currentUser,
       facebookFirestorePayload
     );
 
+    // make sure that record was stored correctly in db
     const validatedFacebookUserFirestoreRecord = await validateFacebookUserFirestoreRecord(
       dispatch,
       currentUser,
       facebookFirestoreAddedRecord
     );
 
+    // update integration context for consumers
     updateStateWithFacebookFirestoreRecord(
       dispatch,
       validatedFacebookUserFirestoreRecord,
