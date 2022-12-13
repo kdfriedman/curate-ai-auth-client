@@ -38,10 +38,9 @@ const incrementFirebaseRecord = async (uid, collections, document, keyToIncremen
   }
 };
 
-const addRecordToFirestore = async (uid, collections, document, payload) => {
-  const [collection1, collection2] = collections;
+const addRecordToFirestore = async (recordConfig, payload) => {
   try {
-    await setDoc(doc(db, collection1, uid, collection2, document), payload);
+    await setDoc(doc(db, ...recordConfig), payload);
     return [FIREBASE.FIRESTORE.GENERIC.RECORD_CREATED, null];
   } catch (error) {
     console.error(FIREBASE_ERROR.FIRESTORE.GENERIC.FAILED_TO_CREATE_NEW_RECORD);
@@ -86,7 +85,7 @@ const addListOfRecordsToFirestore = async (uid, collections, docs, payload, payl
     console.error(FIREBASE_ERROR.FIRESTORE.GENERIC.FAILED_TO_UNION_TO_ARRAY);
     return [null, error];
   }
-  return await addRecordToFirestore(uid, collections, doc1, { [payloadName]: [payload] });
+  return await addRecordToFirestore([collection1, uid, collection2, doc1], { [payloadName]: [payload] });
 };
 
 const removeRecordFromFirestore = async (uid, collections, docs, payloadName, removalRecordPropertyId) => {

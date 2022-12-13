@@ -26,9 +26,12 @@ const writeModelState = async (currentUser, valueToIncrement, moreProps) => {
     );
   }
   return await addRecordToFirestore(
-    currentUser.uid,
-    FIREBASE.FIRESTORE.MODELS.COLLECTIONS,
-    FIREBASE.FIRESTORE.MODELS.DOCS[1],
+    [
+      FIREBASE.FIRESTORE.MODELS.COLLECTIONS[0],
+      currentUser.uid,
+      FIREBASE.FIRESTORE.MODELS.COLLECTIONS[1],
+      FIREBASE.FIRESTORE.MODELS.DOCS[1],
+    ],
     { ...moreProps, [FIREBASE.FIRESTORE.MODELS.CREATION_LIMIT]: valueToIncrement }
   );
 };

@@ -16,6 +16,9 @@ export const FIREBASE = {
       CREATION_LIMIT: 'modelCreationLimit',
       IS_MODEL_LOADING: 'isModelLoading',
     },
+    EMAILS: {
+      COLLECTION: 'emails',
+    },
     GENERIC: {
       UNION_ADDED: 'New union has been added to firestore',
       RECORD_CREATED: 'New firestore record has been created',
