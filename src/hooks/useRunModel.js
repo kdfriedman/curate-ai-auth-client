@@ -9,12 +9,12 @@ const { incrementFirebaseRecord, addRecordToFirestore, hasFirestoreRecord, readU
 const { POST } = HTTP_METHODS;
 
 const writeModelState = async (currentUser, valueToIncrement, moreProps) => {
-  // update firestore with system user access token, auth uid, and email
-  const [hasRecord] = await hasFirestoreRecord(
+  const [hasRecord] = await hasFirestoreRecord([
+    FIREBASE.FIRESTORE.MODELS.COLLECTIONS[0],
     currentUser.uid,
-    FIREBASE.FIRESTORE.MODELS.COLLECTIONS,
-    FIREBASE.FIRESTORE.MODELS.DOCS[1]
-  );
+    FIREBASE.FIRESTORE.MODELS.COLLECTIONS[1],
+    FIREBASE.FIRESTORE.MODELS.DOCS[1],
+  ]);
   if (hasRecord) {
     return await incrementFirebaseRecord(
       currentUser.uid,
@@ -46,7 +46,6 @@ export const useRunModel = () => {
     try {
       const [, modelStateErr] = await writeModelState(currentUser, MODEL_STATE_VALUE_TO_INCREMENT, moreProps);
       if (modelStateErr) throw modelStateErr;
-
       const [modelSuccess, modelErr] = await fetchData({
         method: POST,
         url:
@@ -59,12 +58,13 @@ export const useRunModel = () => {
       if (modelErr) throw modelErr;
 
       // set modelState in context
-      const [modelStateRecordSuccess] = await readUserRecordFromFirestore(
+      const [modelStateRecordSuccess] = await readUserRecordFromFirestore([
+        FIREBASE.FIRESTORE.MODELS.COLLECTIONS[0],
         currentUser.uid,
-        FIREBASE.FIRESTORE.MODELS.COLLECTIONS,
-        FIREBASE.FIRESTORE.MODELS.DOCS[1]
-      );
-      if (modelStateRecordSuccess.exists()) {
+        FIREBASE.FIRESTORE.MODELS.COLLECTIONS[1],
+        FIREBASE.FIRESTORE.MODELS.DOCS[1],
+      ]);
+      if (modelStateRecordSuccess?.exists()) {
         // set modelStateRecord
         setModelState(modelStateRecordSuccess?.data());
       }

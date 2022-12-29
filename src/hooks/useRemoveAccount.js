@@ -11,6 +11,34 @@ const findRecordForRemoval = (event, integrationRecord) => {
   return integrationRecord?.facebookBusinessAccts?.find((acct) => acct.businessAcctId === facebookBusinessAccountId);
 };
 
+const findAssociatedModelsForRemoval = async (integrationId, currentUserUid, removeRecordFromFirestore) => {
+  // remove selected record from firestore db
+  const [, removedModelError] = await removeRecordFromFirestore(
+    [
+      FIREBASE.FIRESTORE.MODELS.COLLECTIONS[0],
+      currentUserUid,
+      FIREBASE.FIRESTORE.MODELS.COLLECTIONS[1],
+      FIREBASE.FIRESTORE.MODELS.DOCS[1],
+    ],
+    FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME,
+    integrationId
+  );
+
+  const [, removedModelStateError] = await removeRecordFromFirestore(
+    [
+      FIREBASE.FIRESTORE.MODELS.COLLECTIONS[0],
+      currentUserUid,
+      FIREBASE.FIRESTORE.MODELS.COLLECTIONS[1],
+      FIREBASE.FIRESTORE.MODELS.DOCS[0],
+    ],
+    FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME,
+    integrationId
+  );
+  if (removedModelError || removedModelStateError) {
+    console.error(removedModelError || removedModelStateError);
+  }
+};
+
 const getLastGeneratedRecord = (integrationRecord) => {
   // convert isostring date into milliseconds since epoch
   const createdDateInMS = integrationRecord.facebookBusinessAccts?.map((record) => {
@@ -49,19 +77,21 @@ const handleGetFacebookAccessToken = async (
   return loginStatus.authResponse?.accessToken;
 };
 
-const refreshState = (record, error, setLoading, setIntegrationRecord) => {
+const refreshState = (record, error, setLoading, setIntegrationRecord, setModelsStore) => {
+  setLoading(false);
+
+  // clear models context
+  setModelsStore(null);
+
   if (error) {
-    setLoading(false);
     return console.error(error);
   }
   // if record is found or record has length of other records, update state
   if (record && record?.data()?.facebookBusinessAccts?.length > 0) {
-    setLoading(false);
     const { facebookBusinessAccts } = record?.data();
     return setIntegrationRecord({ facebookBusinessAccts });
   }
   // if no record is found, reset dashboard
-  setLoading(false);
   setIntegrationRecord(null);
 };
 
@@ -74,6 +104,8 @@ export const useRemoveAccount = () => {
     event,
     setLoading,
     setIntegrationRecord,
+    setModelsStore,
+    modelsStore,
     hasIntegrationRecord,
     handleDeleteFacebookSystemUser
   ) => {
@@ -100,11 +132,24 @@ export const useRemoveAccount = () => {
       return setLoading(false);
     }
 
+    // if models exist, remove them from db
+    if (modelsStore) {
+      // remove all models associated with business acct id from db
+      await findAssociatedModelsForRemoval(
+        selectedRecordForRemoval?.businessAcctId,
+        currentUser.uid,
+        removeRecordFromFirestore
+      );
+    }
+
     // remove selected record from firestore db
     const [, removedRecordError] = await removeRecordFromFirestore(
-      currentUser.uid,
-      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-      FIREBASE.FIRESTORE.FACEBOOK.DOCS,
+      [
+        FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[0],
+        currentUser.uid,
+        FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[1],
+        FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
+      ],
       FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME,
       selectedRecordForRemoval?.businessAcctId
     );
@@ -114,11 +159,12 @@ export const useRemoveAccount = () => {
     }
 
     // get current list of firestore records to re-render components since removal has occurred
-    const [firestoreRecord, firestoreError] = await readUserRecordFromFirestore(
+    const [firestoreRecord, firestoreError] = await readUserRecordFromFirestore([
+      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[0],
       currentUser.uid,
-      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-      FIREBASE.FIRESTORE.FACEBOOK.DOCS[0]
-    );
+      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[1],
+      FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
+    ]);
 
     // if facebook db records exist, update previous access token with refreshed token
     if (firestoreRecord?.data().facebookBusinessAccts.length > 0) {
@@ -133,9 +179,12 @@ export const useRemoveAccount = () => {
         lastGeneratedFirestoreRecord.accessToken !== facebookAuthChange.authResponse?.accessToken
       ) {
         const [, addedFirebaseRecordError] = await addListOfRecordsToFirestore(
-          currentUser.uid,
-          FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-          FIREBASE.FIRESTORE.FACEBOOK.DOCS,
+          [
+            FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[0],
+            currentUser.uid,
+            FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[1],
+            FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
+          ],
           lastGeneratedFirestoreRecord,
           FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME
         );
@@ -145,7 +194,7 @@ export const useRemoveAccount = () => {
         }
       }
     }
-    return refreshState(firestoreRecord, firestoreError, setLoading, setIntegrationRecord);
+    return refreshState(firestoreRecord, firestoreError, setLoading, setIntegrationRecord, setModelsStore);
   };
 
   return { handleRemoveAccount };

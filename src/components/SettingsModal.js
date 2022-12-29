@@ -68,18 +68,24 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
   const updateFirestoreWithCampaignDiffs = async (dbRecord) => {
     // update db with new updated db record
     const [, removedRecordError] = await removeRecordFromFirestore(
-      currentUser.uid,
-      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-      FIREBASE.FIRESTORE.FACEBOOK.DOCS,
+      [
+        FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[0],
+        currentUser.uid,
+        FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[1],
+        FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
+      ],
       FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME,
       dbRecord.businessAcctId
     );
     if (removedRecordError) throw removedRecordError;
 
     const [, addedRecordError] = await addListOfRecordsToFirestore(
-      currentUser.uid,
-      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-      FIREBASE.FIRESTORE.FACEBOOK.DOCS,
+      [
+        FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[0],
+        currentUser.uid,
+        FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[1],
+        FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
+      ],
       dbRecord,
       FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME
     );
@@ -193,9 +199,11 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
               <Flex marginBottom="1rem" className="settings-modal__btn-wrapper">
                 <Button
                   onClick={async () => {
+                    setLoading(true);
                     // pass in db prop
                     await saveModalSettings(dbRecord);
                     // close modal after saving
+                    setLoading(false);
                     onClose();
                   }}
                   _hover={{

@@ -31,7 +31,7 @@ export const IntegrationsPage = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { handleRemoveAccount } = useRemoveAccount();
   const { facebookAuthChange, loginToFacebook } = useFacebookAuth();
-  const { setIntegrationsStore, integrationsStore } = useFirestoreStore();
+  const { setIntegrationsStore, integrationsStore, setModelsStore, modelsStore } = useFirestoreStore();
   useUpdateStateWithFirestoreRecord(
     FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
     FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
@@ -133,6 +133,8 @@ export const IntegrationsPage = () => {
                                 event,
                                 setLoading,
                                 setIntegrationsStore,
+                                setModelsStore,
+                                modelsStore,
                                 integrationsStore,
                                 handleDeleteFacebookSystemUser
                               );

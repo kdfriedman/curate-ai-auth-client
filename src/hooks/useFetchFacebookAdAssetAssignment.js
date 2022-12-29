@@ -130,9 +130,12 @@ const generateFacebookFirestorePayload = (
 const updateFirestoreWithFacebookUserRecord = async (currentUser, facebookFirebasePayload) => {
   // update firestore with system user access token, auth uid, and email
   const [addedRecord, addedRecordError] = await addListOfRecordsToFirestore(
-    currentUser.uid,
-    FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-    FIREBASE.FIRESTORE.FACEBOOK.DOCS,
+    [
+      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[0],
+      currentUser.uid,
+      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[1],
+      FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
+    ],
     facebookFirebasePayload,
     FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME
   );
@@ -143,11 +146,12 @@ const updateFirestoreWithFacebookUserRecord = async (currentUser, facebookFireba
 const validateFacebookUserFirestoreRecord = async (dispatch, currentUser, addedFirestoreRecord) => {
   // read facebook record from firestore to validate if integration exists
 
-  const [record, error] = await readUserRecordFromFirestore(
+  const [record, error] = await readUserRecordFromFirestore([
+    FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[0],
     currentUser.uid,
-    FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-    FIREBASE.FIRESTORE.FACEBOOK.DOCS[0]
-  );
+    FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[1],
+    FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
+  ]);
 
   if (addedFirestoreRecord?.warnMsg || error) {
     // reset business asset it to prevent 3rd useEffect from firing

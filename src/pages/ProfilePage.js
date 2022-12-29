@@ -26,11 +26,12 @@ export const ProfilePage = () => {
 
       // ****** FACEBOOK record ******
       // read facebook record from firestore to validate if integration exists
-      const [record, error] = await readUserRecordFromFirestore(
+      const [record, error] = await readUserRecordFromFirestore([
+        FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[0],
         currentUser.uid,
-        FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-        FIREBASE.FIRESTORE.FACEBOOK.DOCS[0]
-      );
+        FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[1],
+        FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
+      ]);
 
       // log out any errors from firestore fetch
       if (error) {

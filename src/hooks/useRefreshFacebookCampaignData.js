@@ -96,9 +96,12 @@ export const useRefreshFacebookCampaignData = () => {
     // we must remove the full record and re-add to update individual records
     // this is a firebase limitation - cannot update specific array of object indices
     const [, removedRecordError] = await removeRecordFromFirestore(
-      facebookRecord?.uid,
-      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-      FIREBASE.FIRESTORE.FACEBOOK.DOCS,
+      [
+        FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[0],
+        facebookRecord?.uid,
+        FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[1],
+        FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
+      ],
       FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME,
       facebookRecord?.businessAcctId
     );
@@ -109,9 +112,12 @@ export const useRefreshFacebookCampaignData = () => {
 
     // update firestore with copy of old record with the addition of the refreshed fb campaign data
     const [, addedRecordError] = await addListOfRecordsToFirestore(
-      facebookRecord?.uid,
-      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-      FIREBASE.FIRESTORE.FACEBOOK.DOCS,
+      [
+        FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[0],
+        facebookRecord?.uid,
+        FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[1],
+        FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
+      ],
       facebookFirebasePayload,
       FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME
     );
@@ -121,12 +127,12 @@ export const useRefreshFacebookCampaignData = () => {
     }
 
     // read facebook record from firestore to render contents to page
-    const [readRecord, readRecordError] = await readUserRecordFromFirestore(
-      // user id
+    const [readRecord, readRecordError] = await readUserRecordFromFirestore([
+      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[0],
       facebookRecord?.uid,
-      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
-      FIREBASE.FIRESTORE.FACEBOOK.DOCS[0]
-    );
+      FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[1],
+      FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
+    ]);
     if (readRecordError) {
       console.error(readRecordError);
       return setLoading(false);

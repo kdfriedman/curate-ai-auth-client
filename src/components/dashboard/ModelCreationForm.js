@@ -91,6 +91,7 @@ export const ModelCreationForm = ({
         UID: integrationPayload.uid,
         AD_ACCOUNT_ID: integrationPayload.adAccountId,
         FB_CAMPAIGN_IDS: activeCampaignIds,
+        FB_CAMPAIGNS: activeCampaigns,
         SYSTEM_USER_ACCESS_TOKEN: integrationPayload.sysUserAccessToken,
         MODEL_NAME: values.name,
       },

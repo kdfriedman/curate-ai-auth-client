@@ -1,10 +1,14 @@
 import { Flex, Table, Thead, Tbody, Tfoot, Tr, Th, Td, TableCaption, TableContainer } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
+import { FIREBASE } from '../../services/firebase/constants';
 
 export const ModelTable = ({
   hasEmptyModelCollection,
   consolidatedTableData,
+  modelId,
   integrationId,
+  modelsStore,
+  integrationsStore,
   setIsSorted,
   tableHeaders = [],
   tableCaption,
@@ -17,19 +21,41 @@ export const ModelTable = ({
       return (
         <Tr key={index}>
           <Td>{label}</Td>
-          <Td isNumeric>{coef}</Td>
+          <Td isNumeric>{Math.round(coef)}</Td>
         </Tr>
       );
     });
   };
 
   const sortTableData = () => setIsSorted((prev) => !prev);
-
+  const displayedModel = modelsStore?.[FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME].find((model) => model.id === modelId);
   return (
     <>
       {!hasEmptyModelCollection && consolidatedTableData && (
         <>
           <TableContainer>
+            <Flex flexDir="column" mt="2rem">
+              <Flex>
+                <span>AD ACCOUNT:&nbsp;</span>
+                <span style={{ fontWeight: '500' }}>{integrationId || 'N/A'}</span>
+              </Flex>
+              <Flex>
+                <span>MODEL NAME:&nbsp;</span>
+                <span style={{ fontWeight: '500' }}>{displayedModel?.name || 'N/A'}</span>
+              </Flex>
+              {Array.isArray(displayedModel.campaigns) && (
+                <Flex flexFlow="column">
+                  <span>AD CAMPAIGN LIST:</span>
+                  <ul style={{ listStyle: 'none', fontWeight: '500' }}>
+                    {displayedModel.campaigns.map((model) => (
+                      <li key={model.id}>
+                        {model.name} | {model.id} | {model.flight}
+                      </li>
+                    ))}
+                  </ul>
+                </Flex>
+              )}
+            </Flex>
             <Table marginTop="2rem" variant="simple">
               <TableCaption>{tableCaption}</TableCaption>
               <Thead>

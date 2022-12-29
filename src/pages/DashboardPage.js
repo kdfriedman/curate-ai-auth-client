@@ -65,10 +65,14 @@ export const DashboardPage = () => {
     ? true
     : integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.length === 0;
 
+  const isModelCreationLimit = !modelState ? false : modelState?.modelCreationLimit === 3;
+
   const consolidateTableData = () => {
     if (!modelId) return;
     const consolidatedTableData = [];
-    const filteredTableData = modelsStore?.output?.filter((model) => model.id === modelId);
+    const filteredTableData = modelsStore?.[FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME]?.filter(
+      (model) => model.id === modelId
+    );
 
     const tableData = JSON.parse(filteredTableData[0]?.data);
     const labels = Object.entries(tableData[0]);
@@ -135,8 +139,11 @@ export const DashboardPage = () => {
                     modelsStore={modelsStore}
                     modelState={modelState}
                     hasNoIntegrations={hasNoIntegrations}
+                    isModelCreationLimit={isModelCreationLimit}
                     onOpen={onOpen}
-                    modelCardHeading={`You currently have ${modelsStore?.output?.length ?? 0} model outputs to view.`}
+                    modelCardHeading={`You currently have ${modelsStore?.output?.length ?? 0} model output${
+                      modelsStore?.output?.length === 1 ? '' : 's'
+                    } to view.`}
                     modelCardDesc="If you'd like to generate a new model, please select the Create Model button below, provide a unique name and
     select the associated ad account for your model."
                     createModelBtnTxt="Create Model"
@@ -176,9 +183,12 @@ export const DashboardPage = () => {
                   <ModelTable
                     hasEmptyModelCollection={hasEmptyModelCollection}
                     consolidatedTableData={consolidatedTableData}
+                    modelId={modelId}
                     integrationId={integrationId}
                     setIsSorted={setIsSorted}
-                    tableHeaders={['Labels', 'Coefs']}
+                    modelsStore={modelsStore}
+                    integrationsStore={integrationsStore}
+                    tableHeaders={['Labels', 'Engagement Change']}
                     tableCaption={`Model output for ad account: ${integrationId}`}
                   />
                 }

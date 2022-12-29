@@ -2,10 +2,9 @@ import { db } from '../firebase';
 import { updateDoc, doc, getDoc, arrayUnion, arrayRemove, setDoc, increment } from 'firebase/firestore';
 import { FIREBASE_ERROR, FIREBASE } from '../constants';
 
-const readUserRecordFromFirestore = async (uid, collections, document) => {
-  const [collection1, collection2] = collections;
+const readUserRecordFromFirestore = async (recordConfig) => {
   try {
-    const record = await getDoc(doc(db, collection1, uid, collection2, document));
+    const record = await getDoc(doc(db, ...recordConfig));
     return [record, null];
   } catch (error) {
     console.log(error);
@@ -48,10 +47,9 @@ const addRecordToFirestore = async (recordConfig, payload) => {
   }
 };
 
-const hasFirestoreRecord = async (uid, collections, doc) => {
-  const [collection1, collection2] = collections;
+const hasFirestoreRecord = async (recordConfig) => {
   // read record to check if uid exists in database, otherwise create new record
-  const [record, error] = await readUserRecordFromFirestore(uid, [collection1, collection2], doc);
+  const [record, error] = await readUserRecordFromFirestore(recordConfig);
   // check for request error
   if (error) {
     console.error(FIREBASE_ERROR.FIRESTORE.GENERIC.FAILED_READING_DATA);
@@ -61,10 +59,8 @@ const hasFirestoreRecord = async (uid, collections, doc) => {
   return [false, null];
 };
 
-const addListOfRecordsToFirestore = async (uid, collections, docs, payload, payloadName) => {
-  const [collection1, collection2] = collections;
-  const [doc1] = docs;
-  const [hasRecord, record] = await hasFirestoreRecord(uid, collections, doc1);
+const addListOfRecordsToFirestore = async (configRecord, payload, payloadName) => {
+  const [hasRecord, record] = await hasFirestoreRecord(configRecord);
   try {
     // check if record exists before further processing
     if (hasRecord && record.data() && Array.isArray(record?.data()[payloadName])) {
@@ -76,7 +72,7 @@ const addListOfRecordsToFirestore = async (uid, collections, docs, payload, payl
       if (hasDuplicateRecord) return [null, FIREBASE_ERROR.FIRESTORE.GENERIC.DUPLICATE_RECORD];
 
       // if record exist but new payload has different access token, add payload into arr
-      await updateDoc(doc(db, collection1, uid, collection2, doc1), {
+      await updateDoc(doc(db, ...configRecord), {
         [payloadName]: arrayUnion(payload),
       });
       return [FIREBASE.FIRESTORE.GENERIC.UNION_ADDED, null];
@@ -85,14 +81,11 @@ const addListOfRecordsToFirestore = async (uid, collections, docs, payload, payl
     console.error(FIREBASE_ERROR.FIRESTORE.GENERIC.FAILED_TO_UNION_TO_ARRAY);
     return [null, error];
   }
-  return await addRecordToFirestore([collection1, uid, collection2, doc1], { [payloadName]: [payload] });
+  return await addRecordToFirestore(configRecord, { [payloadName]: [payload] });
 };
 
-const removeRecordFromFirestore = async (uid, collections, docs, payloadName, removalRecordPropertyId) => {
-  // destructure collection and doc lists
-  const [collection1, collection2] = collections;
-  const [doc1] = docs;
-  const [hasRecord, record] = await hasFirestoreRecord(uid, collections, doc1);
+const removeRecordFromFirestore = async (configRecord, payloadName, removalRecordPropertyId) => {
+  const [hasRecord, record] = await hasFirestoreRecord(configRecord);
 
   if (hasRecord) {
     // this check is used for users who attempt to remove record which has been manually removed by admin prior, therefore no record exists to remove
@@ -111,7 +104,7 @@ const removeRecordFromFirestore = async (uid, collections, docs, payloadName, re
     }
     try {
       // if record exist, push new payload into array
-      await updateDoc(doc(db, collection1, uid, collection2, doc1), {
+      await updateDoc(doc(db, ...configRecord), {
         [payloadName]: arrayRemove(selectedRecord),
       });
       return [selectedRecord, null];
