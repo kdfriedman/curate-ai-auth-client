@@ -41,6 +41,16 @@ export const IntegrationsPage = () => {
     FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME,
     !integrationsStore
   );
+
+  useUpdateStateWithFirestoreRecord(
+    FIREBASE.FIRESTORE.MODELS.COLLECTIONS,
+    FIREBASE.FIRESTORE.MODELS.DOCS[0],
+    setLoading,
+    setError,
+    setModelsStore,
+    FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME,
+    !modelsStore
+  );
   const hasEmptyIntegrationCollection = !integrationsStore
     ? true
     : integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.length === 0;

@@ -29,6 +29,9 @@ export const ModelTable = ({
 
   const sortTableData = () => setIsSorted((prev) => !prev);
   const displayedModel = modelsStore?.[FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME].find((model) => model.id === modelId);
+  const displayedModelObjectiveType =
+    displayedModel?.campaigns?.find((campaign) => campaign.objective)?.objective || null;
+
   return (
     <>
       {!hasEmptyModelCollection && consolidatedTableData && (
@@ -43,13 +46,17 @@ export const ModelTable = ({
                 <span>MODEL NAME:&nbsp;</span>
                 <span style={{ fontWeight: '500' }}>{displayedModel?.name || 'N/A'}</span>
               </Flex>
+              <Flex>
+                <span>OBJECTIVE:&nbsp;</span>
+                <span style={{ fontWeight: '500' }}>{displayedModelObjectiveType || 'N/A'}</span>
+              </Flex>
               {Array.isArray(displayedModel.campaigns) && (
                 <Flex flexFlow="column">
                   <span>AD CAMPAIGN LIST:</span>
                   <ul style={{ listStyle: 'none', fontWeight: '500' }}>
                     {displayedModel.campaigns.map((model) => (
                       <li key={model.id}>
-                        {model.name} | {model.id} | {model.flight}
+                        {model?.name || 'N/A'} | {model?.id || 'N/A'} | {model?.flight || 'N/A'}
                       </li>
                     ))}
                   </ul>

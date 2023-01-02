@@ -18,24 +18,15 @@ const findAssociatedModelsForRemoval = async (integrationId, currentUserUid, rem
       FIREBASE.FIRESTORE.MODELS.COLLECTIONS[0],
       currentUserUid,
       FIREBASE.FIRESTORE.MODELS.COLLECTIONS[1],
-      FIREBASE.FIRESTORE.MODELS.DOCS[1],
-    ],
-    FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME,
-    integrationId
-  );
-
-  const [, removedModelStateError] = await removeRecordFromFirestore(
-    [
-      FIREBASE.FIRESTORE.MODELS.COLLECTIONS[0],
-      currentUserUid,
-      FIREBASE.FIRESTORE.MODELS.COLLECTIONS[1],
       FIREBASE.FIRESTORE.MODELS.DOCS[0],
     ],
     FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME,
-    integrationId
+    integrationId,
+    FIREBASE.FIRESTORE.MODELS.KEY_TO_USE_FOR_REMOVAL
   );
-  if (removedModelError || removedModelStateError) {
-    console.error(removedModelError || removedModelStateError);
+
+  if (removedModelError) {
+    console.error(removedModelError);
   }
 };
 
@@ -132,13 +123,16 @@ export const useRemoveAccount = () => {
       return setLoading(false);
     }
 
-    // if models exist, remove them from db
+    // if associated models exist, remove them from db
     if (modelsStore) {
-      // remove all models associated with business acct id from db
-      await findAssociatedModelsForRemoval(
-        selectedRecordForRemoval?.businessAcctId,
-        currentUser.uid,
-        removeRecordFromFirestore
+      Promise.all(
+        modelsStore[FIREBASE.FIRESTORE.MODELS.PAYLOAD_NAME].map((model) => {
+          if (model.ad_account_id === selectedRecordForRemoval.adAccountId) {
+            // remove all models associated with ad acct id from db
+            return findAssociatedModelsForRemoval(model?.ad_account_id, currentUser.uid, removeRecordFromFirestore);
+          }
+          return null;
+        })
       );
     }
 
@@ -151,7 +145,8 @@ export const useRemoveAccount = () => {
         FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
       ],
       FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME,
-      selectedRecordForRemoval?.businessAcctId
+      selectedRecordForRemoval?.businessAcctId,
+      FIREBASE.FIRESTORE.FACEBOOK.KEY_TO_USE_FOR_REMOVAL
     );
     if (removedRecordError) {
       console.error(removedRecordError);

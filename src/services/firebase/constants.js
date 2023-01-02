@@ -8,6 +8,7 @@ export const FIREBASE = {
       COLLECTIONS: ['clients', 'integrations'],
       DOCS: ['facebook'],
       PAYLOAD_NAME: 'facebookBusinessAccts',
+      KEY_TO_USE_FOR_REMOVAL: 'businessAcctId',
     },
     MODELS: {
       COLLECTIONS: ['clients', 'models'],
@@ -15,6 +16,7 @@ export const FIREBASE = {
       PAYLOAD_NAME: 'output',
       CREATION_LIMIT: 'modelCreationLimit',
       IS_MODEL_LOADING: 'isModelLoading',
+      KEY_TO_USE_FOR_REMOVAL: 'ad_account_id',
     },
     EMAILS: {
       COLLECTION: 'emails',

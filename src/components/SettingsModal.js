@@ -36,10 +36,13 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
   const { addListOfRecordsToFirestore, removeRecordFromFirestore } = firestoreHandlers;
   // unpack auth context handlers
   const { currentUser } = useAuth();
-  // set campaign status state (isActive checkbox)
-  const [campaignStatus, setCampaignStatus] = useState([]);
   const [loading, setLoading] = useState(false);
   const { adAccountId, adCampaignList, businessAcctId, businessAcctName } = dbRecord;
+  const campaignStatuses = adCampaignList.map((campaign) => ({ isActive: campaign.isActive, id: campaign.id }));
+  // set campaign status state (isActive checkbox)
+  const [campaignStatus, setCampaignStatus] = useState(campaignStatuses);
+  const allChecked = campaignStatus.every((campaignStatus) => campaignStatus.isActive);
+  const isIndeterminate = campaignStatus.some((campaignStatus) => campaignStatus.isActive) && !allChecked;
 
   const generateUpdatedCampaignData = (dbRecord) => {
     // create deep clone to prevent unintentional isActive getting set on array of objects orignal state
@@ -75,7 +78,8 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
         FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
       ],
       FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME,
-      dbRecord.businessAcctId
+      dbRecord.businessAcctId,
+      FIREBASE.FIRESTORE.FACEBOOK.KEY_TO_USE_FOR_REMOVAL
     );
     if (removedRecordError) throw removedRecordError;
 
@@ -130,10 +134,23 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     });
   };
 
+  const handleBulkActivateAdCampaign = (e) => {
+    const updatedCampaignStatuses = campaignStatus.map((campaignStatus) => ({
+      isActive: e.target.checked,
+      id: campaignStatus.id,
+    }));
+    setCampaignStatus(updatedCampaignStatuses);
+  };
+
+  const onCloseModal = () => {
+    setCampaignStatus(campaignStatuses);
+    onClose();
+  };
+
   return (
     <>
       {id === businessAcctId && (
-        <Modal scrollBehavior={'inside'} size={'xl'} isOpen={isOpen} onClose={onClose}>
+        <Modal scrollBehavior={'inside'} size={'xl'} isOpen={isOpen} onClose={onCloseModal}>
           <ModalOverlay />
           <ModalContent
             minWidth={isEqualToOrGreaterThan870[0] ? '53rem' : false}
@@ -163,6 +180,14 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
                 <Table variant="simple">
                   <Thead>
                     <Tr>
+                      <Th>
+                        <Checkbox
+                          onChange={handleBulkActivateAdCampaign}
+                          colorScheme="brand"
+                          isChecked={allChecked}
+                          isIndeterminate={isIndeterminate}
+                        />
+                      </Th>
                       <Th>Campaign ID</Th>
                       <Th>Campaign Name</Th>
                       <Th minWidth={isEqualToOrGreaterThan870[0] ? false : '10rem'}>Campaign Flight</Th>
@@ -173,16 +198,20 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
                     {adCampaignList.map((campaign) => {
                       return (
                         <Tr data-campaign-id={campaign.id} key={campaign.id}>
-                          <Td>{campaign.id}</Td>
-                          <Td>{campaign.name}</Td>
-                          <Td>{campaign.flight}</Td>
                           <Td>
                             <Checkbox
+                              isChecked={
+                                campaignStatus.find((campaignStatus) => campaignStatus.id === campaign.id).isActive
+                              }
                               onChange={activateAdCampaign}
                               colorScheme="brand"
                               defaultChecked={campaign.isActive ? true : false}
                             />
                           </Td>
+                          <Td>{campaign.id}</Td>
+                          <Td>{campaign.name}</Td>
+                          <Td>{campaign.flight}</Td>
+                          <Td>{campaign.isActive ? 'ON' : 'OFF'}</Td>
                         </Tr>
                       );
                     })}
@@ -222,7 +251,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
                   border="1px solid #ece9e9"
                   backgroundColor="#dadada"
                   ml={3}
-                  onClick={onClose}
+                  onClick={onCloseModal}
                 >
                   Close
                 </Button>

@@ -84,7 +84,7 @@ const addListOfRecordsToFirestore = async (configRecord, payload, payloadName) =
   return await addRecordToFirestore(configRecord, { [payloadName]: [payload] });
 };
 
-const removeRecordFromFirestore = async (configRecord, payloadName, removalRecordPropertyId) => {
+const removeRecordFromFirestore = async (configRecord, payloadName, removalRecordPropertyId, removalRecordKey) => {
   const [hasRecord, record] = await hasFirestoreRecord(configRecord);
 
   if (hasRecord) {
@@ -95,13 +95,9 @@ const removeRecordFromFirestore = async (configRecord, payloadName, removalRecor
       window.location.reload();
     }
     const selectedRecord = record?.data()[payloadName].find((record) => {
-      return record.businessAcctId === removalRecordPropertyId;
+      return record[removalRecordKey] === removalRecordPropertyId;
     });
-    if (!selectedRecord) {
-      // if this error occurs, most likely caused by db getting unsynced with app
-      // reload page as fail safe
-      window.location.reload();
-    }
+
     try {
       // if record exist, push new payload into array
       await updateDoc(doc(db, ...configRecord), {

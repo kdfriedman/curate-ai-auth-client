@@ -51,7 +51,7 @@ const fetchFacebookUserAdCampaigns = async (dispatch, facebookAuthChange, busine
   // fetch list of ad campaigns to provide user for selection
   const [adCampaignListResult, adCampaignListError] = await fetchData({
     method: GET,
-    url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION}/${businessAssetId}/campaigns?fields=name,start_time,stop_time&access_token=${facebookAuthChange?.authResponse?.accessToken}`,
+    url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION}/${businessAssetId}/campaigns?fields=objective,name,start_time,stop_time&access_token=${facebookAuthChange?.authResponse?.accessToken}`,
   });
 
   if (adCampaignListError) {
@@ -97,6 +97,7 @@ const formatFacebookUserAdCampaignList = (adCampaignListResult) => {
       name: campaign.name,
       flight: startDate && stopDate ? `${startDate} - ${stopDate}` : 'N/A',
       isActive: false,
+      objective: campaign.objective,
     };
   });
   return formattedAdCampaignList;

@@ -103,7 +103,8 @@ export const useRefreshFacebookCampaignData = () => {
         FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
       ],
       FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME,
-      facebookRecord?.businessAcctId
+      facebookRecord?.businessAcctId,
+      FIREBASE.FIRESTORE.FACEBOOK.KEY_TO_USE_FOR_REMOVAL
     );
     if (removedRecordError) {
       console.error(removedRecordError);

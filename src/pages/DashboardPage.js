@@ -65,7 +65,7 @@ export const DashboardPage = () => {
     ? true
     : integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.length === 0;
 
-  const isModelCreationLimit = !modelState ? false : modelState?.modelCreationLimit === 3;
+  const isModelCreationLimit = !modelState ? false : modelState?.modelCreationLimit >= 3;
 
   const consolidateTableData = () => {
     if (!modelId) return;
@@ -188,7 +188,7 @@ export const DashboardPage = () => {
                     setIsSorted={setIsSorted}
                     modelsStore={modelsStore}
                     integrationsStore={integrationsStore}
-                    tableHeaders={['Labels', 'Engagement Change']}
+                    tableHeaders={['Labels', 'Campaign KPI']}
                     tableCaption={`Model output for ad account: ${integrationId}`}
                   />
                 }
