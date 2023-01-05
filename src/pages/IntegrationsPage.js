@@ -120,6 +120,8 @@ export const IntegrationsPage = () => {
                               if (vendorCardParentElement) {
                                 updateSettingsModalId(vendorCardParentElement.id);
                                 onOpen();
+                                // prevent modal overflow movement when opening/closing
+                                if (document?.body) document.body.setAttribute('style', 'overflow: auto !important');
                               }
                             }}
                             _hover={{

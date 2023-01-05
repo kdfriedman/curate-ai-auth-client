@@ -27,6 +27,30 @@ export const ACTION_TYPES = {
   BUSINESS_ASSET_ID: 'businessAssetId',
 };
 
+export const OBJECTIVES = [
+  { type: 'APP_PROMOTION', id: 1 },
+  { type: 'AWARENESS', id: 2 },
+  { type: 'ENGAGEMENT', id: 3 },
+  { type: 'LEADS', id: 4 },
+  { type: 'SALES', id: 5 },
+  { type: 'TRAFFIC', id: 6 },
+  { type: 'APP_INSTALLS', id: 7 },
+  { type: 'BRAND_AWARENESS', id: 8 },
+  { type: 'CONVERSIONS', id: 9 },
+  { type: 'EVENT_RESPONSES', id: 10 },
+  { type: 'LEAD_GENERATION', id: 11 },
+  { type: 'LINK_CLICKS', id: 12 },
+  { type: 'LOCAL_AWARENESS', id: 13 },
+  { type: 'MESSAGES', id: 14 },
+  { type: 'OFFER_CLAIMS', id: 15 },
+  { type: 'PAGE_LIKES', id: 16 },
+  { type: 'POST_ENGAGEMENT', id: 17 },
+  { type: 'PRODUCT_CATALOG_SALES', id: 18 },
+  { type: 'REACH', id: 19 },
+  { type: 'STORE_VISITS', id: 20 },
+  { type: 'VIDEO_VIEWS', id: 21 },
+];
+
 export const FACEBOOK_ERROR = {
   MARKETING_API: {
     MUST_HAVE_VALID_BUSINESS_ACCOUNT:

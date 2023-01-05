@@ -58,7 +58,7 @@ export const ModelCreationForm = ({
     }
     toast({
       title: 'Model Creation Success',
-      description: 'Your model was successfully initiated. We will email you when it ready for viewing',
+      description: "Your model was successfully initiated. We will email you when it's ready for viewing",
       status: 'success',
       duration: 5000,
       isClosable: true,
