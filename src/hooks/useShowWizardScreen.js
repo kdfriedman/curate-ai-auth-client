@@ -18,6 +18,7 @@ export const useShowWizardScreen = () => {
     activeObjective,
     setActiveObjective,
   }) => {
+    console.log(campaignStatus);
     switch (activeWizardId) {
       case WIZARD_ID_MAP.OBJECTIVE: {
         return (

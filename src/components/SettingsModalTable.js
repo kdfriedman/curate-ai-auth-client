@@ -68,7 +68,7 @@ export const SettingsModalTable = ({ adCampaignList, campaignStatus, setCampaign
                     isChecked={campaignStatus.find((campaignStatus) => campaignStatus.id === campaign.id).isActive}
                     onChange={activateAdCampaign}
                     colorScheme="brand"
-                    defaultChecked={campaign.isActive ? true : false}
+                    // defaultChecked={campaign.isActive ? true : false}
                   />
                 </Td>
                 <Td>{campaign.id}</Td>

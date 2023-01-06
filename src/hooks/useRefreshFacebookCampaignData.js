@@ -11,13 +11,13 @@ const getFacebookCampaignData = async (adAccountId, userAccessToken) => {
   // fetch list of ad campaigns to render refreshed facebook ad campaign data
   const [adCampaignListResult, adCampaignListError] = await fetchData({
     method: GET,
-    url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION}/${adAccountId}/campaigns?fields=name,start_time,stop_time&access_token=${userAccessToken}`,
+    url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION}/${adAccountId}/campaigns?fields=name,start_time,stop_time,objective&access_token=${userAccessToken}`,
   });
   return [adCampaignListResult, adCampaignListError];
 };
 
 const generateAdCampaignPayload = (adCampaignListResult) => {
-  return adCampaignListResult?.data?.data.map((campaign) => {
+  return adCampaignListResult?.data?.data?.map((campaign) => {
     let startDate;
     let stopDate;
     try {
@@ -41,6 +41,7 @@ const generateAdCampaignPayload = (adCampaignListResult) => {
       name: campaign.name,
       flight: startDate && stopDate ? `${startDate} - ${stopDate}` : 'N/A',
       isActive: false,
+      objective: campaign.objective,
     };
   });
 };

@@ -41,7 +41,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     .filter((objective, i, arr) => arr.findIndex((obj) => obj.type === objective.type) === i);
 
   // set active campaign
-  const [campaignStatus, setCampaignStatus] = useState(campaignStatuses);
+  const [campaignStatus, setCampaignStatus] = useState(() => campaignStatuses);
   // set active objective
   const [activeObjective, setActiveObjective] = useState(null);
 
@@ -110,7 +110,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
 
   const onCloseModal = () => {
     // reset campaign checkbox state
-    setCampaignStatus(campaignStatuses);
+    setCampaignStatus((prev) => [...prev]);
     // reset wizard state
     setActiveWizardId(WIZARD_ID_MAP.OBJECTIVE);
     // reset objective state
