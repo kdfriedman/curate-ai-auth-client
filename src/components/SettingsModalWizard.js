@@ -1,14 +1,20 @@
+import { useState } from 'react';
 import { Flex } from '@chakra-ui/react';
 
 export const SettingsModalWizard = ({
   setActiveWizardId,
   activeWizardId,
   wizardIdMap: WIZARD_ID_MAP,
-  resetWizardScreenState,
+  activeObjective,
 }) => {
+  const [hasError, setError] = useState(null);
+
   const handleSettingWizardScreenState = (e) => {
     setActiveWizardId(parseInt(e.target.dataset.id));
-    resetWizardScreenState();
+  };
+
+  const handleDisablingWizardScreen = (e) => {
+    setError(true);
   };
 
   return (
@@ -58,8 +64,8 @@ export const SettingsModalWizard = ({
             height="3rem"
             alignItems="center"
             fontWeight="700"
-            cursor={activeWizardId === WIZARD_ID_MAP.CAMPAIGN ? 'default' : 'pointer'}
-            onClick={handleSettingWizardScreenState}
+            cursor={activeWizardId === WIZARD_ID_MAP.CAMPAIGN ? 'default' : activeObjective ? 'pointer' : 'not-allowed'}
+            onClick={activeObjective ? handleSettingWizardScreenState : handleDisablingWizardScreen}
           >
             2
           </Flex>

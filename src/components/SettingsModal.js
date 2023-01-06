@@ -118,11 +118,6 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     onClose();
   };
 
-  const resetWizardScreenState = () => {
-    setCampaignStatus(campaignStatuses);
-    setActiveObjective(null);
-  };
-
   return (
     <>
       {id === businessAcctId && (
@@ -135,10 +130,15 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
             maxHeight="33rem"
           >
             <ModalHeader textAlign="center" margin="1rem 0 0">
-              {businessAcctName}
-              <Heading as="h6" size="xs">
-                Ad Account | {adAccountId}
-              </Heading>
+              {businessAcctName} | {adAccountId}
+              {activeObjective && (
+                <Flex fontSize="16px" justifyContent="center">
+                  Selected campaign objective: &nbsp;
+                  <Flex color="#635bff" fontWeight="600">
+                    {activeObjective}
+                  </Flex>
+                </Flex>
+              )}
             </ModalHeader>
             <ModalCloseButton />
             <ModalBody>
@@ -178,7 +178,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
                         await saveModalSettings(dbRecord);
                         // close modal after saving
                         setLoading(false);
-                        onClose();
+                        onCloseModal();
                       }}
                       _hover={{
                         opacity: '.8',
@@ -222,7 +222,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
                 setActiveWizardId={setActiveWizardId}
                 activeWizardId={activeWizardId}
                 wizardIdMap={WIZARD_ID_MAP}
-                resetWizardScreenState={resetWizardScreenState}
+                activeObjective={activeObjective}
               />
             </ModalFooter>
           </ModalContent>

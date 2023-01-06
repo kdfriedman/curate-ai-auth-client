@@ -1,11 +1,7 @@
-import { Flex, FormControl, FormLabel, Switch, Grid, useMediaQuery } from '@chakra-ui/react';
+import { Flex, FormControl, FormLabel, Heading, Switch, Grid, useMediaQuery } from '@chakra-ui/react';
 import React from 'react';
 
 export const SettingsModalSelect = ({ objectives, setActiveObjective, activeObjective }) => {
-  const isEqualToOrGreaterThan870 = useMediaQuery('(min-width: 870px)');
-  const isEqualToOrLessThan500 = useMediaQuery('(max-width: 500px)');
-  const isEqualToOrLessThan400 = useMediaQuery('(max-width: 400px)');
-
   const handleSettingObjective = (e) => {
     const isSwitchedOn = e.target.checked;
     const labelElement = e.target?.closest('[data-objective-id]');
@@ -14,10 +10,11 @@ export const SettingsModalSelect = ({ objectives, setActiveObjective, activeObje
     setActiveObjective(isSwitchedOn ? objective : null);
   };
 
-  console.log('activeObjective', activeObjective);
-
   return (
-    <Flex>
+    <Flex flexDir="column" alignItems="center">
+      <Flex mb="2rem" fontSize="17px" fontWeight="400">
+        Please select one campaign objective from the list below:
+      </Flex>
       <FormControl
         as={Grid}
         templateColumns="15rem 3rem 15rem 3rem"
@@ -34,6 +31,7 @@ export const SettingsModalSelect = ({ objectives, setActiveObjective, activeObje
                 data-objective-id={objective.type}
                 onChange={handleSettingObjective}
                 isDisabled={activeObjective !== objective.type && activeObjective !== null}
+                isChecked={activeObjective === objective.type}
               />
             </React.Fragment>
           );

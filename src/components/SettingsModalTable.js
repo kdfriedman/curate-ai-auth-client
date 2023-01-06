@@ -1,6 +1,6 @@
 import { Flex, Box, Table, Thead, Tbody, Checkbox, Tr, Th, Td } from '@chakra-ui/react';
 
-export const SettingsModalTable = ({ adCampaignList, campaignStatus, setCampaignStatus }) => {
+export const SettingsModalTable = ({ adCampaignList, campaignStatus, setCampaignStatus, activeObjective }) => {
   const allChecked = campaignStatus.every((campaignStatus) => campaignStatus.isActive);
   const isIndeterminate = campaignStatus.some((campaignStatus) => campaignStatus.isActive) && !allChecked;
 
@@ -39,84 +39,87 @@ export const SettingsModalTable = ({ adCampaignList, campaignStatus, setCampaign
     // set all campaigns in bulk
     setCampaignStatus(updatedCampaignStatuses);
   };
+
   return (
-    <Table variant="simple">
-      <Thead>
-        <Tr>
-          <Th>
-            <Checkbox
-              onChange={handleBulkActivateAdCampaign}
-              colorScheme="brand"
-              isChecked={allChecked}
-              isIndeterminate={isIndeterminate}
-            />
-          </Th>
-          <Th>Campaign ID</Th>
-          <Th>Campaign Name</Th>
-          <Th width="10rem">Campaign Flight</Th>
-          <Th>Active Status</Th>
-        </Tr>
-      </Thead>
-      <Tbody>
-        {adCampaignList.map((campaign) => {
-          return (
-            <Tr data-campaign-id={campaign.id} key={campaign.id}>
-              <Td>
-                <Checkbox
-                  isChecked={campaignStatus.find((campaignStatus) => campaignStatus.id === campaign.id).isActive}
-                  onChange={activateAdCampaign}
-                  colorScheme="brand"
-                  defaultChecked={campaign.isActive ? true : false}
-                />
-              </Td>
-              <Td>{campaign.id}</Td>
-              <Td>{campaign.name}</Td>
-              <Td>{campaign.flight}</Td>
-              <Td>
-                {campaign.isActive ? (
-                  <>
-                    <Flex
-                      className="integration-status-container"
-                      flexDirection="row"
-                      justifyContent="start"
-                      alignItems="center"
-                      columnGap="6px"
-                    >
-                      <Box
-                        className="integration-status-indicator"
-                        h="10px"
-                        w="10px"
-                        borderRadius="50%"
-                        backgroundColor="#35b653"
-                      />
-                      <Box>ACTIVE</Box>
-                    </Flex>
-                  </>
-                ) : (
-                  <>
-                    <Flex
-                      className="integration-status-container"
-                      flexDirection="row"
-                      justifyContent="center"
-                      alignItems="center"
-                      columnGap="6px"
-                    >
-                      <Box
-                        className="integration-status-indicator"
-                        h="10px"
-                        w="10px"
-                        borderRadius="50%"
-                        backgroundColor="#dc3545"
-                      />
-                      <Box>INACTIVE</Box>
-                    </Flex>
-                  </>
-                )}
-              </Td>
-            </Tr>
-          );
-        })}
-      </Tbody>
-    </Table>
+    <>
+      <Table variant="simple">
+        <Thead>
+          <Tr>
+            <Th>
+              <Checkbox
+                onChange={handleBulkActivateAdCampaign}
+                colorScheme="brand"
+                isChecked={allChecked}
+                isIndeterminate={isIndeterminate}
+              />
+            </Th>
+            <Th>Campaign ID</Th>
+            <Th>Campaign Name</Th>
+            <Th width="10rem">Campaign Flight</Th>
+            <Th>Active Status</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {adCampaignList.map((campaign) => {
+            return (
+              <Tr data-campaign-id={campaign.id} key={campaign.id}>
+                <Td>
+                  <Checkbox
+                    isChecked={campaignStatus.find((campaignStatus) => campaignStatus.id === campaign.id).isActive}
+                    onChange={activateAdCampaign}
+                    colorScheme="brand"
+                    defaultChecked={campaign.isActive ? true : false}
+                  />
+                </Td>
+                <Td>{campaign.id}</Td>
+                <Td>{campaign.name}</Td>
+                <Td>{campaign.flight}</Td>
+                <Td>
+                  {campaign.isActive ? (
+                    <>
+                      <Flex
+                        className="integration-status-container"
+                        flexDirection="row"
+                        justifyContent="start"
+                        alignItems="center"
+                        columnGap="6px"
+                      >
+                        <Box
+                          className="integration-status-indicator"
+                          h="10px"
+                          w="10px"
+                          borderRadius="50%"
+                          backgroundColor="#35b653"
+                        />
+                        <Box>ACTIVE</Box>
+                      </Flex>
+                    </>
+                  ) : (
+                    <>
+                      <Flex
+                        className="integration-status-container"
+                        flexDirection="row"
+                        justifyContent="center"
+                        alignItems="center"
+                        columnGap="6px"
+                      >
+                        <Box
+                          className="integration-status-indicator"
+                          h="10px"
+                          w="10px"
+                          borderRadius="50%"
+                          backgroundColor="#dc3545"
+                        />
+                        <Box>INACTIVE</Box>
+                      </Flex>
+                    </>
+                  )}
+                </Td>
+              </Tr>
+            );
+          })}
+        </Tbody>
+      </Table>
+    </>
   );
 };

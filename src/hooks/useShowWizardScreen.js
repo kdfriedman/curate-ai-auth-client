@@ -34,6 +34,7 @@ export const useShowWizardScreen = () => {
             adCampaignList={adCampaignList}
             setCampaignStatus={setCampaignStatus}
             campaignStatus={campaignStatus}
+            activeObjective={activeObjective}
           />
         );
       }
