@@ -64,10 +64,8 @@ const addListOfRecordsToFirestore = async (configRecord, payload, payloadName) =
   try {
     // check if record exists before further processing
     if (hasRecord && record.data() && Array.isArray(record?.data()[payloadName])) {
-      // loop through all records within vendor array
       const hasDuplicateRecord = record?.data()[payloadName]?.find((record) => {
-        // if record exist and access token is same as prev, return duplicate err
-        return record.adAccountId === payload.adAccountId && record.userAccessToken === payload.userAccessToken;
+        return record.adAccountId === payload.adAccountId;
       });
       if (hasDuplicateRecord) return [null, FIREBASE_ERROR.FIRESTORE.GENERIC.DUPLICATE_RECORD];
 

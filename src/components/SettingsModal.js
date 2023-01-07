@@ -13,7 +13,6 @@ import {
   ModalCloseButton,
   Button,
   Tooltip,
-  Heading,
   useMediaQuery,
 } from '@chakra-ui/react';
 import { SettingsModalWizard } from './SettingsModalWizard';
@@ -39,11 +38,20 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
   const objectives = adCampaignList
     .map((campaign) => ({ id: campaign.id, type: campaign.objective }))
     .filter((objective, i, arr) => arr.findIndex((obj) => obj.type === objective.type) === i);
+  // look for active campaign to use for active objective type
+  const hasActiveCampaign = adCampaignList.find((campaign) => campaign.isActive);
+
+  const initialActiveObjective = () => {
+    if (hasActiveCampaign) return hasActiveCampaign.objective;
+    return null;
+  };
 
   // set active campaign
   const [campaignStatus, setCampaignStatus] = useState(() => campaignStatuses);
   // set active objective
-  const [activeObjective, setActiveObjective] = useState(null);
+  const [activeObjective, setActiveObjective] = useState(() => initialActiveObjective());
+
+  const filteredCampaignListByObjective = adCampaignList.filter((campaign) => campaign.objective === activeObjective);
 
   const generateUpdatedCampaignData = (dbRecord) => {
     // create deep clone to prevent unintentional isActive getting set on array of objects orignal state
@@ -108,13 +116,22 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     }
   };
 
+  const onSaveModal = async () => {
+    setLoading(true);
+    // pass in db prop
+    await saveModalSettings(dbRecord);
+    // close modal after saving
+    setLoading(false);
+    onCloseModal();
+  };
+
   const onCloseModal = () => {
     // reset campaign checkbox state
     setCampaignStatus((prev) => [...prev]);
     // reset wizard state
     setActiveWizardId(WIZARD_ID_MAP.OBJECTIVE);
     // reset objective state
-    setActiveObjective(null);
+    setActiveObjective((prev) => prev);
     onClose();
   };
 
@@ -131,9 +148,17 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
           >
             <ModalHeader textAlign="center" margin="1rem 0 0">
               {businessAcctName} | {adAccountId}
+              {hasActiveCampaign && (
+                <Flex fontSize="16px" justifyContent="center">
+                  Previous selected objective: &nbsp;
+                  <Flex color="#6c757d" fontWeight="600">
+                    {hasActiveCampaign.objective}
+                  </Flex>
+                </Flex>
+              )}
               {activeObjective && (
                 <Flex fontSize="16px" justifyContent="center">
-                  Selected campaign objective: &nbsp;
+                  Current selected objective: &nbsp;
                   <Flex color="#635bff" fontWeight="600">
                     {activeObjective}
                   </Flex>
@@ -155,7 +180,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
               )}
               {!loading &&
                 renderWizardScreen({
-                  adCampaignList,
+                  adCampaignList: filteredCampaignListByObjective,
                   campaignStatus,
                   setCampaignStatus,
                   objectives,
@@ -172,14 +197,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
                 >
                   <Flex className="settings-modal__btn-wrapper">
                     <Button
-                      onClick={async () => {
-                        setLoading(true);
-                        // pass in db prop
-                        await saveModalSettings(dbRecord);
-                        // close modal after saving
-                        setLoading(false);
-                        onCloseModal();
-                      }}
+                      onClick={onSaveModal}
                       _hover={{
                         opacity: '.8',
                       }}

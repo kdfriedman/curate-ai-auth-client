@@ -1,4 +1,4 @@
-import { Flex, FormControl, FormLabel, Heading, Switch, Grid, useMediaQuery } from '@chakra-ui/react';
+import { Flex, FormControl, FormLabel, Switch, Grid, useMediaQuery } from '@chakra-ui/react';
 import React from 'react';
 
 export const SettingsModalSelect = ({ objectives, setActiveObjective, activeObjective }) => {

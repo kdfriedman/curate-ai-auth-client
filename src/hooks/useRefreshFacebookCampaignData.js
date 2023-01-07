@@ -16,6 +16,17 @@ const getFacebookCampaignData = async (adAccountId, userAccessToken) => {
   return [adCampaignListResult, adCampaignListError];
 };
 
+const preservePrevCampaignIsActiveState = (prevAdCampaignList, refreshedAdCampaignList) => {
+  const refreshedAdCampaignListWithPrevIsActive = refreshedAdCampaignList.map((campaign) => {
+    const hasMatchingPrevCampaign = prevAdCampaignList.find((preCampaign) => preCampaign.id === campaign.id)?.isActive;
+    return {
+      ...campaign,
+      isActive: hasMatchingPrevCampaign ?? false,
+    };
+  });
+  return refreshedAdCampaignListWithPrevIsActive;
+};
+
 const generateAdCampaignPayload = (adCampaignListResult) => {
   return adCampaignListResult?.data?.data?.map((campaign) => {
     let startDate;
@@ -40,7 +51,6 @@ const generateAdCampaignPayload = (adCampaignListResult) => {
       id: campaign.id,
       name: campaign.name,
       flight: startDate && stopDate ? `${startDate} - ${stopDate}` : 'N/A',
-      isActive: false,
       objective: campaign.objective,
     };
   });
@@ -96,7 +106,7 @@ export const useRefreshFacebookCampaignData = () => {
     // remove associated record data from firestore db
     // we must remove the full record and re-add to update individual records
     // this is a firebase limitation - cannot update specific array of object indices
-    const [, removedRecordError] = await removeRecordFromFirestore(
+    const [removedRecord, removedRecordError] = await removeRecordFromFirestore(
       [
         FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS[0],
         facebookRecord?.uid,
@@ -107,10 +117,16 @@ export const useRefreshFacebookCampaignData = () => {
       facebookRecord?.businessAcctId,
       FIREBASE.FIRESTORE.FACEBOOK.KEY_TO_USE_FOR_REMOVAL
     );
+    console.log(removedRecord);
     if (removedRecordError) {
       console.error(removedRecordError);
       return setLoading(false);
     }
+
+    facebookFirebasePayload.adCampaignList = preservePrevCampaignIsActiveState(
+      removedRecord.adCampaignList,
+      facebookFirebasePayload.adCampaignList
+    );
 
     // update firestore with copy of old record with the addition of the refreshed fb campaign data
     const [, addedRecordError] = await addListOfRecordsToFirestore(
