@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import firestoreHandlers from '../services/firebase/data/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { FIREBASE } from '../services/firebase/constants';
@@ -33,25 +33,34 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
   const [loading, setLoading] = useState(false);
   // integration record data
   const { adAccountId, adCampaignList, businessAcctId, businessAcctName } = dbRecord;
-  const campaignStatuses = adCampaignList.map((campaign) => ({ isActive: campaign.isActive, id: campaign.id }));
-  // filter out unique objectives
-  const objectives = adCampaignList
-    .map((campaign) => ({ id: campaign.id, type: campaign.objective }))
-    .filter((objective, i, arr) => arr.findIndex((obj) => obj.type === objective.type) === i);
-  // look for active campaign to use for active objective type
-  const hasActiveCampaign = adCampaignList.find((campaign) => campaign.isActive);
 
-  const initialActiveObjective = () => {
-    if (hasActiveCampaign) return hasActiveCampaign.objective;
-    return null;
-  };
+  // default campaign statuses
+  const campaignStatuses = useMemo(
+    () => adCampaignList.map((campaign) => ({ isActive: campaign.isActive, id: campaign.id })),
+    [adCampaignList]
+  );
+
+  // filter out unique objectives
+  const objectives = useMemo(
+    () =>
+      adCampaignList
+        .map((campaign) => ({ id: campaign.id, type: campaign.objective }))
+        .filter((objective, i, arr) => arr.findIndex((obj) => obj.type === objective.type) === i),
+    [adCampaignList]
+  );
+
+  // look for active campaign to use for active objective type
+  const hasActiveCampaign = useMemo(() => adCampaignList.find((campaign) => campaign.isActive), [adCampaignList]);
 
   // set active campaign
   const [campaignStatus, setCampaignStatus] = useState(() => campaignStatuses);
   // set active objective
-  const [activeObjective, setActiveObjective] = useState(() => initialActiveObjective());
+  const [activeObjective, setActiveObjective] = useState(null);
 
-  const filteredCampaignListByObjective = adCampaignList.filter((campaign) => campaign.objective === activeObjective);
+  const filteredCampaignListByObjective = useMemo(
+    () => adCampaignList.filter((campaign) => campaign.objective === activeObjective),
+    [activeObjective, adCampaignList]
+  );
 
   const generateUpdatedCampaignData = (dbRecord) => {
     // create deep clone to prevent unintentional isActive getting set on array of objects orignal state
@@ -75,6 +84,15 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
       return updatedAdCampaignList[i].isActive.toString() !== campaign.isActive.toString();
     });
     return diffOfAdCampaignList;
+  };
+
+  const disableCampaignsWithStaleObjectives = (activeObjective, adCampaignList) => {
+    return adCampaignList.map((campaign) => {
+      if (campaign.objective !== activeObjective) {
+        return { ...campaign, isActive: false };
+      }
+      return campaign;
+    });
   };
 
   const updateFirestoreWithCampaignDiffs = async (dbRecord) => {
@@ -105,13 +123,18 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     if (addedRecordError) throw addedRecordError;
   };
 
-  const saveModalSettings = async (dbRecord) => {
+  const saveModalSettings = async (dbRecord, activeObjective) => {
     const updatedAdCampaignList = generateUpdatedCampaignData(dbRecord);
+    // find diff between prev changes and new ones
     const diffOfAdCampaignList = hasUpdatedCampaignDiff(updatedAdCampaignList);
-
+    // if prev selected campaigns exist that do not share active objective, disable campaigns
+    const updatedAdCampaignListWithActiveObjective = disableCampaignsWithStaleObjectives(
+      activeObjective,
+      updatedAdCampaignList
+    );
     //update db record with updated campaign list
     if (diffOfAdCampaignList.length > 0) {
-      dbRecord.adCampaignList = updatedAdCampaignList;
+      dbRecord.adCampaignList = updatedAdCampaignListWithActiveObjective;
       await updateFirestoreWithCampaignDiffs(dbRecord);
     }
   };
@@ -119,19 +142,19 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
   const onSaveModal = async () => {
     setLoading(true);
     // pass in db prop
-    await saveModalSettings(dbRecord);
+    await saveModalSettings(dbRecord, activeObjective);
     // close modal after saving
     setLoading(false);
     onCloseModal();
   };
 
-  const onCloseModal = () => {
+  const onCloseModal = (isOnSave) => {
     // reset campaign checkbox state
-    setCampaignStatus((prev) => [...prev]);
+    // setCampaignStatus((prev) => [...prev]);
     // reset wizard state
     setActiveWizardId(WIZARD_ID_MAP.OBJECTIVE);
     // reset objective state
-    setActiveObjective((prev) => prev);
+    setActiveObjective(null);
     onClose();
   };
 

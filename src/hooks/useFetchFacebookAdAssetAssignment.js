@@ -7,6 +7,7 @@ import { useFacebookAuth } from '../contexts/FacebookContext';
 import firestoreHandlers from '../services/firebase/data/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '../contexts/AuthContext';
+import CryptoJS from 'crypto-js';
 
 // firestore db functions
 const { addListOfRecordsToFirestore, readUserRecordFromFirestore } = firestoreHandlers;
@@ -15,6 +16,20 @@ const { addListOfRecordsToFirestore, readUserRecordFromFirestore } = firestoreHa
 const { GET, POST } = HTTP_METHODS;
 const { IS_LOADING, HAS_ERRORS, BUSINESS_ASSET_ID, BUSINESS_SYSTEM_USER_ID, IS_FETCH_FACEBOOK_AD_ASSET_ASSIGNMENT } =
   ACTION_TYPES;
+
+const fetchSysUserSecretKey = async (payload, appCheckId) => {
+  const [secretKey, secretKeyErr] = await fetchData({
+    method: POST,
+    url:
+      process.env.NODE_ENV === 'development'
+        ? `${process.env.REACT_APP_MODELS_CREATE_HOST_DEV}${process.env.REACT_APP_SYSTEM_USER_SERVICE_KEY}`
+        : `${process.env.REACT_APP_MODELS_CREATE_HOST_PROD}${process.env.REACT_APP_SYSTEM_USER_SERVICE_KEY}`,
+    data: payload,
+    headers: { [process.env.REACT_APP_FIREBASE_APP_CHECK_CUSTOM_HEADER]: appCheckId },
+  });
+  if (secretKeyErr) throw secretKeyErr;
+  return secretKey;
+};
 
 const fetchFacebookUserAdAssetAssignment = async (
   dispatch,
@@ -105,6 +120,7 @@ const formatFacebookUserAdCampaignList = (adCampaignListResult) => {
 
 const generateFacebookFirestorePayload = (
   sysUserAccessToken,
+  secretKey,
   userBusinessId,
   businessAssetId,
   fbBusinessAcctName,
@@ -112,11 +128,13 @@ const generateFacebookFirestorePayload = (
   currentUser,
   facebookAuthChange
 ) => {
+  // Encrypt
+  const SYSTEM_USER_ACCESS_TOKEN = CryptoJS.AES.encrypt(sysUserAccessToken, secretKey).toString();
   // create payload object for facebook integration
   const facebookFirebasePayload = {
     uid: currentUser.uid,
     email: currentUser.providerData?.[0]?.email,
-    sysUserAccessToken,
+    sysUserAccessToken: SYSTEM_USER_ACCESS_TOKEN,
     businessAcctName: fbBusinessAcctName.name,
     businessAcctId: userBusinessId,
     adAccountId: businessAssetId,
@@ -214,7 +232,7 @@ const updateStateWithFacebookFirestoreRecord = (dispatch, record, setIntegration
 };
 
 export const useFetchFacebookAdAssetAssignment = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, getAuthToken, getAppToken } = useAuth();
   const { facebookAuthChange } = useFacebookAuth();
   const handleFetchFacebookAdAssetAssignment = async (
     dispatch,
@@ -231,9 +249,15 @@ export const useFetchFacebookAdAssetAssignment = () => {
     const facebookBusinessAccountName = userBusinessList.find((businessObject) => businessObject.id === userBusinessId);
     const formattedFacebookUserAdCampaignList = formatFacebookUserAdCampaignList(facebooUserAdCampaignData);
 
+    // get key from server to encrypt syst access token in db
+    const { token: appCheckToken } = (await getAppToken(currentUser)) ?? {};
+    const authToken = await getAuthToken(currentUser);
+    const secretKey = await fetchSysUserSecretKey({ FIREBASE_ID_TOKEN: authToken }, appCheckToken);
+
     // create payload to store in db
     const facebookFirestorePayload = generateFacebookFirestorePayload(
       sysUserAccessToken,
+      secretKey?.data?.key,
       userBusinessId,
       businessAssetId,
       facebookBusinessAccountName,
@@ -241,6 +265,7 @@ export const useFetchFacebookAdAssetAssignment = () => {
       currentUser,
       facebookAuthChange
     );
+
     // update db
     const facebookFirestoreAddedRecord = await updateFirestoreWithFacebookUserRecord(
       currentUser,

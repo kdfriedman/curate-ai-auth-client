@@ -9,6 +9,7 @@
     "@emotion/styled": "^11.10.5",
     "axios": "^0.21.1",
     "caniuse-lite": "^1.0.30001418",
+    "crypto-js": "^4.1.1",
     "firebase": "9.12",
     "firebase-tools": "^11.14.2",
     "focus-visible": "^5.2.0",
