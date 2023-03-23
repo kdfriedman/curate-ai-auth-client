@@ -5,7 +5,7 @@ import { ERROR } from '../constants/error';
 
 export const useShowWizardScreen = () => {
   const WIZARD_ID_MAP = {
-    OBJECTIVE: 1,
+    INSIGHT: 1,
     CAMPAIGN: 2,
   };
   const [activeWizardId, setActiveWizardId] = useState(1);
@@ -14,19 +14,13 @@ export const useShowWizardScreen = () => {
     adCampaignList,
     campaignStatus,
     setCampaignStatus,
-    objectives,
-    activeObjective,
-    setActiveObjective,
+    actions,
+    activeAction,
+    setActiveAction,
   }) => {
     switch (activeWizardId) {
-      case WIZARD_ID_MAP.OBJECTIVE: {
-        return (
-          <SettingsModalSelect
-            objectives={objectives}
-            activeObjective={activeObjective}
-            setActiveObjective={setActiveObjective}
-          />
-        );
+      case WIZARD_ID_MAP.INSIGHT: {
+        return <SettingsModalSelect actions={actions} activeAction={activeAction} setActiveAction={setActiveAction} />;
       }
       case WIZARD_ID_MAP.CAMPAIGN: {
         return (
@@ -34,7 +28,7 @@ export const useShowWizardScreen = () => {
             adCampaignList={adCampaignList}
             setCampaignStatus={setCampaignStatus}
             campaignStatus={campaignStatus}
-            activeObjective={activeObjective}
+            activeAction={activeAction}
           />
         );
       }

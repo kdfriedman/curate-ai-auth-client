@@ -187,6 +187,20 @@ div[name="adAccountSelect"] .chakra-select__wrapper {
   width: 100%;
 }
 
+td#insightsSelectTableData .chakra-select__wrapper {
+  width: 11rem;
+  margin: 0.5rem 1rem 0 0;
+}
+
+td#insightsSelectTableData select {
+  width: 11rem;
+  padding: 0 1rem 0 1rem;
+}
+
+footer.settings-modal__footer {
+  margin-bottom: 1rem;
+}
+
 @keyframes opacityPulse {
   0% {opacity: 0.0;}
   50% {opacity: 1.0;}

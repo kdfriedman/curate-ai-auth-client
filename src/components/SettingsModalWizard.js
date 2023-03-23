@@ -5,7 +5,7 @@ export const SettingsModalWizard = ({
   setActiveWizardId,
   activeWizardId,
   wizardIdMap: WIZARD_ID_MAP,
-  activeObjective,
+  activeAction,
 }) => {
   const [hasError, setError] = useState(null);
 
@@ -22,28 +22,28 @@ export const SettingsModalWizard = ({
       <Flex className="settings-modal-wizard__step-wrapper" flexDir="row" columnGap="1rem">
         <Flex flexDir="column" rowGap="5px" alignItems="center">
           <Flex
-            data-id={WIZARD_ID_MAP.OBJECTIVE}
+            data-id={WIZARD_ID_MAP.INSIGHT}
             justifyContent="center"
             borderRadius="50%"
-            backgroundColor={activeWizardId === WIZARD_ID_MAP.OBJECTIVE ? '#635bff' : '#dadada'}
+            backgroundColor={activeWizardId === WIZARD_ID_MAP.INSIGHT ? '#635bff' : '#dadada'}
             color="#fff"
             width="3rem"
             height="3rem"
             alignItems="center"
             fontWeight="700"
-            cursor={activeWizardId === WIZARD_ID_MAP.OBJECTIVE ? 'default' : 'pointer'}
+            cursor={activeWizardId === WIZARD_ID_MAP.INSIGHT ? 'default' : 'pointer'}
             onClick={handleSettingWizardScreenState}
           >
             1
           </Flex>
           <Flex
-            opacity={activeWizardId === WIZARD_ID_MAP.OBJECTIVE ? 1 : 0.5}
+            opacity={activeWizardId === WIZARD_ID_MAP.INSIGHT ? 1 : 0.5}
             color="#4A5568"
             fontSize="12px"
             fontWeight="700"
             lineHeight="16px"
           >
-            Select an objective
+            Select an insight
           </Flex>
         </Flex>
         <Flex
@@ -64,8 +64,8 @@ export const SettingsModalWizard = ({
             height="3rem"
             alignItems="center"
             fontWeight="700"
-            cursor={activeWizardId === WIZARD_ID_MAP.CAMPAIGN ? 'default' : activeObjective ? 'pointer' : 'not-allowed'}
-            onClick={activeObjective ? handleSettingWizardScreenState : handleDisablingWizardScreen}
+            cursor={activeWizardId === WIZARD_ID_MAP.CAMPAIGN ? 'default' : activeAction ? 'pointer' : 'not-allowed'}
+            onClick={activeAction ? handleSettingWizardScreenState : handleDisablingWizardScreen}
           >
             2
           </Flex>

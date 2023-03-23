@@ -40,12 +40,13 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     [adCampaignList]
   );
 
-  // filter out unique objectives
-  const objectives = useMemo(
+  // filter out unique actions
+  const actions = useMemo(
     () =>
       adCampaignList
-        .map((campaign) => ({ id: campaign.id, type: campaign.objective }))
-        .filter((objective, i, arr) => arr.findIndex((obj) => obj.type === objective.type) === i),
+        .map((campaign) => campaign.actions)
+        .flat()
+        .filter((action, i, campaignActions) => campaignActions.indexOf(action) === i),
     [adCampaignList]
   );
 
@@ -54,12 +55,12 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
 
   // set active campaign
   const [campaignStatus, setCampaignStatus] = useState(() => campaignStatuses);
-  // set active objective
-  const [activeObjective, setActiveObjective] = useState(null);
+  // set active insight
+  const [activeAction, setActiveAction] = useState(null);
 
-  const filteredCampaignListByObjective = useMemo(
-    () => adCampaignList.filter((campaign) => campaign.objective === activeObjective),
-    [activeObjective, adCampaignList]
+  const filteredCampaignListByAction = useMemo(
+    () => adCampaignList.filter((campaign) => campaign.actions.some((action) => action === activeAction)),
+    [activeAction, adCampaignList]
   );
 
   const generateUpdatedCampaignData = (dbRecord) => {
@@ -86,9 +87,9 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     return diffOfAdCampaignList;
   };
 
-  const disableCampaignsWithStaleObjectives = (activeObjective, adCampaignList) => {
+  const disableCampaignsWithStaleObjectives = (activeAction, adCampaignList) => {
     return adCampaignList.map((campaign) => {
-      if (campaign.objective !== activeObjective) {
+      if (campaign.actions.some((action) => action !== activeAction)) {
         return { ...campaign, isActive: false };
       }
       return campaign;
@@ -123,18 +124,18 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     if (addedRecordError) throw addedRecordError;
   };
 
-  const saveModalSettings = async (dbRecord, activeObjective) => {
+  const saveModalSettings = async (dbRecord, activeAction) => {
     const updatedAdCampaignList = generateUpdatedCampaignData(dbRecord);
     // find diff between prev changes and new ones
     const diffOfAdCampaignList = hasUpdatedCampaignDiff(updatedAdCampaignList);
     // if prev selected campaigns exist that do not share active objective, disable campaigns
-    const updatedAdCampaignListWithActiveObjective = disableCampaignsWithStaleObjectives(
-      activeObjective,
+    const updatedAdCampaignListWithActiveAction = disableCampaignsWithStaleObjectives(
+      activeAction,
       updatedAdCampaignList
     );
     //update db record with updated campaign list
     if (diffOfAdCampaignList.length > 0) {
-      dbRecord.adCampaignList = updatedAdCampaignListWithActiveObjective;
+      dbRecord.adCampaignList = updatedAdCampaignListWithActiveAction;
       await updateFirestoreWithCampaignDiffs(dbRecord);
     }
   };
@@ -142,7 +143,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
   const onSaveModal = async () => {
     setLoading(true);
     // pass in db prop
-    await saveModalSettings(dbRecord, activeObjective);
+    await saveModalSettings(dbRecord, activeAction);
     // close modal after saving
     setLoading(false);
     onCloseModal();
@@ -152,9 +153,9 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     // reset campaign checkbox state
     // setCampaignStatus((prev) => [...prev]);
     // reset wizard state
-    setActiveWizardId(WIZARD_ID_MAP.OBJECTIVE);
+    setActiveWizardId(WIZARD_ID_MAP.INSIGHT);
     // reset objective state
-    setActiveObjective(null);
+    setActiveAction(null);
     onClose();
   };
 
@@ -173,17 +174,17 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
               {businessAcctName} | {adAccountId}
               {hasActiveCampaign && (
                 <Flex fontSize="16px" justifyContent="center">
-                  Previous selected objective: &nbsp;
+                  Previous selected insight: &nbsp;
                   <Flex color="#6c757d" fontWeight="600">
                     {hasActiveCampaign.objective}
                   </Flex>
                 </Flex>
               )}
-              {activeObjective && (
+              {activeAction && (
                 <Flex fontSize="16px" justifyContent="center">
-                  Current selected objective: &nbsp;
+                  Current selected insight: &nbsp;
                   <Flex color="#635bff" fontWeight="600">
-                    {activeObjective}
+                    {activeAction}
                   </Flex>
                 </Flex>
               )}
@@ -203,12 +204,12 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
               )}
               {!loading &&
                 renderWizardScreen({
-                  adCampaignList: filteredCampaignListByObjective,
+                  adCampaignList: filteredCampaignListByAction,
                   campaignStatus,
                   setCampaignStatus,
-                  objectives,
-                  activeObjective,
-                  setActiveObjective,
+                  actions,
+                  activeAction,
+                  setActiveAction,
                 })}
             </ModalBody>
             <ModalFooter flexDir="column" className="settings-modal__footer">
@@ -263,7 +264,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
                 setActiveWizardId={setActiveWizardId}
                 activeWizardId={activeWizardId}
                 wizardIdMap={WIZARD_ID_MAP}
-                activeObjective={activeObjective}
+                activeAction={activeAction}
               />
             </ModalFooter>
           </ModalContent>

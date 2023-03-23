@@ -1,19 +1,19 @@
-import { Flex, FormControl, FormLabel, Switch, Grid, useMediaQuery } from '@chakra-ui/react';
+import { Flex, FormControl, FormLabel, Switch, Grid } from '@chakra-ui/react';
 import React from 'react';
 
-export const SettingsModalSelect = ({ objectives, setActiveObjective, activeObjective }) => {
+export const SettingsModalSelect = ({ actions, setActiveAction, activeAction }) => {
   const handleSettingObjective = (e) => {
     const isSwitchedOn = e.target.checked;
-    const labelElement = e.target?.closest('[data-objective-id]');
-    const objective = labelElement?.dataset?.objectiveId;
-    if (!objective) return;
-    setActiveObjective(isSwitchedOn ? objective : null);
+    const labelElement = e.target?.closest('[data-action-id]');
+    const action = labelElement?.dataset?.actionId;
+    if (!action) return;
+    setActiveAction(isSwitchedOn ? action : null);
   };
 
   return (
     <Flex flexDir="column" alignItems="center">
       <Flex mb="2rem" fontSize="17px" fontWeight="400">
-        Please select one campaign objective from the list below:
+        Please select one campaign insight from the list below:
       </Flex>
       <FormControl
         as={Grid}
@@ -23,15 +23,15 @@ export const SettingsModalSelect = ({ objectives, setActiveObjective, activeObje
         columnGap="1.5rem"
         width="inherit"
       >
-        {objectives.map((objective) => {
+        {actions.sort().map((action, i) => {
           return (
-            <React.Fragment key={objective.id}>
-              <FormLabel htmlFor={objective.type}>{objective.type}:</FormLabel>
+            <React.Fragment key={i}>
+              <FormLabel htmlFor={action}>{action}:</FormLabel>
               <Switch
-                data-objective-id={objective.type}
+                data-action-id={action}
                 onChange={handleSettingObjective}
-                isDisabled={activeObjective !== objective.type && activeObjective !== null}
-                isChecked={activeObjective === objective.type}
+                isDisabled={activeAction !== action && activeAction !== null}
+                isChecked={activeAction === action}
               />
             </React.Fragment>
           );

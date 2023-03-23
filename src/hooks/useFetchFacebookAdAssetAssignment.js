@@ -66,7 +66,7 @@ const fetchFacebookUserAdCampaigns = async (dispatch, facebookAuthChange, busine
   // fetch list of ad campaigns to provide user for selection
   const [adCampaignListResult, adCampaignListError] = await fetchData({
     method: GET,
-    url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION}/${businessAssetId}/campaigns?fields=objective,name,start_time,stop_time&access_token=${facebookAuthChange?.authResponse?.accessToken}`,
+    url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION}/${businessAssetId}/campaigns?fields=objective,name,start_time,stop_time,insights.date_preset(maximum).level(campaign){actions}&limit=250&access_token=${facebookAuthChange?.authResponse?.accessToken}`,
   });
 
   if (adCampaignListError) {
@@ -88,33 +88,40 @@ const fetchFacebookUserAdCampaigns = async (dispatch, facebookAuthChange, busine
 };
 
 const formatFacebookUserAdCampaignList = (adCampaignListResult) => {
-  const formattedAdCampaignList = adCampaignListResult?.data?.data.map((campaign) => {
-    let startDate;
-    let stopDate;
-    try {
-      if (campaign.start_time && campaign.stop_time) {
-        const startFormattedDate = new Date(campaign.start_time).toISOString().slice(0, 10);
-        const stopFormattedDate = new Date(campaign.stop_time).toISOString().slice(0, 10);
-        const startFormattedDateList = startFormattedDate.split('-');
-        const stopFormattedDateList = stopFormattedDate.split('-');
-        const startFormattedDateLastItem = startFormattedDateList.shift();
-        const stopFormattedDateLastItem = stopFormattedDateList.shift();
-        startFormattedDateList.push(startFormattedDateLastItem);
-        stopFormattedDateList.push(stopFormattedDateLastItem);
-        startDate = startFormattedDateList.join('/');
-        stopDate = stopFormattedDateList.join('/');
+  const formattedAdCampaignList = adCampaignListResult?.data?.data
+    .map((campaign) => {
+      let startDate;
+      let stopDate;
+      try {
+        if (campaign.start_time && campaign.stop_time) {
+          const startFormattedDate = new Date(campaign.start_time).toISOString().slice(0, 10);
+          const stopFormattedDate = new Date(campaign.stop_time).toISOString().slice(0, 10);
+          const startFormattedDateList = startFormattedDate.split('-');
+          const stopFormattedDateList = stopFormattedDate.split('-');
+          const startFormattedDateLastItem = startFormattedDateList.shift();
+          const stopFormattedDateLastItem = stopFormattedDateList.shift();
+          startFormattedDateList.push(startFormattedDateLastItem);
+          stopFormattedDateList.push(stopFormattedDateLastItem);
+          startDate = startFormattedDateList.join('/');
+          stopDate = stopFormattedDateList.join('/');
+        }
+      } catch (err) {
+        console.error(err);
       }
-    } catch (err) {
-      console.error(err);
-    }
-    return {
-      id: campaign.id,
-      name: campaign.name,
-      flight: startDate && stopDate ? `${startDate} - ${stopDate}` : 'N/A',
-      isActive: false,
-      objective: campaign.objective,
-    };
-  });
+      return {
+        id: campaign.id,
+        name: campaign.name,
+        flight: startDate && stopDate ? `${startDate} - ${stopDate}` : 'N/A',
+        isActive: false,
+        objective: campaign.objective,
+        actions: campaign.insights
+          ? campaign.insights?.data?.[0].actions
+              .map((action) => action.action_type)
+              .filter((action, index, actions) => actions.indexOf(action) === index)
+          : null,
+      };
+    })
+    .filter((campaign) => campaign.actions !== null && Array.isArray(campaign.actions));
   return formattedAdCampaignList;
 };
 
