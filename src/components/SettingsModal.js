@@ -163,19 +163,20 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     await saveModalSettings(dbRecord, activeAction);
     // close modal after saving
     setLoading(false);
-    onCloseModal();
+    onCloseModal(true);
   };
 
-  const onCloseModal = () => {
+  const onCloseModal = (isSave) => {
+    if (!isSave) {
+      setCampaignStatus(() => campaignStatuses);
+    }
     // reset campaign checkbox state
-    setCampaignStatus(() => campaignStatuses);
     // reset wizard state
     setActiveWizardId(WIZARD_ID_MAP.INSIGHT);
     // reset objective state
     setActiveAction(null);
     onClose();
   };
-  console.log(campaignStatuses);
 
   return (
     <>
