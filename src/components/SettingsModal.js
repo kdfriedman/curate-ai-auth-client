@@ -68,7 +68,9 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
       const hasUpdatedCampaign = campaignStatus.find((campaignObj) => campaignObj.id === campaign.id);
       // if campaign has associated change stored in state, update record with new state
       if (hasUpdatedCampaign) {
+        const hasUpdatedAction = campaign.activeAction !== activeAction;
         campaign.isActive = hasUpdatedCampaign.isActive;
+        campaign.activeAction = hasUpdatedAction ? activeAction : campaign.activeAction;
       }
       return campaign;
     });
@@ -77,8 +79,15 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
 
   const hasUpdatedCampaignDiff = (updatedAdCampaignList) => {
     // diffing function to only update db if changes exist between adCampaignLists
+    // TODO: check ternary to see why not working
     const diffOfAdCampaignList = dbRecord.adCampaignList.filter((campaign, i) => {
-      // loop through both arrays and compare the isActive property as type strings
+      // loop through both arrays and compare the isActive and activeAction (if not null) property as type strings
+      if (updatedAdCampaignList[i].activeAction && campaign.activeAction) {
+        return (
+          updatedAdCampaignList[i].isActive.toString() !== campaign.isActive.toString() ||
+          updatedAdCampaignList[i].activeAction.toString() !== campaign.activeAction.toString()
+        );
+      }
       return updatedAdCampaignList[i].isActive.toString() !== campaign.isActive.toString();
     });
     return diffOfAdCampaignList;
@@ -157,15 +166,16 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     onCloseModal();
   };
 
-  const onCloseModal = (isOnSave) => {
+  const onCloseModal = () => {
     // reset campaign checkbox state
-    // setCampaignStatus((prev) => [...prev]);
+    setCampaignStatus(() => campaignStatuses);
     // reset wizard state
     setActiveWizardId(WIZARD_ID_MAP.INSIGHT);
     // reset objective state
     setActiveAction(null);
     onClose();
   };
+  console.log(campaignStatuses);
 
   return (
     <>

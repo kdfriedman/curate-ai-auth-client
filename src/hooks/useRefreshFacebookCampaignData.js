@@ -19,13 +19,12 @@ const getFacebookCampaignData = async (adAccountId, userAccessToken) => {
 const preservePrevCampaignIsActiveState = (prevAdCampaignList, refreshedAdCampaignList) => {
   const refreshedAdCampaignListWithPrevIsActive = refreshedAdCampaignList.map((campaign) => {
     const matchedPrevCampaign = prevAdCampaignList.find((prevCampaign) => prevCampaign.id === campaign.id);
-    if (!matchedPrevCampaign) return campaign;
     const matchedPrevCampaignIsActiveState = matchedPrevCampaign?.isActive;
     const matchedPrevCampaignActiveActionState = matchedPrevCampaign?.activeAction;
     return {
       ...campaign,
       isActive: matchedPrevCampaignIsActiveState ?? false,
-      activeAction: matchedPrevCampaignActiveActionState,
+      activeAction: matchedPrevCampaignActiveActionState ?? null,
     };
   });
   return refreshedAdCampaignListWithPrevIsActive;
