@@ -19,8 +19,9 @@ const getFacebookCampaignData = async (adAccountId, userAccessToken) => {
 const preservePrevCampaignIsActiveState = (prevAdCampaignList, refreshedAdCampaignList) => {
   const refreshedAdCampaignListWithPrevIsActive = refreshedAdCampaignList.map((campaign) => {
     const matchedPrevCampaign = prevAdCampaignList.find((prevCampaign) => prevCampaign.id === campaign.id);
-    const matchedPrevCampaignIsActiveState = matchedPrevCampaign.isActive;
-    const matchedPrevCampaignActiveActionState = matchedPrevCampaign.activeAction;
+    if (!matchedPrevCampaign) return campaign;
+    const matchedPrevCampaignIsActiveState = matchedPrevCampaign?.isActive;
+    const matchedPrevCampaignActiveActionState = matchedPrevCampaign?.activeAction;
     return {
       ...campaign,
       isActive: matchedPrevCampaignIsActiveState ?? false,
@@ -31,38 +32,43 @@ const preservePrevCampaignIsActiveState = (prevAdCampaignList, refreshedAdCampai
 };
 
 const generateAdCampaignPayload = (adCampaignListResult) => {
-  return adCampaignListResult?.data?.data?.map((campaign) => {
-    let startDate;
-    let stopDate;
-    try {
-      if (campaign.start_time && campaign.stop_time) {
-        const startFormattedDate = new Date(campaign.start_time).toISOString().slice(0, 10);
-        const stopFormattedDate = new Date(campaign.stop_time).toISOString().slice(0, 10);
-        const startFormattedDateList = startFormattedDate.split('-');
-        const stopFormattedDateList = stopFormattedDate.split('-');
-        const startFormattedDateLastItem = startFormattedDateList.shift();
-        const stopFormattedDateLastItem = stopFormattedDateList.shift();
-        startFormattedDateList.push(startFormattedDateLastItem);
-        stopFormattedDateList.push(stopFormattedDateLastItem);
-        startDate = startFormattedDateList.join('/');
-        stopDate = stopFormattedDateList.join('/');
-      }
-    } catch (err) {
-      console.error(err);
-    }
-    return {
-      id: campaign.id,
-      name: campaign.name,
-      flight: startDate && stopDate ? `${startDate} - ${stopDate}` : 'N/A',
-      objective: campaign.objective,
-      actions: campaign.insights
-        ? campaign.insights?.data?.[0].actions
-            .map((action) => action.action_type)
-            .filter((action, index, actions) => actions.indexOf(action) === index)
-        : null,
-      activeAction: null,
-    };
-  });
+  return (
+    adCampaignListResult?.data?.data
+      ?.map((campaign) => {
+        let startDate;
+        let stopDate;
+        try {
+          if (campaign.start_time && campaign.stop_time) {
+            const startFormattedDate = new Date(campaign.start_time).toISOString().slice(0, 10);
+            const stopFormattedDate = new Date(campaign.stop_time).toISOString().slice(0, 10);
+            const startFormattedDateList = startFormattedDate.split('-');
+            const stopFormattedDateList = stopFormattedDate.split('-');
+            const startFormattedDateLastItem = startFormattedDateList.shift();
+            const stopFormattedDateLastItem = stopFormattedDateList.shift();
+            startFormattedDateList.push(startFormattedDateLastItem);
+            stopFormattedDateList.push(stopFormattedDateLastItem);
+            startDate = startFormattedDateList.join('/');
+            stopDate = stopFormattedDateList.join('/');
+          }
+        } catch (err) {
+          console.error(err);
+        }
+        return {
+          id: campaign.id,
+          name: campaign.name,
+          flight: startDate && stopDate ? `${startDate} - ${stopDate}` : 'N/A',
+          objective: campaign.objective,
+          actions: campaign.insights
+            ? campaign.insights?.data?.[0].actions
+                .map((action) => action.action_type)
+                .filter((action, index, actions) => actions.indexOf(action) === index)
+            : null,
+          activeAction: null,
+        };
+      })
+      // remove any campaigns from being used if no insights/actions exist to model against
+      .filter((campaign) => campaign.actions !== null && Array.isArray(campaign.actions))
+  );
 };
 
 export const useRefreshFacebookCampaignData = () => {

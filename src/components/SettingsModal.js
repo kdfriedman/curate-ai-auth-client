@@ -130,7 +130,6 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     if (addedRecordError) throw addedRecordError;
   };
 
-  // TODO: fix checked campaigns in relation to activeAction and db updates
   const saveModalSettings = async (dbRecord, activeAction) => {
     const updatedAdCampaignList = generateUpdatedCampaignData(dbRecord);
     // find diff between prev changes and new ones
@@ -145,7 +144,6 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     //update db record with updated campaign list
     if (diffOfAdCampaignList.length > 0) {
       dbRecord.adCampaignList = updatedCampaignsWithActiveActions;
-      console.log(dbRecord);
       await updateFirestoreWithCampaignDiffs(dbRecord);
     }
   };

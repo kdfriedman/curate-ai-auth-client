@@ -122,6 +122,7 @@ const formatFacebookUserAdCampaignList = (adCampaignListResult) => {
         activeAction: null,
       };
     })
+    // remove any campaigns from being used if no insights/actions exist to model against
     .filter((campaign) => campaign.actions !== null && Array.isArray(campaign.actions));
   return formattedAdCampaignList;
 };
@@ -146,7 +147,7 @@ const generateFacebookFirestorePayload = (
     businessAcctName: fbBusinessAcctName.name,
     businessAcctId: userBusinessId,
     adAccountId: businessAssetId,
-    adCampaignList: adCampaignList,
+    adCampaignList,
     userAccessToken: facebookAuthChange?.authResponse?.accessToken,
     id: uuidv4(),
     createdAt: new Date().toISOString(),
