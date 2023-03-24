@@ -119,6 +119,7 @@ const formatFacebookUserAdCampaignList = (adCampaignListResult) => {
               .map((action) => action.action_type)
               .filter((action, index, actions) => actions.indexOf(action) === index)
           : null,
+        activeAction: null,
       };
     })
     .filter((campaign) => campaign.actions !== null && Array.isArray(campaign.actions));

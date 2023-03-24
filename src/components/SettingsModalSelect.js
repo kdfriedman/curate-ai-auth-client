@@ -24,9 +24,21 @@ export const SettingsModalSelect = ({ actions, setActiveAction, activeAction }) 
         width="inherit"
       >
         {actions.sort().map((action, i) => {
+          // remove underscore and captialize first letters of each word
+          const formattedAction = action
+            .replace(/[_.]+/g, ' ')
+            .split(' ')
+            .map((word) => {
+              // captialize Facebook abbreviation
+              if (/(fb)/.test(word)) {
+                return word.toUpperCase();
+              }
+              return word[0].toUpperCase() + word.slice(1, word.length);
+            })
+            .join(' ');
           return (
             <React.Fragment key={i}>
-              <FormLabel htmlFor={action}>{action}:</FormLabel>
+              <FormLabel htmlFor={action}>{formattedAction}</FormLabel>
               <Switch
                 data-action-id={action}
                 onChange={handleSettingObjective}

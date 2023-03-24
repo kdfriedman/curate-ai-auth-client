@@ -18,10 +18,13 @@ const getFacebookCampaignData = async (adAccountId, userAccessToken) => {
 
 const preservePrevCampaignIsActiveState = (prevAdCampaignList, refreshedAdCampaignList) => {
   const refreshedAdCampaignListWithPrevIsActive = refreshedAdCampaignList.map((campaign) => {
-    const hasMatchingPrevCampaign = prevAdCampaignList.find((preCampaign) => preCampaign.id === campaign.id)?.isActive;
+    const matchedPrevCampaign = prevAdCampaignList.find((prevCampaign) => prevCampaign.id === campaign.id);
+    const matchedPrevCampaignIsActiveState = matchedPrevCampaign.isActive;
+    const matchedPrevCampaignActiveActionState = matchedPrevCampaign.activeAction;
     return {
       ...campaign,
-      isActive: hasMatchingPrevCampaign ?? false,
+      isActive: matchedPrevCampaignIsActiveState ?? false,
+      activeAction: matchedPrevCampaignActiveActionState,
     };
   });
   return refreshedAdCampaignListWithPrevIsActive;
@@ -57,6 +60,7 @@ const generateAdCampaignPayload = (adCampaignListResult) => {
             .map((action) => action.action_type)
             .filter((action, index, actions) => actions.indexOf(action) === index)
         : null,
+      activeAction: null,
     };
   });
 };

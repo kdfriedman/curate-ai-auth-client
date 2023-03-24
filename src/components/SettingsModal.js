@@ -50,9 +50,6 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     [adCampaignList]
   );
 
-  // look for active campaign to use for active objective type
-  const hasActiveCampaign = useMemo(() => adCampaignList.find((campaign) => campaign.isActive), [adCampaignList]);
-
   // set active campaign
   const [campaignStatus, setCampaignStatus] = useState(() => campaignStatuses);
   // set active insight
@@ -89,8 +86,17 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
 
   const disableCampaignsWithStaleObjectives = (activeAction, adCampaignList) => {
     return adCampaignList.map((campaign) => {
-      if (campaign.actions.some((action) => action !== activeAction)) {
-        return { ...campaign, isActive: false };
+      if (campaign.actions.some((action) => action === activeAction)) {
+        return campaign;
+      }
+      return { ...campaign, isActive: false, activeAction: null };
+    });
+  };
+
+  const addActiveActionToCampaigns = (activeAction, adCampaignList) => {
+    return adCampaignList.map((campaign) => {
+      if (campaign.isActive) {
+        return { ...campaign, activeAction };
       }
       return campaign;
     });
@@ -124,18 +130,22 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     if (addedRecordError) throw addedRecordError;
   };
 
+  // TODO: fix checked campaigns in relation to activeAction and db updates
   const saveModalSettings = async (dbRecord, activeAction) => {
     const updatedAdCampaignList = generateUpdatedCampaignData(dbRecord);
     // find diff between prev changes and new ones
     const diffOfAdCampaignList = hasUpdatedCampaignDiff(updatedAdCampaignList);
-    // if prev selected campaigns exist that do not share active objective, disable campaigns
-    const updatedAdCampaignListWithActiveAction = disableCampaignsWithStaleObjectives(
+    // if prev selected campaigns exist that do not share active action, disable campaigns
+    const disabledCampaignsWithStaleActions = disableCampaignsWithStaleObjectives(activeAction, updatedAdCampaignList);
+    // update active action on all active campaigns
+    const updatedCampaignsWithActiveActions = addActiveActionToCampaigns(
       activeAction,
-      updatedAdCampaignList
+      disabledCampaignsWithStaleActions
     );
     //update db record with updated campaign list
     if (diffOfAdCampaignList.length > 0) {
-      dbRecord.adCampaignList = updatedAdCampaignListWithActiveAction;
+      dbRecord.adCampaignList = updatedCampaignsWithActiveActions;
+      console.log(dbRecord);
       await updateFirestoreWithCampaignDiffs(dbRecord);
     }
   };
@@ -172,14 +182,6 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
           >
             <ModalHeader textAlign="center" margin="1rem 0 0">
               {businessAcctName} | {adAccountId}
-              {hasActiveCampaign && (
-                <Flex fontSize="16px" justifyContent="center">
-                  Previous selected insight: &nbsp;
-                  <Flex color="#6c757d" fontWeight="600">
-                    {hasActiveCampaign.objective}
-                  </Flex>
-                </Flex>
-              )}
               {activeAction && (
                 <Flex fontSize="16px" justifyContent="center">
                   Current selected insight: &nbsp;
