@@ -35,11 +35,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
   const { adAccountId, adCampaignList, businessAcctId, businessAcctName } = dbRecord;
 
   // default campaign statuses
-  const campaignStatuses = useMemo(
-    () => adCampaignList.map((campaign) => ({ isActive: campaign.isActive, id: campaign.id })),
-    [adCampaignList]
-  );
-
+  const campaignStatuses = adCampaignList.map((campaign) => ({ isActive: campaign.isActive, id: campaign.id }));
   // filter out unique actions
   const actions = useMemo(
     () =>
@@ -163,13 +159,10 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     await saveModalSettings(dbRecord, activeAction);
     // close modal after saving
     setLoading(false);
-    onCloseModal(true);
+    onCloseModal();
   };
 
-  const onCloseModal = (isSave) => {
-    if (!isSave) {
-      setCampaignStatus(() => campaignStatuses);
-    }
+  const onCloseModal = () => {
     // reset campaign checkbox state
     // reset wizard state
     setActiveWizardId(WIZARD_ID_MAP.INSIGHT);
