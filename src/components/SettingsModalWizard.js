@@ -5,7 +5,7 @@ export const SettingsModalWizard = ({
   setActiveWizardId,
   activeWizardId,
   wizardIdMap: WIZARD_ID_MAP,
-  activeAction,
+  activeInsight,
 }) => {
   const [hasError, setError] = useState(null);
 
@@ -64,8 +64,8 @@ export const SettingsModalWizard = ({
             height="3rem"
             alignItems="center"
             fontWeight="700"
-            cursor={activeWizardId === WIZARD_ID_MAP.CAMPAIGN ? 'default' : activeAction ? 'pointer' : 'not-allowed'}
-            onClick={activeAction ? handleSettingWizardScreenState : handleDisablingWizardScreen}
+            cursor={activeWizardId === WIZARD_ID_MAP.CAMPAIGN ? 'default' : activeInsight ? 'pointer' : 'not-allowed'}
+            onClick={activeInsight ? handleSettingWizardScreenState : handleDisablingWizardScreen}
           >
             2
           </Flex>

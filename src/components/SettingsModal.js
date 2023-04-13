@@ -36,25 +36,21 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
 
   // default campaign statuses
   const campaignStatuses = adCampaignList.map((campaign) => ({ isActive: campaign.isActive, id: campaign.id }));
-  // filter out unique actions
-  const actions = useMemo(
+
+  // filter out unique insights
+  const insights = useMemo(
     () =>
       adCampaignList
-        .map((campaign) => campaign.actions)
+        .map((campaign) => campaign.insights)
         .flat()
-        .filter((action, i, campaignActions) => campaignActions.indexOf(action) === i),
+        .filter((insight, i, campaignInsights) => campaignInsights.indexOf(insight) === i),
     [adCampaignList]
   );
 
   // set active campaign
   const [campaignStatus, setCampaignStatus] = useState(() => campaignStatuses);
   // set active insight
-  const [activeAction, setActiveAction] = useState(null);
-
-  const filteredCampaignListByAction = useMemo(
-    () => adCampaignList.filter((campaign) => campaign.actions.some((action) => action === activeAction)),
-    [activeAction, adCampaignList]
-  );
+  const [activeInsight, setActiveInsight] = useState(null);
 
   const generateUpdatedCampaignData = (dbRecord) => {
     // create deep clone to prevent unintentional isActive getting set on array of objects orignal state
@@ -64,9 +60,9 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
       const hasUpdatedCampaign = campaignStatus.find((campaignObj) => campaignObj.id === campaign.id);
       // if campaign has associated change stored in state, update record with new state
       if (hasUpdatedCampaign) {
-        const hasUpdatedAction = campaign.activeAction !== activeAction;
+        const hasUpdatedInsight = campaign.activeInsight !== activeInsight;
         campaign.isActive = hasUpdatedCampaign.isActive;
-        campaign.activeAction = hasUpdatedAction ? activeAction : campaign.activeAction;
+        campaign.activeInsight = hasUpdatedInsight ? activeInsight : campaign.activeInsight;
       }
       return campaign;
     });
@@ -77,11 +73,11 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     // diffing function to only update db if changes exist between adCampaignLists
     // TODO: check ternary to see why not working
     const diffOfAdCampaignList = dbRecord.adCampaignList.filter((campaign, i) => {
-      // loop through both arrays and compare the isActive and activeAction (if not null) property as type strings
-      if (updatedAdCampaignList[i].activeAction && campaign.activeAction) {
+      // loop through both arrays and compare the isActive and activeInsight (if not null) property as type strings
+      if (updatedAdCampaignList[i].activeInsight && campaign.activeInsight) {
         return (
           updatedAdCampaignList[i].isActive.toString() !== campaign.isActive.toString() ||
-          updatedAdCampaignList[i].activeAction.toString() !== campaign.activeAction.toString()
+          updatedAdCampaignList[i].activeInsight.toString() !== campaign.activeInsight.toString()
         );
       }
       return updatedAdCampaignList[i].isActive.toString() !== campaign.isActive.toString();
@@ -89,19 +85,19 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     return diffOfAdCampaignList;
   };
 
-  const disableCampaignsWithStaleObjectives = (activeAction, adCampaignList) => {
+  const disableCampaignsWithStaleObjectives = (activeInsight, adCampaignList) => {
     return adCampaignList.map((campaign) => {
-      if (campaign.actions.some((action) => action === activeAction)) {
+      if (campaign.insights.some((insight) => insight === activeInsight)) {
         return campaign;
       }
-      return { ...campaign, isActive: false, activeAction: null };
+      return { ...campaign, isActive: false, activeInsight: null };
     });
   };
 
-  const addActiveActionToCampaigns = (activeAction, adCampaignList) => {
+  const addActiveInsightToCampaigns = (activeInsight, adCampaignList) => {
     return adCampaignList.map((campaign) => {
       if (campaign.isActive) {
-        return { ...campaign, activeAction };
+        return { ...campaign, activeInsight };
       }
       return campaign;
     });
@@ -135,20 +131,23 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     if (addedRecordError) throw addedRecordError;
   };
 
-  const saveModalSettings = async (dbRecord, activeAction) => {
+  const saveModalSettings = async (dbRecord, activeInsight) => {
     const updatedAdCampaignList = generateUpdatedCampaignData(dbRecord);
     // find diff between prev changes and new ones
     const diffOfAdCampaignList = hasUpdatedCampaignDiff(updatedAdCampaignList);
-    // if prev selected campaigns exist that do not share active action, disable campaigns
-    const disabledCampaignsWithStaleActions = disableCampaignsWithStaleObjectives(activeAction, updatedAdCampaignList);
-    // update active action on all active campaigns
-    const updatedCampaignsWithActiveActions = addActiveActionToCampaigns(
-      activeAction,
-      disabledCampaignsWithStaleActions
+    // if prev selected campaigns exist that do not share active insight, disable campaigns
+    const disabledCampaignsWithStaleInsights = disableCampaignsWithStaleObjectives(
+      activeInsight,
+      updatedAdCampaignList
+    );
+    // update active insight on all active campaigns
+    const updatedCampaignsWithActiveInsights = addActiveInsightToCampaigns(
+      activeInsight,
+      disabledCampaignsWithStaleInsights
     );
     //update db record with updated campaign list
     if (diffOfAdCampaignList.length > 0) {
-      dbRecord.adCampaignList = updatedCampaignsWithActiveActions;
+      dbRecord.adCampaignList = updatedCampaignsWithActiveInsights;
       await updateFirestoreWithCampaignDiffs(dbRecord);
     }
   };
@@ -156,7 +155,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
   const onSaveModal = async () => {
     setLoading(true);
     // pass in db prop
-    await saveModalSettings(dbRecord, activeAction);
+    await saveModalSettings(dbRecord, activeInsight);
     // close modal after saving
     setLoading(false);
     onCloseModal();
@@ -167,7 +166,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
     // reset wizard state
     setActiveWizardId(WIZARD_ID_MAP.INSIGHT);
     // reset objective state
-    setActiveAction(null);
+    setActiveInsight(null);
     onClose();
   };
 
@@ -184,14 +183,17 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
           >
             <ModalHeader textAlign="center" margin="1rem 0 0">
               {businessAcctName} | {adAccountId}
-              {activeAction && (
+              {activeInsight && (
                 <Flex fontSize="16px" justifyContent="center">
                   Current selected insight: &nbsp;
                   <Flex color="#635bff" fontWeight="600">
-                    {activeAction}
+                    {activeInsight}
                   </Flex>
                 </Flex>
               )}
+              <Flex justifyContent="center" mb="2rem" fontSize="17px" fontWeight="400">
+                Please select one campaign insight from the list below:
+              </Flex>
             </ModalHeader>
             <ModalCloseButton />
             <ModalBody>
@@ -208,12 +210,12 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
               )}
               {!loading &&
                 renderWizardScreen({
-                  adCampaignList: filteredCampaignListByAction,
+                  adCampaignList,
                   campaignStatus,
                   setCampaignStatus,
-                  actions,
-                  activeAction,
-                  setActiveAction,
+                  insights,
+                  activeInsight,
+                  setActiveInsight,
                 })}
             </ModalBody>
             <ModalFooter flexDir="column" className="settings-modal__footer">
@@ -268,7 +270,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
                 setActiveWizardId={setActiveWizardId}
                 activeWizardId={activeWizardId}
                 wizardIdMap={WIZARD_ID_MAP}
-                activeAction={activeAction}
+                activeInsight={activeInsight}
               />
             </ModalFooter>
           </ModalContent>

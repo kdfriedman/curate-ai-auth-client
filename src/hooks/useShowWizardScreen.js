@@ -14,13 +14,15 @@ export const useShowWizardScreen = () => {
     adCampaignList,
     campaignStatus,
     setCampaignStatus,
-    actions,
-    activeAction,
-    setActiveAction,
+    insights,
+    activeInsight,
+    setActiveInsight,
   }) => {
     switch (activeWizardId) {
       case WIZARD_ID_MAP.INSIGHT: {
-        return <SettingsModalSelect actions={actions} activeAction={activeAction} setActiveAction={setActiveAction} />;
+        return (
+          <SettingsModalSelect insights={insights} activeInsight={activeInsight} setActiveInsight={setActiveInsight} />
+        );
       }
       case WIZARD_ID_MAP.CAMPAIGN: {
         return (
@@ -28,7 +30,7 @@ export const useShowWizardScreen = () => {
             adCampaignList={adCampaignList}
             setCampaignStatus={setCampaignStatus}
             campaignStatus={campaignStatus}
-            activeAction={activeAction}
+            activeInsight={activeInsight}
           />
         );
       }

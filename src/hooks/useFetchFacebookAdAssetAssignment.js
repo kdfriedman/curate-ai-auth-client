@@ -1,7 +1,7 @@
 import fetchData from '../services/fetch/fetch';
 import { ERROR } from '../constants/error';
 import { HTTP_METHODS } from '../services/fetch/constants';
-import { FACEBOOK_API, ACTION_TYPES } from '../services/facebook/constants';
+import { FACEBOOK_API, ACTION_TYPES, FACEBOOK_METRICS } from '../services/facebook/constants';
 import { FIREBASE } from '../services/firebase/constants';
 import { useFacebookAuth } from '../contexts/FacebookContext';
 import firestoreHandlers from '../services/firebase/data/firestore';
@@ -66,7 +66,11 @@ const fetchFacebookUserAdCampaigns = async (dispatch, facebookAuthChange, busine
   // fetch list of ad campaigns to provide user for selection
   const [adCampaignListResult, adCampaignListError] = await fetchData({
     method: GET,
-    url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION}/${businessAssetId}/campaigns?fields=objective,name,start_time,stop_time,insights.date_preset(maximum).level(campaign){actions}&limit=250&access_token=${facebookAuthChange?.authResponse?.accessToken}`,
+    url: `${FACEBOOK_API.GRAPH.HOSTNAME}${
+      FACEBOOK_API.GRAPH.VERSION
+    }/${businessAssetId}/campaigns?fields=objective,name,start_time,stop_time,insights.date_preset(maximum).level(campaign){${Object.keys(
+      FACEBOOK_METRICS
+    ).join()}}&limit=250&access_token=${facebookAuthChange?.authResponse?.accessToken}`,
   });
 
   if (adCampaignListError) {
@@ -114,16 +118,12 @@ const formatFacebookUserAdCampaignList = (adCampaignListResult) => {
         flight: startDate && stopDate ? `${startDate} - ${stopDate}` : 'N/A',
         isActive: false,
         objective: campaign.objective,
-        actions: campaign.insights
-          ? campaign.insights?.data?.[0].actions
-              .map((action) => action.action_type)
-              .filter((action, index, actions) => actions.indexOf(action) === index)
-          : null,
-        activeAction: null,
+        insights: campaign.insights ? Object.keys(campaign.insights?.data?.[0]) : null,
+        activeInsight: null,
       };
     })
-    // remove any campaigns from being used if no insights/actions exist to model against
-    .filter((campaign) => campaign.actions !== null && Array.isArray(campaign.actions));
+    // remove any campaigns from being used if no insights exist to model against
+    .filter((campaign) => campaign.insights !== null && Array.isArray(campaign.insights));
   return formattedAdCampaignList;
 };
 

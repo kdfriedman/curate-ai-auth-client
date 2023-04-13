@@ -63,3 +63,19 @@ export const FACEBOOK_ERROR = {
     ERROR_VALIDATING_TOKEN: 'Error validating access token',
   },
 };
+
+// Facebook insights: https://developers.facebook.com/docs/marketing-api/reference/adgroup/insights/
+export const FACEBOOK_METRICS = {
+  reach: 'Reach',
+  impressions: 'Impressions',
+  cpm: 'CPM (cost per 1,000 impressions)',
+  clicks: 'Clicks',
+  cpc: 'CPC (cost per click)',
+  ctr: 'CTR (click through rate)',
+  cost_per_thruplay: 'Cost per ThruPla',
+  video_p25_watched_actions: 'Video View (25% viewed)',
+  cost_per_inline_post_engagement: 'CPE (Cost per engagement)',
+  cpp: 'Cost per purchase or conversion',
+  conversions: 'Conversions',
+  spend: 'Spend (estimated total spent on ads)',
+};

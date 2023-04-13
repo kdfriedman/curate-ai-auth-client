@@ -82,6 +82,7 @@ export const ModelCreationForm = ({
     }
 
     const activeCampaignIds = activeCampaigns.map((activeCampaign) => activeCampaign.id);
+    const activeInsight = activeCampaigns.find((activeCampaign) => activeCampaign.activeInsight)?.activeInsight;
     setModelCreationLoading(true);
 
     // initaite model creation
@@ -92,6 +93,7 @@ export const ModelCreationForm = ({
         AD_ACCOUNT_ID: integrationPayload.adAccountId,
         FB_CAMPAIGN_IDS: activeCampaignIds,
         FB_CAMPAIGNS: activeCampaigns,
+        FB_CAMPAIGN_INSIGHT: activeInsight,
         SYSTEM_USER_ACCESS_TOKEN: integrationPayload.sysUserAccessToken,
         MODEL_NAME: values.name,
       },

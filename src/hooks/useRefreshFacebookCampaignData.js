@@ -20,11 +20,11 @@ const preservePrevCampaignIsActiveState = (prevAdCampaignList, refreshedAdCampai
   const refreshedAdCampaignListWithPrevIsActive = refreshedAdCampaignList.map((campaign) => {
     const matchedPrevCampaign = prevAdCampaignList.find((prevCampaign) => prevCampaign.id === campaign.id);
     const matchedPrevCampaignIsActiveState = matchedPrevCampaign?.isActive;
-    const matchedPrevCampaignActiveActionState = matchedPrevCampaign?.activeAction;
+    const matchedPrevCampaignActiveInsightState = matchedPrevCampaign?.activeInsight;
     return {
       ...campaign,
       isActive: matchedPrevCampaignIsActiveState ?? false,
-      activeAction: matchedPrevCampaignActiveActionState ?? null,
+      activeInsight: matchedPrevCampaignActiveInsightState ?? null,
     };
   });
   return refreshedAdCampaignListWithPrevIsActive;
@@ -57,16 +57,12 @@ const generateAdCampaignPayload = (adCampaignListResult) => {
           name: campaign.name,
           flight: startDate && stopDate ? `${startDate} - ${stopDate}` : 'N/A',
           objective: campaign.objective,
-          actions: campaign.insights
-            ? campaign.insights?.data?.[0].actions
-                .map((action) => action.action_type)
-                .filter((action, index, actions) => actions.indexOf(action) === index)
-            : null,
-          activeAction: null,
+          insights: campaign.insights ? Object.keys(campaign.insights?.data?.[0]) : null,
+          activeInsight: null,
         };
       })
       // remove any campaigns from being used if no insights/actions exist to model against
-      .filter((campaign) => campaign.actions !== null && Array.isArray(campaign.actions))
+      .filter((campaign) => campaign.insights !== null && Array.isArray(campaign.insights))
   );
 };
 

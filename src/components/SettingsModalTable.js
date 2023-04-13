@@ -1,6 +1,6 @@
 import { Flex, Box, Table, Thead, Tbody, Checkbox, Tr, Th, Td } from '@chakra-ui/react';
 
-export const SettingsModalTable = ({ adCampaignList, campaignStatus, setCampaignStatus }) => {
+export const SettingsModalTable = ({ adCampaignList, campaignStatus, setCampaignStatus, activeInsight }) => {
   const allChecked = campaignStatus.every((campaignStatus) => campaignStatus.isActive);
   const isIndeterminate = campaignStatus.some((campaignStatus) => campaignStatus.isActive) && !allChecked;
 
