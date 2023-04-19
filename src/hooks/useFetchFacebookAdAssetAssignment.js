@@ -115,10 +115,14 @@ const formatFacebookUserAdCampaignList = (adCampaignListResult) => {
       return {
         id: campaign.id,
         name: campaign.name,
-        flight: startDate && stopDate ? `${startDate} - ${stopDate}` : 'N/A',
+        flight: startDate || stopDate ? `${startDate || 'N/A'} - ${stopDate || 'N/A'}` : 'N/A',
         isActive: false,
         objective: campaign.objective,
-        insights: campaign.insights ? Object.keys(campaign.insights?.data?.[0]) : null,
+        insights: campaign.insights
+          ? Object.keys(campaign.insights?.data?.[0]).filter(
+              (insight) => insight !== 'date_start' && insight !== 'date_stop'
+            )
+          : null,
         activeInsight: null,
       };
     })

@@ -52,6 +52,12 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
   // set active insight
   const [activeInsight, setActiveInsight] = useState(null);
 
+  // filter campaigns by insights that are available on a given campaign
+  const filteredAdCampaignListBySelectedInsight = useMemo(
+    () => adCampaignList.filter((campaign) => campaign.insights.some((insight) => insight === activeInsight)),
+    [adCampaignList, activeInsight]
+  );
+
   const generateUpdatedCampaignData = (dbRecord) => {
     // create deep clone to prevent unintentional isActive getting set on array of objects orignal state
     const deepCloneAdCampaignList = JSON.parse(JSON.stringify(dbRecord.adCampaignList));
@@ -210,7 +216,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
               )}
               {!loading &&
                 renderWizardScreen({
-                  adCampaignList,
+                  adCampaignList: filteredAdCampaignListBySelectedInsight,
                   campaignStatus,
                   setCampaignStatus,
                   insights,

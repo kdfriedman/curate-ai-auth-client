@@ -160,8 +160,6 @@ export const DashboardPage = () => {
                       onClose={onClose}
                       integrationsStore={integrationsStore}
                       integrationsPayloadName={FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME}
-                      formSingleLabel="Name"
-                      formSelectLabel="Account"
                       formSubmitBtn="Run Model"
                     />
                   </ModelCreationModal>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useRunModel } from '../../hooks/useRunModel';
 import {
   Flex,
@@ -17,31 +17,34 @@ import * as Yup from 'yup';
 import { useAuth } from '../../contexts/AuthContext';
 import { errorMap } from '../ErrorMap';
 import { Loader } from '../../components/Loader';
+import { MODEL_FORM } from '../../constants/model';
 
-export const ModelCreationForm = ({
-  onClose,
-  integrationsStore,
-  integrationsPayloadName,
-  formSingleLabel,
-  formSelectLabel,
-  formSubmitBtn,
-}) => {
+export const ModelCreationForm = ({ onClose, integrationsStore, integrationsPayloadName, formSubmitBtn }) => {
   const [hasModelCreationErr, setModelCreationErr] = useState(null);
   const [isModelCreationLoading, setModelCreationLoading] = useState(false);
+  const [activeInsight, setActiveInsight] = useState(null);
   const { getAuthToken, getAppToken, currentUser } = useAuth();
   const { handleRunModel } = useRunModel();
   const toast = useToast();
 
   // form validation schema
   const LoginSchema = Yup.object().shape({
-    name: Yup.string()
+    company: Yup.string()
       .min(2)
       .max(60)
       .matches(
         /^[^@$%^&*()[\]~`"';:+<>=?,.]+$/,
-        'Please use only letters, numbers, dashes, or underscores in your model name.'
+        'Please use only letters, numbers, dashes, or underscores in your company.'
       )
-      .required('Providing a name is required.'),
+      .required('Providing a company is required.'),
+    industry: Yup.string()
+      .min(2)
+      .max(60)
+      .matches(
+        /^[^@$%^&*()[\]~`"';:+<>=?,.]+$/,
+        'Please use only letters, numbers, dashes, or underscores in your industry.'
+      )
+      .required('Providing an industry is required.'),
     adAccountSelect: Yup.string().required('Selecting an ad account is required.'),
   });
 
@@ -95,7 +98,8 @@ export const ModelCreationForm = ({
         FB_CAMPAIGNS: activeCampaigns,
         FB_CAMPAIGN_INSIGHT: activeInsight,
         SYSTEM_USER_ACCESS_TOKEN: integrationPayload.sysUserAccessToken,
-        MODEL_NAME: values.name,
+        COMPANY: values.company,
+        INDUSTRY: values.industry,
       },
       appCheckToken
     );
@@ -120,7 +124,8 @@ export const ModelCreationForm = ({
         {!isModelCreationLoading && (
           <Formik
             initialValues={{
-              name: '',
+              company: '',
+              industry: '',
               adAccountSelect: '',
             }}
             validationSchema={LoginSchema}
@@ -128,18 +133,32 @@ export const ModelCreationForm = ({
           >
             {({ errors, touched }) => (
               <Form width="330px">
-                <FormControl className="form-floating" isInvalid={errors.name && touched.name}>
-                  <FormLabel fontSize="16px" marginTop="10px" htmlFor="name">
-                    {formSingleLabel}
+                <FormControl className="form-floating" isInvalid={errors.company && touched.company}>
+                  <FormLabel fontSize="16px" marginTop="10px" htmlFor="company">
+                    {MODEL_FORM.COMPANY}
                   </FormLabel>
                   <Field
                     style={{ height: 'calc(2.5rem + 2px' }}
                     className="form-control"
-                    name="name"
+                    name="company"
                     type="text"
-                    placeholder="Name"
+                    placeholder="Company"
                   />
-                  <FormErrorMessage>{errors.name}</FormErrorMessage>
+                  <FormErrorMessage>{errors.company}</FormErrorMessage>
+                </FormControl>
+
+                <FormControl className="form-floating" isInvalid={errors.industry && touched.industry}>
+                  <FormLabel fontSize="16px" marginTop="10px" htmlFor="industry">
+                    {MODEL_FORM.INDUSTRY}
+                  </FormLabel>
+                  <Field
+                    style={{ height: 'calc(2.5rem + 2px' }}
+                    className="form-control"
+                    name="industry"
+                    type="text"
+                    placeholder="Industry"
+                  />
+                  <FormErrorMessage>{errors.industry}</FormErrorMessage>
                 </FormControl>
 
                 <Field>
@@ -150,12 +169,28 @@ export const ModelCreationForm = ({
                       name="adAccountSelect"
                       id="adAccountSelect"
                     >
-                      <FormLabel fontSize="16px" marginTop="10px" htmlFor="name">
-                        {formSelectLabel}
+                      <FormLabel fontSize="16px" marginTop="10px" htmlFor="account">
+                        {MODEL_FORM.ACCOUNT}
                       </FormLabel>
                       <Select
                         margin="0"
-                        onChange={field.onChange}
+                        onChange={(e) => {
+                          const selectedAccount = e.target.value;
+                          const selectedAccountIntegration = integrationsStore?.[integrationsPayloadName]?.find(
+                            (integration) => integration.adAccountId === selectedAccount
+                          );
+                          if (!selectedAccountIntegration) setActiveInsight(null);
+                          if (
+                            selectedAccountIntegration &&
+                            Array.isArray(selectedAccountIntegration.adCampaignList) &&
+                            selectedAccountIntegration.adCampaignList.length > 0
+                          ) {
+                            const insight = selectedAccountIntegration.adCampaignList[0].activeInsight;
+                            const [firstLetter, ...restOfString] = insight;
+                            setActiveInsight([firstLetter.toUpperCase(), ...restOfString].join(''));
+                          }
+                          field.onChange(e);
+                        }}
                         name="adAccountSelect"
                         placeholder="Select an ad account"
                       >
@@ -169,6 +204,17 @@ export const ModelCreationForm = ({
                     </FormControl>
                   )}
                 </Field>
+
+                {activeInsight && (
+                  <FormControl className="form-floating">
+                    <FormLabel fontSize="16px" marginTop="10px" htmlFor="industry">
+                      {MODEL_FORM.KPI}
+                    </FormLabel>
+                    <Flex color="#635bff" fontWeight="700">
+                      {activeInsight}
+                    </Flex>
+                  </FormControl>
+                )}
 
                 <Button
                   disabled={isModelCreationLoading}
