@@ -187,6 +187,11 @@ div[name="adAccountSelect"] .chakra-select__wrapper {
   width: 100%;
 }
 
+div[name="industry"] .chakra-select__wrapper {
+  margin: 0;
+  width: 100%;
+}
+
 td#insightsSelectTableData .chakra-select__wrapper {
   width: 11rem;
   margin: 0.5rem 1rem 0 0;

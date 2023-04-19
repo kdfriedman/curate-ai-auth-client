@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useRunModel } from '../../hooks/useRunModel';
 import {
   Flex,
@@ -17,7 +17,7 @@ import * as Yup from 'yup';
 import { useAuth } from '../../contexts/AuthContext';
 import { errorMap } from '../ErrorMap';
 import { Loader } from '../../components/Loader';
-import { MODEL_FORM } from '../../constants/model';
+import { MODEL_FORM, MODEL_INDUSTRIES } from '../../constants/model';
 
 export const ModelCreationForm = ({ onClose, integrationsStore, integrationsPayloadName, formSubmitBtn }) => {
   const [hasModelCreationErr, setModelCreationErr] = useState(null);
@@ -37,14 +37,7 @@ export const ModelCreationForm = ({ onClose, integrationsStore, integrationsPayl
         'Please use only letters, numbers, dashes, or underscores in your company.'
       )
       .required('Providing a company is required.'),
-    industry: Yup.string()
-      .min(2)
-      .max(60)
-      .matches(
-        /^[^@$%^&*()[\]~`"';:+<>=?,.]+$/,
-        'Please use only letters, numbers, dashes, or underscores in your industry.'
-      )
-      .required('Providing an industry is required.'),
+    industry: Yup.string().required('Selecting an industry is required.'),
     adAccountSelect: Yup.string().required('Selecting an ad account is required.'),
   });
 
@@ -147,64 +140,71 @@ export const ModelCreationForm = ({ onClose, integrationsStore, integrationsPayl
                   <FormErrorMessage>{errors.company}</FormErrorMessage>
                 </FormControl>
 
-                <FormControl className="form-floating" isInvalid={errors.industry && touched.industry}>
-                  <FormLabel fontSize="16px" marginTop="10px" htmlFor="industry">
-                    {MODEL_FORM.INDUSTRY}
-                  </FormLabel>
-                  <Field
-                    style={{ height: 'calc(2.5rem + 2px' }}
-                    className="form-control"
-                    name="industry"
-                    type="text"
-                    placeholder="Industry"
-                  />
-                  <FormErrorMessage>{errors.industry}</FormErrorMessage>
-                </FormControl>
-
                 <Field>
                   {({ field }) => (
-                    <FormControl
-                      className="form-floating"
-                      isInvalid={errors.adAccountSelect && touched.adAccountSelect}
-                      name="adAccountSelect"
-                      id="adAccountSelect"
-                    >
-                      <FormLabel fontSize="16px" marginTop="10px" htmlFor="account">
-                        {MODEL_FORM.ACCOUNT}
-                      </FormLabel>
-                      <Select
-                        margin="0"
-                        onChange={(e) => {
-                          field.onChange(e);
-                          const selectedAccount = e.target.value;
-                          const selectedAccountIntegration = integrationsStore?.[integrationsPayloadName]?.find(
-                            (integration) => integration.adAccountId === selectedAccount
-                          );
-                          if (!selectedAccountIntegration) setActiveInsight(null);
-                          if (
-                            selectedAccountIntegration &&
-                            Array.isArray(selectedAccountIntegration.adCampaignList) &&
-                            selectedAccountIntegration.adCampaignList.length > 0
-                          ) {
-                            const insight = selectedAccountIntegration.adCampaignList.find(
-                              (campaign) => campaign.activeInsight
-                            ).activeInsight;
-                            if (!insight) return;
-                            const [firstLetter, ...restOfString] = insight;
-                            setActiveInsight([firstLetter.toUpperCase(), ...restOfString].join(''));
-                          }
-                        }}
-                        name="adAccountSelect"
-                        placeholder="Select an ad account"
+                    <>
+                      <FormControl
+                        className="form-floating"
+                        isInvalid={errors.industry && touched.industry}
+                        name="industry"
+                        id="industry"
                       >
-                        {integrationsStore?.[integrationsPayloadName]?.map((integration, i) => (
-                          <option key={integration.id} value={integration.adAccountId}>
-                            {integration.adAccountId + ' | ' + integration.businessAcctName}
-                          </option>
-                        ))}
-                      </Select>
-                      <FormErrorMessage>{errors.adAccountSelect}</FormErrorMessage>
-                    </FormControl>
+                        <FormLabel fontSize="16px" marginTop="10px" htmlFor="industry">
+                          {MODEL_FORM.INDUSTRY}
+                        </FormLabel>
+                        <Select margin="0" onChange={field.onChange} name="industry" placeholder="Select an industry">
+                          {Object.values(MODEL_INDUSTRIES).map((industry, i) => (
+                            <option key={i} value={industry}>
+                              {industry}
+                            </option>
+                          ))}
+                        </Select>
+                        <FormErrorMessage>{errors.industry}</FormErrorMessage>
+                      </FormControl>
+
+                      <FormControl
+                        className="form-floating"
+                        isInvalid={errors.adAccountSelect && touched.adAccountSelect}
+                        name="adAccountSelect"
+                        id="adAccountSelect"
+                      >
+                        <FormLabel fontSize="16px" marginTop="10px" htmlFor="account">
+                          {MODEL_FORM.ACCOUNT}
+                        </FormLabel>
+                        <Select
+                          margin="0"
+                          onChange={(e) => {
+                            field.onChange(e);
+                            const selectedAccount = e.target.value;
+                            const selectedAccountIntegration = integrationsStore?.[integrationsPayloadName]?.find(
+                              (integration) => integration.adAccountId === selectedAccount
+                            );
+                            if (!selectedAccountIntegration) setActiveInsight(null);
+                            if (
+                              selectedAccountIntegration &&
+                              Array.isArray(selectedAccountIntegration.adCampaignList) &&
+                              selectedAccountIntegration.adCampaignList.length > 0
+                            ) {
+                              const insight = selectedAccountIntegration.adCampaignList.find(
+                                (campaign) => campaign.activeInsight
+                              ).activeInsight;
+                              if (!insight) return;
+                              const [firstLetter, ...restOfString] = insight;
+                              setActiveInsight([firstLetter.toUpperCase(), ...restOfString].join(''));
+                            }
+                          }}
+                          name="adAccountSelect"
+                          placeholder="Select an ad account"
+                        >
+                          {integrationsStore?.[integrationsPayloadName]?.map((integration, i) => (
+                            <option key={integration.id} value={integration.adAccountId}>
+                              {integration.adAccountId + ' | ' + integration.businessAcctName}
+                            </option>
+                          ))}
+                        </Select>
+                        <FormErrorMessage>{errors.adAccountSelect}</FormErrorMessage>
+                      </FormControl>
+                    </>
                   )}
                 </Field>
 
@@ -218,7 +218,12 @@ export const ModelCreationForm = ({ onClose, integrationsStore, integrationsPayl
                     </Flex>
                   </FormLabel>
                   <Field
-                    style={{ height: 'calc(2.5rem + 2px', color: '#635bff' }}
+                    style={{
+                      height: 'calc(2.5rem + 2px',
+                      color: '#635bff',
+                      backgroundColor: '#eee',
+                      cursor: 'not-allowed',
+                    }}
                     className="form-control"
                     name="KPI"
                     type="text"
