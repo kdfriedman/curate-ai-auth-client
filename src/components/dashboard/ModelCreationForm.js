@@ -175,6 +175,7 @@ export const ModelCreationForm = ({ onClose, integrationsStore, integrationsPayl
                       <Select
                         margin="0"
                         onChange={(e) => {
+                          field.onChange(e);
                           const selectedAccount = e.target.value;
                           const selectedAccountIntegration = integrationsStore?.[integrationsPayloadName]?.find(
                             (integration) => integration.adAccountId === selectedAccount
@@ -185,11 +186,13 @@ export const ModelCreationForm = ({ onClose, integrationsStore, integrationsPayl
                             Array.isArray(selectedAccountIntegration.adCampaignList) &&
                             selectedAccountIntegration.adCampaignList.length > 0
                           ) {
-                            const insight = selectedAccountIntegration.adCampaignList[0].activeInsight;
+                            const insight = selectedAccountIntegration.adCampaignList.find(
+                              (campaign) => campaign.activeInsight
+                            ).activeInsight;
+                            if (!insight) return;
                             const [firstLetter, ...restOfString] = insight;
                             setActiveInsight([firstLetter.toUpperCase(), ...restOfString].join(''));
                           }
-                          field.onChange(e);
                         }}
                         name="adAccountSelect"
                         placeholder="Select an ad account"
@@ -205,16 +208,25 @@ export const ModelCreationForm = ({ onClose, integrationsStore, integrationsPayl
                   )}
                 </Field>
 
-                {activeInsight && (
-                  <FormControl className="form-floating">
-                    <FormLabel fontSize="16px" marginTop="10px" htmlFor="industry">
+                <FormControl className="form-floating">
+                  <FormLabel fontSize="16px" marginTop="10px" htmlFor="industry">
+                    <Flex flexDir="column">
                       {MODEL_FORM.KPI}
-                    </FormLabel>
-                    <Flex color="#635bff" fontWeight="700">
-                      {activeInsight}
+                      <span style={{ fontSize: '13px' }}>
+                        Your KPI will appear here after you select an ad account.
+                      </span>
                     </Flex>
-                  </FormControl>
-                )}
+                  </FormLabel>
+                  <Field
+                    style={{ height: 'calc(2.5rem + 2px', color: '#635bff' }}
+                    className="form-control"
+                    name="KPI"
+                    type="text"
+                    placeholder="e.g. Clicks"
+                    value={activeInsight || ''}
+                    disabled
+                  />
+                </FormControl>
 
                 <Button
                   disabled={isModelCreationLoading}

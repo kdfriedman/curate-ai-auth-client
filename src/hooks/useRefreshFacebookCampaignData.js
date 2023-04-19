@@ -1,6 +1,6 @@
 import fetchData from '../services/fetch/fetch';
 import firestoreHandlers from '../services/firebase/data/firestore';
-import { FACEBOOK_API, FACEBOOK_ERROR } from '../services/facebook/constants';
+import { FACEBOOK_API, FACEBOOK_ERROR, FACEBOOK_METRICS } from '../services/facebook/constants';
 import { FIREBASE } from '../services/firebase/constants';
 import { HTTP_METHODS } from '../services/fetch/constants';
 import { useFacebookAuth } from '../contexts/FacebookContext';
@@ -11,7 +11,11 @@ const getFacebookCampaignData = async (adAccountId, userAccessToken) => {
   // fetch list of ad campaigns to render refreshed facebook ad campaign data
   const [adCampaignListResult, adCampaignListError] = await fetchData({
     method: GET,
-    url: `${FACEBOOK_API.GRAPH.HOSTNAME}${FACEBOOK_API.GRAPH.VERSION}/${adAccountId}/campaigns?fields=objective,name,start_time,stop_time,insights.date_preset(maximum).level(campaign){actions}&limit=250&access_token=${userAccessToken}`,
+    url: `${FACEBOOK_API.GRAPH.HOSTNAME}${
+      FACEBOOK_API.GRAPH.VERSION
+    }/${adAccountId}/campaigns?fields=objective,name,start_time,stop_time,insights.date_preset(maximum).level(campaign){${Object.keys(
+      FACEBOOK_METRICS
+    ).join()}}&limit=250&access_token=${userAccessToken}`,
   });
   return [adCampaignListResult, adCampaignListError];
 };
