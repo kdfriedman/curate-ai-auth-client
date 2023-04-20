@@ -6,6 +6,15 @@ import { HTTP_METHODS } from '../services/fetch/constants';
 import { useFacebookAuth } from '../contexts/FacebookContext';
 const { GET } = HTTP_METHODS;
 
+const hasPaginatedAdsDataResult = (data) => {
+  if (!data && typeof data !== 'object') {
+    return console.error('hasPaginatedAdsDataResult err: data argument is null, undefined, or not a valid object');
+  }
+  // checks fb ads api response to see if next property is present
+  // if so, there is another page of data to query
+  if (data?.paging?.next) return data?.paging?.next;
+};
+
 // fetch list of ad campaigns to render refreshed facebook ad campaign data
 const getFacebookCampaignData = async (adAccountId, userAccessToken) => {
   // fetch list of ad campaigns to render refreshed facebook ad campaign data
@@ -15,8 +24,30 @@ const getFacebookCampaignData = async (adAccountId, userAccessToken) => {
       FACEBOOK_API.GRAPH.VERSION
     }/${adAccountId}/campaigns?fields=objective,name,start_time,stop_time,insights.date_preset(maximum).level(campaign){${Object.keys(
       FACEBOOK_METRICS
-    ).join()}}&limit=250&access_token=${userAccessToken}`,
+    ).join()}}&limit=10&access_token=${userAccessToken}`,
   });
+
+  const adsCampaignListData = adCampaignListResult?.data;
+  // check if there is a paginated result available from the api response
+  let hasPaginatedResult = hasPaginatedAdsDataResult(adsCampaignListData);
+
+  // if paginated results exists, use result's next url to continue requesting data until the next property is not available,
+  // which indicates that no more results exists
+  while (hasPaginatedResult) {
+    const [paginatedData, paginatedError] = await fetchData(hasPaginatedResult);
+    if (paginatedError) {
+      hasPaginatedResult = null;
+      return [null, paginatedError];
+    }
+    const adsPaginatedData = paginatedData.data;
+
+    // check if there is a paginated result available from the api response
+    hasPaginatedResult = hasPaginatedAdsDataResult(adsPaginatedData);
+    if (hasPaginatedResult) {
+      // add paginated results into data array of original data
+      adsCampaignListData.data.push(...(adsPaginatedData?.data || []));
+    }
+  }
   return [adCampaignListResult, adCampaignListError];
 };
 

@@ -62,6 +62,15 @@ const fetchFacebookUserAdAssetAssignment = async (
   }
 };
 
+const hasPaginatedAdsDataResult = (data) => {
+  if (!data && typeof data !== 'object') {
+    return console.error('hasPaginatedAdsDataResult err: data argument is null, undefined, or not a valid object');
+  }
+  // checks fb ads api response to see if next property is present
+  // if so, there is another page of data to query
+  if (data?.paging?.next) return data?.paging?.next;
+};
+
 const fetchFacebookUserAdCampaigns = async (dispatch, facebookAuthChange, businessAssetId) => {
   // fetch list of ad campaigns to provide user for selection
   const [adCampaignListResult, adCampaignListError] = await fetchData({
@@ -72,6 +81,35 @@ const fetchFacebookUserAdCampaigns = async (dispatch, facebookAuthChange, busine
       FACEBOOK_METRICS
     ).join()}}&limit=250&access_token=${facebookAuthChange?.authResponse?.accessToken}`,
   });
+
+  const adsCampaignListData = adCampaignListResult?.data;
+  // check if there is a paginated result available from the api response
+  let hasPaginatedResult = hasPaginatedAdsDataResult(adsCampaignListData);
+
+  // if paginated results exists, use result's next url to continue requesting data until the next property is not available,
+  // which indicates that no more results exists
+  while (hasPaginatedResult) {
+    const [paginatedData, paginatedError] = await fetchData(hasPaginatedResult);
+    if (paginatedError) {
+      hasPaginatedResult = null;
+      dispatch({
+        type: HAS_ERRORS,
+        payload: {
+          errorMessage: adCampaignListError,
+          errorUIMessage: ERROR.DASHBOARD.MAIN,
+        },
+      });
+      throw new Error('paginatedError is type ' + paginatedError);
+    }
+    const adsPaginatedData = paginatedData.data;
+
+    // check if there is a paginated result available from the api response
+    hasPaginatedResult = hasPaginatedAdsDataResult(adsPaginatedData);
+    if (hasPaginatedResult) {
+      // add paginated results into data array of original data
+      adsCampaignListData.data.push(...(adsPaginatedData?.data || []));
+    }
+  }
 
   if (adCampaignListError) {
     // set isLoading to true to render progress
