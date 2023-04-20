@@ -77,7 +77,6 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
 
   const hasUpdatedCampaignDiff = (updatedAdCampaignList) => {
     // diffing function to only update db if changes exist between adCampaignLists
-    // TODO: check ternary to see why not working
     const diffOfAdCampaignList = dbRecord.adCampaignList.filter((campaign, i) => {
       // loop through both arrays and compare the isActive and activeInsight (if not null) property as type strings
       if (updatedAdCampaignList[i].activeInsight && campaign.activeInsight) {
@@ -105,7 +104,7 @@ export const SettingsModal = ({ isOpen, onClose, dbRecord, id, setIntegrationRec
       if (campaign.isActive) {
         return { ...campaign, activeInsight };
       }
-      return campaign;
+      return { ...campaign, activeInsight: null };
     });
   };
 
