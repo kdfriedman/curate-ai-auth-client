@@ -18,6 +18,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { errorMap } from '../ErrorMap';
 import { Loader } from '../../components/Loader';
 import { MODEL_FORM, MODEL_INDUSTRIES } from '../../constants/model';
+import { FACEBOOK_METRICS } from '../../services/facebook/constants';
 
 export const ModelCreationForm = ({ onClose, integrationsStore, integrationsPayloadName, formSubmitBtn }) => {
   const [hasModelCreationErr, setModelCreationErr] = useState(null);
@@ -189,8 +190,7 @@ export const ModelCreationForm = ({ onClose, integrationsStore, integrationsPayl
                                 (campaign) => campaign.activeInsight
                               ).activeInsight;
                               if (!insight) return;
-                              const [firstLetter, ...restOfString] = insight;
-                              setActiveInsight([firstLetter.toUpperCase(), ...restOfString].join(''));
+                              setActiveInsight(FACEBOOK_METRICS[insight]);
                             }
                           }}
                           name="adAccountSelect"
