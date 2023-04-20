@@ -24,7 +24,7 @@ const getFacebookCampaignData = async (adAccountId, userAccessToken) => {
       FACEBOOK_API.GRAPH.VERSION
     }/${adAccountId}/campaigns?fields=objective,name,start_time,stop_time,insights.date_preset(maximum).level(campaign){${Object.keys(
       FACEBOOK_METRICS
-    ).join()}}&limit=10&access_token=${userAccessToken}`,
+    ).join()}}&limit=250&access_token=${userAccessToken}`,
   });
 
   const adsCampaignListData = adCampaignListResult?.data;
