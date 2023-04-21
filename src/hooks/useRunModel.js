@@ -4,11 +4,11 @@ import firestoreHandlers from '../services/firebase/data/firestore';
 import { FIREBASE } from '../services/firebase/constants';
 import { useAuth } from '../contexts/AuthContext';
 import { useFirestoreStore } from '../contexts/FirestoreContext';
-const { incrementFirebaseRecord, addRecordToFirestore, hasFirestoreRecord, readUserRecordFromFirestore } =
+const { updateFirestoreRecordByKey, addRecordToFirestore, hasFirestoreRecord, readUserRecordFromFirestore } =
   firestoreHandlers;
 const { POST } = HTTP_METHODS;
 
-const writeModelState = async (currentUser, valueToIncrement, moreProps) => {
+const writeModelState = async (currentUser, key, value, moreProps = {}) => {
   const [hasRecord] = await hasFirestoreRecord([
     FIREBASE.FIRESTORE.MODELS.COLLECTIONS[0],
     currentUser.uid,
@@ -16,12 +16,12 @@ const writeModelState = async (currentUser, valueToIncrement, moreProps) => {
     FIREBASE.FIRESTORE.MODELS.DOCS[1],
   ]);
   if (hasRecord) {
-    return await incrementFirebaseRecord(
+    return await updateFirestoreRecordByKey(
       currentUser.uid,
       FIREBASE.FIRESTORE.MODELS.COLLECTIONS,
       FIREBASE.FIRESTORE.MODELS.DOCS[1],
-      FIREBASE.FIRESTORE.MODELS.CREATION_LIMIT,
-      valueToIncrement,
+      key,
+      value,
       moreProps
     );
   }
@@ -32,7 +32,7 @@ const writeModelState = async (currentUser, valueToIncrement, moreProps) => {
       FIREBASE.FIRESTORE.MODELS.COLLECTIONS[1],
       FIREBASE.FIRESTORE.MODELS.DOCS[1],
     ],
-    { ...moreProps, [FIREBASE.FIRESTORE.MODELS.CREATION_LIMIT]: valueToIncrement }
+    { ...moreProps, [key]: value }
   );
 };
 
@@ -41,10 +41,8 @@ export const useRunModel = () => {
   const { setModelState } = useFirestoreStore();
 
   const handleRunModel = async (payload, appCheckId) => {
-    const MODEL_STATE_VALUE_TO_INCREMENT = 1;
-    const moreProps = { [FIREBASE.FIRESTORE.MODELS.IS_MODEL_LOADING]: true };
     try {
-      const [, modelStateErr] = await writeModelState(currentUser, MODEL_STATE_VALUE_TO_INCREMENT, moreProps);
+      const [, modelStateErr] = await writeModelState(currentUser, FIREBASE.FIRESTORE.MODELS.IS_MODEL_LOADING, true);
       if (modelStateErr) throw modelStateErr;
       const [modelSuccess, modelErr] = await fetchData({
         method: POST,

@@ -94,6 +94,7 @@ export const ModelCreationForm = ({ onClose, integrationsStore, integrationsPayl
         SYSTEM_USER_ACCESS_TOKEN: integrationPayload.sysUserAccessToken,
         COMPANY: values.company,
         INDUSTRY: values.industry,
+        MODEL_NAME: `${values.company}|${activeInsight}|${integrationPayload.adAccountId}|${new Date().toISOString()}`,
       },
       appCheckToken
     );

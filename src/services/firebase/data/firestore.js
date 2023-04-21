@@ -37,6 +37,20 @@ const incrementFirebaseRecord = async (uid, collections, document, keyToIncremen
   }
 };
 
+const updateFirestoreRecordByKey = async (uid, collections, document, key, valueToUpdate, moreProps) => {
+  const [collection1, collection2] = collections;
+
+  try {
+    await updateDoc(doc(db, collection1, uid, collection2, document), {
+      [key]: valueToUpdate,
+      ...moreProps,
+    });
+    return [FIREBASE.FIRESTORE.GENERIC.UNION_ADDED, null];
+  } catch (error) {
+    return [null, error];
+  }
+};
+
 const addRecordToFirestore = async (recordConfig, payload) => {
   try {
     await setDoc(doc(db, ...recordConfig), payload);
@@ -117,6 +131,7 @@ const firestoreHandlers = {
   readUserRecordFromFirestore,
   readCurateAIRecordFromFirestore,
   incrementFirebaseRecord,
+  updateFirestoreRecordByKey,
   hasFirestoreRecord,
 };
 
