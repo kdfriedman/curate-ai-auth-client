@@ -81,7 +81,8 @@ export const ModelCreationForm = ({ onClose, integrationsStore, integrationsPayl
     const activeCampaignIds = activeCampaigns.map((activeCampaign) => activeCampaign.id);
     const activeInsight = activeCampaigns.find((activeCampaign) => activeCampaign.activeInsight)?.activeInsight;
     setModelCreationLoading(true);
-
+    const dateAsISOString = new Date().toISOString();
+    const dateAndTime = dateAsISOString.slice(0, dateAsISOString.length - 5);
     // initaite model creation
     const runModelResponse = await handleRunModel(
       {
@@ -94,7 +95,7 @@ export const ModelCreationForm = ({ onClose, integrationsStore, integrationsPayl
         SYSTEM_USER_ACCESS_TOKEN: integrationPayload.sysUserAccessToken,
         COMPANY: values.company,
         INDUSTRY: values.industry,
-        MODEL_NAME: `${values.company}|${activeInsight}|${integrationPayload.adAccountId}|${new Date().toISOString()}`,
+        MODEL_NAME: `${values.company}_${activeInsight}_${integrationPayload.adAccountId}_${dateAndTime}`,
       },
       appCheckToken
     );
