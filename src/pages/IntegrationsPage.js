@@ -58,9 +58,9 @@ export const IntegrationsPage = () => {
   return (
     <>
       <Header />
-      <Loader isLoading={isLoading} loadingMessage="Loading..." />
-
-      {!isLoading && (
+      {isLoading ? (
+        <Loader isLoading={isLoading} loadingMessage="Loading..." />
+      ) : (
         <Box maxHeight="100vh" className="container">
           <section className="integrations__container">
             <IntegrationVendorWidget

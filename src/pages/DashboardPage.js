@@ -88,113 +88,118 @@ export const DashboardPage = () => {
   return (
     <>
       <Header />
-      <Loader isLoading={isLoading} loadingMessage="Loading..." />
-      {hasError && <ErrorMessage errorMessage={ERROR.DASHBOARD.MAIN} />}
-      <Box className="dashboard">
-        <Flex
-          boxShadow="0 0.125rem 0.25rem rgb(0 0 0 / 8%)"
-          padding="2rem"
-          fontSize="18px"
-          color="rgb(26, 32, 44)"
-          fontWeight="800"
-          textTransform="uppercase"
-          letterSpacing=".2em"
-          justifyContent={isEqualToOrLessThan800[0] ? 'center' : ''}
-        >
-          Dashboard
-        </Flex>
-        <Flex flexDirection="column">
-          <Box
-            padding={isEqualToOrLessThan800[0] ? '1rem 1rem 0 1rem' : '2rem 0 0 2rem'}
-            fontSize="16px"
-            color="#6c757d"
-            fontWeight="800"
-            textAlign={isEqualToOrLessThan800[0] ? 'center' : 'left'}
-          >
-            Model Analysis
-          </Box>
-          <Flex
-            maxWidth={isEqualToOrLessThan450[0] ? '20rem' : ''}
-            boxShadow="0 0.5rem 1rem rgb(0 0 0 / 15%)"
-            margin="1rem 2rem"
-            borderRadius="10px"
-            border="1px solid #f0f0f0"
-            alignItems="center"
-            justifyContent={isEqualToOrLessThan800[0] ? 'center' : 'space-between'}
-          >
-            <Box
-              fontWeight="800"
-              fontSize="14px"
+      {isLoading ? (
+        <Loader isLoading={isLoading} loadingMessage="Loading..." />
+      ) : (
+        <>
+          {hasError && <ErrorMessage errorMessage={ERROR.DASHBOARD.MAIN} />}
+          <Box className="dashboard">
+            <Flex
+              boxShadow="0 0.125rem 0.25rem rgb(0 0 0 / 8%)"
+              padding="2rem"
+              fontSize="18px"
               color="rgb(26, 32, 44)"
-              minWidth={isEqualToOrLessThan450[0] ? 0 : '25rem'}
-              padding="1rem 2rem"
-              width="100%"
+              fontWeight="800"
+              textTransform="uppercase"
+              letterSpacing=".2em"
+              justifyContent={isEqualToOrLessThan800[0] ? 'center' : ''}
             >
-              <ModelTabs
-                hasNoIntegrations={hasNoIntegrations}
-                hasEmptyModelCollection={hasEmptyModelCollection}
-                modelBanner={<ModelBanner />}
-                modelCreationCard={
-                  <ModelCreationCard
-                    modelsStore={modelsStore}
-                    modelState={modelState}
+              Dashboard
+            </Flex>
+            <Flex flexDirection="column">
+              <Box
+                padding={isEqualToOrLessThan800[0] ? '1rem 1rem 0 1rem' : '2rem 0 0 2rem'}
+                fontSize="16px"
+                color="#6c757d"
+                fontWeight="800"
+                textAlign={isEqualToOrLessThan800[0] ? 'center' : 'left'}
+              >
+                Model Analysis
+              </Box>
+              <Flex
+                maxWidth={isEqualToOrLessThan450[0] ? '20rem' : ''}
+                boxShadow="0 0.5rem 1rem rgb(0 0 0 / 15%)"
+                margin="1rem 2rem"
+                borderRadius="10px"
+                border="1px solid #f0f0f0"
+                alignItems="center"
+                justifyContent={isEqualToOrLessThan800[0] ? 'center' : 'space-between'}
+              >
+                <Box
+                  fontWeight="800"
+                  fontSize="14px"
+                  color="rgb(26, 32, 44)"
+                  minWidth={isEqualToOrLessThan450[0] ? 0 : '25rem'}
+                  padding="1rem 2rem"
+                  width="100%"
+                >
+                  <ModelTabs
                     hasNoIntegrations={hasNoIntegrations}
-                    isModelCreationLimit={isModelCreationLimit}
-                    onOpen={onOpen}
-                    modelCardHeading={`You currently have ${modelsStore?.output?.length ?? 0} model output${
-                      modelsStore?.output?.length === 1 ? '' : 's'
-                    } to view.`}
-                    modelCardDesc="If you'd like to generate a new model, please select the Create Model button below, provide a unique name and
-    select the associated ad account for your model."
-                    createModelBtnTxt="Create Model"
-                  />
-                }
-                modelCreationModal={
-                  <ModelCreationModal
-                    modalTitle="New Model"
-                    modalHeader=" Please complete the details below to run your model."
-                    isOpen={isOpen}
-                    onClose={onClose}
-                  >
-                    <ModelCreationForm
-                      onClose={onClose}
-                      integrationsStore={integrationsStore}
-                      integrationsPayloadName={FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME}
-                      formSubmitBtn="Run Model"
-                    />
-                  </ModelCreationModal>
-                }
-                modelMenuSelect={
-                  <ModelMenuSelect
-                    consolidatedTableData={consolidatedTableData}
-                    modelId={modelId}
-                    setModelId={setModelId}
-                    modelsStore={modelsStore}
-                    integrationsStore={integrationsStore}
-                    integrationsStorePayload={FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME}
-                    setIntegrationId={setIntegrationId}
-                    openMenuBtnTxt="Completed Models"
-                    closeMenuBtnTxt="Clear Model"
-                  />
-                }
-                modelTable={
-                  <ModelTable
                     hasEmptyModelCollection={hasEmptyModelCollection}
-                    consolidatedTableData={consolidatedTableData}
-                    modelId={modelId}
-                    integrationId={integrationId}
-                    setIsSorted={setIsSorted}
-                    modelsStore={modelsStore}
-                    integrationsStore={integrationsStore}
-                    tableHeaders={['Labels', 'Campaign KPI']}
-                    tableCaption={`Model output for ad account: ${integrationId}`}
+                    modelBanner={<ModelBanner />}
+                    modelCreationCard={
+                      <ModelCreationCard
+                        modelsStore={modelsStore}
+                        modelState={modelState}
+                        hasNoIntegrations={hasNoIntegrations}
+                        isModelCreationLimit={isModelCreationLimit}
+                        onOpen={onOpen}
+                        modelCardHeading={`You currently have ${modelsStore?.output?.length ?? 0} model output${
+                          modelsStore?.output?.length === 1 ? '' : 's'
+                        } to view.`}
+                        modelCardDesc="If you'd like to generate a new model, please select the Create Model button below, provide a unique name and
+select the associated ad account for your model."
+                        createModelBtnTxt="Create Model"
+                      />
+                    }
+                    modelCreationModal={
+                      <ModelCreationModal
+                        modalTitle="New Model"
+                        modalHeader=" Please complete the details below to run your model."
+                        isOpen={isOpen}
+                        onClose={onClose}
+                      >
+                        <ModelCreationForm
+                          onClose={onClose}
+                          integrationsStore={integrationsStore}
+                          integrationsPayloadName={FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME}
+                          formSubmitBtn="Run Model"
+                        />
+                      </ModelCreationModal>
+                    }
+                    modelMenuSelect={
+                      <ModelMenuSelect
+                        consolidatedTableData={consolidatedTableData}
+                        modelId={modelId}
+                        setModelId={setModelId}
+                        modelsStore={modelsStore}
+                        integrationsStore={integrationsStore}
+                        integrationsStorePayload={FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME}
+                        setIntegrationId={setIntegrationId}
+                        openMenuBtnTxt="Completed Models"
+                        closeMenuBtnTxt="Clear Model"
+                      />
+                    }
+                    modelTable={
+                      <ModelTable
+                        hasEmptyModelCollection={hasEmptyModelCollection}
+                        consolidatedTableData={consolidatedTableData}
+                        modelId={modelId}
+                        integrationId={integrationId}
+                        setIsSorted={setIsSorted}
+                        modelsStore={modelsStore}
+                        integrationsStore={integrationsStore}
+                        tableHeaders={['Labels', 'Campaign KPI']}
+                        tableCaption={`Model output for ad account: ${integrationId}`}
+                      />
+                    }
                   />
-                }
-              />
-            </Box>
-          </Flex>
-        </Flex>
-      </Box>
+                </Box>
+              </Flex>
+            </Flex>
+          </Box>
+        </>
+      )}
     </>
   );
 };
