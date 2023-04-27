@@ -90,7 +90,7 @@ export const DashboardPage = () => {
       <Header />
       <Loader isLoading={isLoading} loadingMessage="Loading..." />
       {hasError && <ErrorMessage errorMessage={ERROR.DASHBOARD.MAIN} />}
-      <Box gridColumn="1 / span 4" gridRow="1" className="dashboard" minHeight="20rem" paddingBottom="2rem">
+      <Box className="dashboard">
         <Flex
           boxShadow="0 0.125rem 0.25rem rgb(0 0 0 / 8%)"
           padding="2rem"

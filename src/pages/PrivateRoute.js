@@ -1,6 +1,7 @@
 import React from 'react';
 import { Route, Redirect } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { FormatPage } from './FormatPage';
 
 export const PrivateRoute = ({ component: Component, ...rest }) => {
   const { currentUser } = useAuth();
@@ -10,7 +11,9 @@ export const PrivateRoute = ({ component: Component, ...rest }) => {
       {...rest}
       render={(props) => {
         return currentUser ? (
-          <Component {...props} />
+          <FormatPage>
+            <Component {...props} />
+          </FormatPage>
         ) : (
           <Redirect to="/login" />
         );
