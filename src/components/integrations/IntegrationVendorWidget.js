@@ -55,8 +55,7 @@ export const IntegrationVendorWidget = ({
             Status: {hasEmptyIntegrationCollection ? 'Inactive' : 'Active'}
           </Text>
         </Flex>
-        {hasEmptyIntegrationCollection && integrationVendorLoginButton}
-        {!hasEmptyIntegrationCollection && integrationVendorSwitchAccount}
+        {hasEmptyIntegrationCollection ? integrationVendorLoginButton : integrationVendorSwitchAccount}
       </Box>
     </>
   );

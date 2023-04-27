@@ -102,11 +102,9 @@ export const IntegrationsPage = () => {
                 />
               )}
 
-              {hasEmptyIntegrationCollection && (
+              {hasEmptyIntegrationCollection ? (
                 <IntegrationVendorTip vendorTipMessage={'Get started now by integrating your Facebook account.'} />
-              )}
-
-              {!hasEmptyIntegrationCollection && (
+              ) : (
                 <>
                   {integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.map((record) => {
                     return (

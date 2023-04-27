@@ -72,17 +72,6 @@ export const Header = () => {
       label: 'Dashboard',
     },
     {
-      id: 3,
-      parent: Box,
-      child: MenuListItem,
-      props: {
-        onClick: () => setLogoutEvent(true),
-        style: { fontSize: '1.25rem', fontWeight: 500, cursor: 'pointer' },
-      },
-      parentProps: { style: { textDecoration: 'none' }, className: 'header__nav-menu-item' },
-      label: 'Logout',
-    },
-    {
       id: 4,
       parent: Link,
       child: MenuListItem,
@@ -96,6 +85,17 @@ export const Header = () => {
         style: { fontSize: '1.25rem', fontWeight: 500, cursor: 'pointer' },
       },
       label: 'Help & Support',
+    },
+    {
+      id: 3,
+      parent: Box,
+      child: MenuListItem,
+      props: {
+        onClick: () => setLogoutEvent(true),
+        style: { fontSize: '1.25rem', fontWeight: 500, cursor: 'pointer' },
+      },
+      parentProps: { style: { textDecoration: 'none' }, className: 'header__nav-menu-item' },
+      label: 'Logout',
     },
   ];
 

@@ -141,7 +141,7 @@ export const ProfilePage = () => {
                       {hasIntegrationRecord?.facebookBusinessAccts?.length ? (
                         <span style={{ fontWeight: '500' }}>Facebook</span>
                       ) : (
-                        'N/A'
+                        'None'
                       )}
                     </Text>
                     <Link
