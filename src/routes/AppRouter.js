@@ -3,6 +3,7 @@ import { LoginPage } from '../pages/LoginPage';
 import { IntegrationsPage } from '../pages/IntegrationsPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { ProfilePage } from '../pages/ProfilePage';
+import { HelpPage } from '../pages/HelpPage';
 import { PasswordResetPage } from '../pages/PasswordResetPage';
 import { NewPasswordPage } from '../pages/NewPasswordPage';
 import { PrivateRoute } from '../pages/PrivateRoute.js';
@@ -24,6 +25,8 @@ const AppRouter = () => (
             <PrivateRoute exact path="/profile" component={ProfilePage} />
             {/* Private Dashboard route*/}
             <PrivateRoute exact path="/dashboard" component={DashboardPage} />
+            {/* Private Help & Support route*/}
+            <PrivateRoute exact path="/help-and-support" component={HelpPage} />
             {/* Login route*/}
             <Route path="/login" component={LoginPage} />
             {/* password reset route*/}

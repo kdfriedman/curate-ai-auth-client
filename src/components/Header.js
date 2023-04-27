@@ -27,10 +27,15 @@ export const Header = () => {
     }
   }, [logout, hasLogoutEvent, history]);
 
+  const MenuListItem = ({ children, ...props }) => {
+    return <li {...props}>{children}</li>;
+  };
+
   const menuItems = [
     {
       id: 0,
       parent: Link,
+      child: MenuListItem,
       props: { style: { fontSize: '1.25rem', fontWeight: 500 } },
       parentProps: {
         as: NavLink,
@@ -43,6 +48,7 @@ export const Header = () => {
     {
       id: 1,
       parent: Link,
+      child: MenuListItem,
       props: { style: { fontSize: '1.25rem', fontWeight: 500 } },
       parentProps: {
         as: NavLink,
@@ -55,6 +61,7 @@ export const Header = () => {
     {
       id: 2,
       parent: Link,
+      child: MenuListItem,
       props: { style: { fontSize: '1.25rem', fontWeight: 500 } },
       parentProps: {
         as: NavLink,
@@ -67,6 +74,7 @@ export const Header = () => {
     {
       id: 3,
       parent: Box,
+      child: MenuListItem,
       props: {
         onClick: () => setLogoutEvent(true),
         style: { fontSize: '1.25rem', fontWeight: 500, cursor: 'pointer' },
@@ -74,15 +82,30 @@ export const Header = () => {
       parentProps: { style: { textDecoration: 'none' }, className: 'header__nav-menu-item' },
       label: 'Logout',
     },
+    {
+      id: 4,
+      parent: Link,
+      child: MenuListItem,
+      parentProps: {
+        as: NavLink,
+        to: '/help-and-support',
+        style: { textDecoration: 'none' },
+        className: 'header__nav-menu-item',
+      },
+      props: {
+        style: { fontSize: '1.25rem', fontWeight: 500, cursor: 'pointer' },
+      },
+      label: 'Help & Support',
+    },
   ];
 
   const generateMenuItems = (menuItems) => {
     return menuItems.map((item) => {
-      const { parent: Parent, id, props, parentProps, label } = item;
+      const { parent: Parent, child: Child, id, props, parentProps, label } = item;
       return (
         <React.Fragment key={id}>
           <Parent {...parentProps}>
-            <li {...props}>{label}</li>
+            <Child {...props}>{label}</Child>
           </Parent>
         </React.Fragment>
       );

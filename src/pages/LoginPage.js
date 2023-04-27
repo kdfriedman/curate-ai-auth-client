@@ -9,7 +9,6 @@ import {
   Heading,
   Button,
   Link,
-  Text,
   Box,
   Alert,
   AlertIcon,
@@ -19,6 +18,7 @@ import {
 import { errorMap } from '../components/ErrorMap';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
+import { Footer } from '../components/Footer';
 
 export const LoginPage = () => {
   const [inputType, setInputType] = useState('password');
@@ -190,24 +190,7 @@ export const LoginPage = () => {
             )}
           </Formik>
         </Flex>
-
-        <Flex>
-          <Box className="login__contact-sales">
-            <Text fontSize="14px" whiteSpace="nowrap">
-              Interested in using CurateAI?{' '}
-              <Link
-                color="#635bff"
-                href="mailto:
-                ryanwelling@gmail.com?cc=kev.d.friedman@gmail.com&subject=CurateAI%20Contact%20Sales"
-              >
-                Contact our team.
-              </Link>
-            </Text>
-          </Box>
-        </Flex>
-        <Flex margin="1.5rem" className="login__copy-right" color="#6c757d" fontWeight="500">
-          © CurateAI {new Date().getFullYear()}
-        </Flex>
+        <Footer />
       </Flex>
     </>
   );

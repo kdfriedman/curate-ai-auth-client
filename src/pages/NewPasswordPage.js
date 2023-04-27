@@ -19,6 +19,7 @@ import {
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { Loader } from '../components/Loader';
+import { Footer } from '../components/Footer';
 
 export const NewPasswordPage = () => {
   const { verifyPasswordResetRequest, confirmPasswordResetRequest } = useAuth();
@@ -222,23 +223,7 @@ export const NewPasswordPage = () => {
           </Flex>
         )}
 
-        <Flex>
-          <Box className="password-reset__contact-sales">
-            <Text fontSize="14px" whiteSpace="nowrap">
-              Interested in using CurateAI?{' '}
-              <Link
-                color="#635bff"
-                href="mailto:
-                ryanwelling@gmail.com?cc=kev.d.friedman@gmail.com&subject=CurateAI%20Contact%20Sales"
-              >
-                Contact our team.
-              </Link>
-            </Text>
-          </Box>
-        </Flex>
-        <Flex margin="1.5rem" className="password-reset__copy-right" color="#6c757d" fontWeight="500">
-          © CurateAI {new Date().getFullYear()}
-        </Flex>
+        <Footer />
       </Flex>
     </>
   );
