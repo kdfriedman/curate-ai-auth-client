@@ -88,7 +88,7 @@ export const ProfilePage = () => {
               )}
             </>
           )}
-          <section className="profile__section">
+          <section>
             <Box gridColumn="1 / 5" gridRow="1" className="profile__dashboard" minHeight="20rem" paddingBottom="2rem">
               <Flex
                 boxShadow="0 0.125rem 0.25rem rgb(0 0 0 / 8%)"

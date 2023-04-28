@@ -4,7 +4,7 @@ export const Footer = () => {
   return (
     <>
       <Flex>
-        <Box className="login__contact-sales">
+        <Box className="footer__contact-sales">
           <Text fontSize="14px" whiteSpace="nowrap">
             Interested in using CurateAI?{' '}
             <Link
@@ -17,7 +17,7 @@ export const Footer = () => {
           </Text>
         </Box>
       </Flex>
-      <Flex margin="1.5rem" className="login__copy-right" color="#6c757d" fontWeight="500">
+      <Flex margin="1.5rem" className="footer__copy-right" color="#6c757d" fontWeight="500">
         © CurateAI {new Date().getFullYear()}
       </Flex>
     </>

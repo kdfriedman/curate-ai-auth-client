@@ -95,7 +95,6 @@ export const DashboardPage = () => {
           {hasError && <ErrorMessage errorMessage={ERROR.DASHBOARD.MAIN} />}
           <Box className="dashboard">
             <Flex
-              boxShadow="0 0.125rem 0.25rem rgb(0 0 0 / 8%)"
               padding="2rem"
               fontSize="18px"
               color="rgb(26, 32, 44)"

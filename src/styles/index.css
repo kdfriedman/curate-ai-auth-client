@@ -154,24 +154,18 @@ div.chakra-select__wrapper {
   margin: 0.5rem 1rem 0 2rem;
 }
 
-.profile__section {
-  display: grid;
-  margin: 0.5rem;
-  padding: 1rem;
-  grid-gap: 10px;
-  grid-template-columns: repeat(4, 1fr);
-  min-height: 20rem;
-}
-
 .profile__dashboard {
   background: #fff;
-  box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 15%);
+  border-radius: 10px;
+}
+
+.help__dashboard {
+  background: #fff;
   border-radius: 10px;
 }
 
 .dashboard {
   background: #fff;
-  box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 15%);
   border-radius: 10px;
 }
 
