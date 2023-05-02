@@ -18,11 +18,11 @@ export const IntegrationVendorWidget = ({
         maxHeight={hasEmptyIntegrationCollection ? '12rem' : '14rem'}
         minHeight={hasEmptyIntegrationCollection ? 0 : '14rem'}
         background="#fff"
-        boxShadow="0 0.5rem 1rem rgb(0 0 0 / 15%)"
         borderRadius="10px"
         height="100%"
         flexDirection="column"
         marginBottom=".5rem"
+        border="1px solid #f0f0f0"
       >
         <Text
           className="integration-info"

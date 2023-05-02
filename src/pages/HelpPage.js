@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Header } from '../components/Header';
-import { Flex, Box, useMediaQuery, Button, FormControl, FormLabel, FormErrorMessage } from '@chakra-ui/react';
+import { Flex, Box, useMediaQuery, Button, FormControl, FormLabel, FormErrorMessage, Textarea } from '@chakra-ui/react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import { useAuth } from '../contexts/AuthContext';
 import { Loader } from '../components/Loader';
 
 export const HelpPage = () => {
@@ -61,13 +60,21 @@ export const HelpPage = () => {
                   fontWeight="800"
                   textAlign={isEqualToOrLessThan800[0] ? 'center' : 'left'}
                 >
-                  Contact Us
+                  Submit a request
                 </Box>
-
+                <Flex
+                  padding={isEqualToOrLessThan800[0] ? '1rem 1rem 0 1rem' : '2rem 0 0 2rem'}
+                  fontWeight="600"
+                  fontSize="14px"
+                  maxWidth="50rem"
+                >
+                  Please fill out the contact form below and we'll get back to you as soon as possible. Whether you need
+                  technical support, information about our products or services, or simply have a general question, our
+                  team is ready to help.
+                </Flex>
                 <Flex
                   maxWidth={isEqualToOrLessThan450[0] ? '20rem' : '750px'}
                   className="help__dashboard-card-container"
-                  boxShadow="0 0.5rem 1rem rgb(0 0 0 / 15%)"
                   margin="1rem 2rem"
                   borderRadius="10px"
                   border="1px solid #f0f0f0"
@@ -81,6 +88,8 @@ export const HelpPage = () => {
                     color="rgb(26, 32, 44)"
                     minWidth={isEqualToOrLessThan450[0] ? 0 : '25rem'}
                     padding="1rem 2rem"
+                    width="100%"
+                    maxWidth="50rem"
                   >
                     <Formik
                       initialValues={{
@@ -105,7 +114,7 @@ export const HelpPage = () => {
                               type="text"
                               placeholder="Email"
                             />
-                            <FormErrorMessage>{errors.email}</FormErrorMessage>
+                            <FormErrorMessage fontWeight="400">{errors.email}</FormErrorMessage>
                           </FormControl>
                           <FormControl className="form-floating" isInvalid={errors.name && touched.name}>
                             <FormLabel fontSize="16px" marginTop="10px" htmlFor="name">
@@ -118,7 +127,7 @@ export const HelpPage = () => {
                               type="text"
                               placeholder="Full Name"
                             />
-                            <FormErrorMessage>{errors.name}</FormErrorMessage>
+                            <FormErrorMessage fontWeight="400">{errors.name}</FormErrorMessage>
                           </FormControl>
                           <FormControl className="form-floating" isInvalid={errors.subject && touched.subject}>
                             <FormLabel fontSize="16px" marginTop="10px" htmlFor="subject">
@@ -131,21 +140,28 @@ export const HelpPage = () => {
                               type="text"
                               placeholder="Subject"
                             />
-                            <FormErrorMessage>{errors.subject}</FormErrorMessage>
+                            <FormErrorMessage fontWeight="400">{errors.subject}</FormErrorMessage>
                           </FormControl>
 
                           <FormControl className="form-floating" isInvalid={errors.description && touched.description}>
                             <FormLabel fontSize="16px" marginTop="10px" htmlFor="description">
                               Description
                             </FormLabel>
-                            <Field
-                              style={{ height: 'calc(2.5rem + 2px' }}
-                              className="form-control"
-                              name="description"
+                            <Textarea
                               type="text"
+                              _focus={{
+                                color: '#212529',
+                                backgroundColor: '#fff',
+                                borderColor: 'rgb(99 91 255)',
+                                outline: '0',
+                                boxShadow: '0 0 0 0.25rem rgb(99 91 255 / 25%)',
+                              }}
+                              resize="none"
                               placeholder="Description"
+                              height="8rem"
+                              name="description"
                             />
-                            <FormErrorMessage>{errors.description}</FormErrorMessage>
+                            <FormErrorMessage fontWeight="400">{errors.description}</FormErrorMessage>
                           </FormControl>
 
                           <Button

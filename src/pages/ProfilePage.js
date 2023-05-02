@@ -91,7 +91,6 @@ export const ProfilePage = () => {
           <section>
             <Box gridColumn="1 / 5" gridRow="1" className="profile__dashboard" minHeight="20rem" paddingBottom="2rem">
               <Flex
-                boxShadow="0 0.125rem 0.25rem rgb(0 0 0 / 8%)"
                 padding="2rem"
                 fontSize="18px"
                 color="rgb(26, 32, 44)"
@@ -112,13 +111,12 @@ export const ProfilePage = () => {
                   fontWeight="800"
                   textAlign={isEqualToOrLessThan800[0] ? 'center' : 'left'}
                 >
-                  Account Information
+                  Account information
                 </Box>
 
                 <Flex
                   maxWidth={isEqualToOrLessThan450[0] ? '20rem' : '750px'}
                   className="profile__dashboard-card-container"
-                  boxShadow="0 0.5rem 1rem rgb(0 0 0 / 15%)"
                   margin="1rem 2rem"
                   borderRadius="10px"
                   border="1px solid #f0f0f0"

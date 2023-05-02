@@ -1,4 +1,15 @@
-import { Box, Text, Flex, useMediaQuery } from '@chakra-ui/react';
+import {
+  Box,
+  Text,
+  Flex,
+  useMediaQuery,
+  Card,
+  CardHeader,
+  CardBody,
+  StackDivider,
+  Stack,
+  Heading,
+} from '@chakra-ui/react';
 
 export const IntegrationVendorCard = ({ record, children }) => {
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
@@ -11,7 +22,6 @@ export const IntegrationVendorCard = ({ record, children }) => {
       flexDir={isEqualToOrLessThan950[0] ? 'column' : 'row'}
       maxWidth={isEqualToOrLessThan450[0] ? '20rem' : '750px'}
       className="integrations__vendor-card-container"
-      boxShadow="0 0.5rem 1rem rgb(0 0 0 / 15%)"
       margin="1rem 2rem"
       borderRadius="10px"
       border="1px solid #f0f0f0"
@@ -19,31 +29,39 @@ export const IntegrationVendorCard = ({ record, children }) => {
       justifyContent="space-between"
       data-vendor-card-id
     >
-      <Box
-        className="integrations__vendor-card"
-        key={`vendor-card-${record.id}`}
-        fontWeight="800"
-        fontSize="14px"
-        color="rgb(26, 32, 44)"
-        minWidth={isEqualToOrLessThan450[0] ? 0 : '25rem'}
-        padding="1rem 2rem"
-        display={isEqualToOrLessThan800[0] ? 'flex' : ''}
-        flexFlow={isEqualToOrLessThan800[0] ? 'column' : ''}
-        alignItems={isEqualToOrLessThan800[0] ? 'center' : ''}
-      >
-        <Text key={`user-email-${record.id}`}>
-          User Email: <span style={{ fontWeight: '500' }}>{record.email ?? 'N/A'}</span>
-        </Text>
-        <Text key={`business-account-${record.id}`}>
-          Business Account Name: <span style={{ fontWeight: '500' }}>{record.businessAcctName ?? 'N/A'}</span>
-        </Text>
-        <Text key={`business-id-${record.id}`}>
-          Business Account Id: <span style={{ fontWeight: '500' }}>{record.businessAcctId ?? 'N/A'}</span>
-        </Text>
-        <Text key={`ad-account-id-${record.id}`}>
-          Ad Account Id: <span style={{ fontWeight: '500' }}>{record.adAccountId ?? 'N/A'}</span>
-        </Text>
-      </Box>
+      <Card minWidth="50%">
+        <CardHeader>
+          <Heading size="md">Business Account</Heading>
+        </CardHeader>
+        <CardBody>
+          <Stack divider={<StackDivider />} spacing="4">
+            <Box>
+              <Heading size="xs" textTransform="uppercase">
+                Account Name
+              </Heading>
+              <Text pt="2" fontSize="sm" key={`business-account-${record.id}`}>
+                <span style={{ fontWeight: '500' }}>{record.businessAcctName ?? 'N/A'}</span>
+              </Text>
+            </Box>
+            <Box>
+              <Heading size="xs" textTransform="uppercase">
+                Business Id
+              </Heading>
+              <Text pt="2" fontSize="sm" key={`business-id-${record.id}`}>
+                <span style={{ fontWeight: '500' }}>{record.businessAcctId ?? 'N/A'}</span>
+              </Text>
+            </Box>
+            <Box>
+              <Heading size="xs" textTransform="uppercase">
+                Ad Account Id
+              </Heading>
+              <Text pt="2" fontSize="sm" key={`ad-account-id-${record.id}`}>
+                <span style={{ fontWeight: '500' }}>{record.adAccountId ?? 'N/A'}</span>
+              </Text>
+            </Box>
+          </Stack>
+        </CardBody>
+      </Card>
       {children}
     </Flex>
   );

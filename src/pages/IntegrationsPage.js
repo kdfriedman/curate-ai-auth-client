@@ -109,7 +109,12 @@ export const IntegrationsPage = () => {
                   {integrationsStore?.[FIREBASE.FIRESTORE.FACEBOOK.PAYLOAD_NAME]?.map((record) => {
                     return (
                       <IntegrationVendorCard key={record.id} record={record}>
-                        <Flex flexDir="column" className="integrations__vendor-card-btn-container">
+                        <Flex
+                          flexDir="column"
+                          marginLeft="auto"
+                          marginRight="auto"
+                          className="integrations__vendor-card-btn-container"
+                        >
                           <Button
                             onClick={(e) => {
                               // get parent container element with business acct id as dom id

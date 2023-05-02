@@ -113,7 +113,7 @@ export const DashboardPage = () => {
                 fontWeight="800"
                 textAlign={isEqualToOrLessThan800[0] ? 'center' : 'left'}
               >
-                Model Analysis
+                Model analysis
               </Box>
               <Flex
                 maxWidth={isEqualToOrLessThan450[0] ? '20rem' : ''}
