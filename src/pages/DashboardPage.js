@@ -106,18 +106,8 @@ export const DashboardPage = () => {
               Dashboard
             </Flex>
             <Flex flexDirection="column">
-              <Box
-                padding={isEqualToOrLessThan800[0] ? '1rem 1rem 0 1rem' : '2rem 0 0 2rem'}
-                fontSize="16px"
-                color="#6c757d"
-                fontWeight="800"
-                textAlign={isEqualToOrLessThan800[0] ? 'center' : 'left'}
-              >
-                Model analysis
-              </Box>
               <Flex
                 maxWidth={isEqualToOrLessThan450[0] ? '20rem' : ''}
-                boxShadow="0 0.5rem 1rem rgb(0 0 0 / 15%)"
                 margin="1rem 2rem"
                 borderRadius="10px"
                 border="1px solid #f0f0f0"

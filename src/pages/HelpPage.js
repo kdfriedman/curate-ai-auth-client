@@ -52,16 +52,6 @@ export const HelpPage = () => {
                 Help & Support
               </Flex>
               <Flex flexDirection="column" className="help__dashboard-body">
-                <Box
-                  className="help__dashboard-account-info"
-                  padding={isEqualToOrLessThan800[0] ? '1rem 1rem 0 1rem' : '2rem 0 0 2rem'}
-                  fontSize="16px"
-                  color="#6c757d"
-                  fontWeight="800"
-                  textAlign={isEqualToOrLessThan800[0] ? 'center' : 'left'}
-                >
-                  Submit a request
-                </Box>
                 <Flex
                   padding={isEqualToOrLessThan800[0] ? '1rem 1rem 0 1rem' : '2rem 0 0 2rem'}
                   fontWeight="600"
@@ -144,26 +134,20 @@ export const HelpPage = () => {
                           </FormControl>
 
                           <FormControl className="form-floating" isInvalid={errors.description && touched.description}>
-                            <FormLabel fontSize="16px" marginTop="10px" htmlFor="description">
+                            <FormLabel id="helpDescriptionLabel" fontSize="16px" marginTop="10px" htmlFor="description">
                               Description
                             </FormLabel>
-                            <Textarea
-                              type="text"
-                              _focus={{
-                                color: '#212529',
-                                backgroundColor: '#fff',
-                                borderColor: 'rgb(99 91 255)',
-                                outline: '0',
-                                boxShadow: '0 0 0 0.25rem rgb(99 91 255 / 25%)',
-                              }}
-                              resize="none"
-                              placeholder="Description"
-                              height="8rem"
+                            <Field
+                              id="helpDescription"
+                              as={Textarea}
+                              style={{ height: '8rem' }}
+                              className="form-control"
                               name="description"
+                              placeholder="Description"
+                              resize="none"
                             />
                             <FormErrorMessage fontWeight="400">{errors.description}</FormErrorMessage>
                           </FormControl>
-
                           <Button
                             _hover={{
                               opacity: '.8',

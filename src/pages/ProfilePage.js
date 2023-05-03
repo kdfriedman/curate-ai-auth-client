@@ -2,7 +2,21 @@ import { useState, useEffect } from 'react';
 import { Header } from '../components/Header';
 import { Loader } from '../components/Loader';
 import { NavLink } from 'react-router-dom';
-import { Flex, Box, Text, useMediaQuery, Link, Button } from '@chakra-ui/react';
+import {
+  Flex,
+  Box,
+  Text,
+  useMediaQuery,
+  Link,
+  Button,
+  Heading,
+  Card,
+  CardBody,
+  Stack,
+  StackDivider,
+  CardHeader,
+  CardFooter,
+} from '@chakra-ui/react';
 import { useAuth } from '../contexts/AuthContext';
 import firestoreHandlers from '../services/firebase/data/firestore';
 import { errorMap } from '../components/ErrorMap';
@@ -10,6 +24,7 @@ import { FIREBASE } from '../services/firebase/constants';
 import { ERROR } from '../constants/error';
 
 export const ProfilePage = () => {
+  let record;
   const [hasError, setError] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [hasIntegrationRecord, setIntegrationRecord] = useState(null);
@@ -103,23 +118,9 @@ export const ProfilePage = () => {
                 Profile
               </Flex>
               <Flex flexDirection="column" className="profile__dashboard-body">
-                <Box
-                  className="profile__dashboard-account-info"
-                  padding={isEqualToOrLessThan800[0] ? '1rem 1rem 0 1rem' : '2rem 0 0 2rem'}
-                  fontSize="16px"
-                  color="#6c757d"
-                  fontWeight="800"
-                  textAlign={isEqualToOrLessThan800[0] ? 'center' : 'left'}
-                >
-                  Account information
-                </Box>
-
                 <Flex
                   maxWidth={isEqualToOrLessThan450[0] ? '20rem' : '750px'}
                   className="profile__dashboard-card-container"
-                  margin="1rem 2rem"
-                  borderRadius="10px"
-                  border="1px solid #f0f0f0"
                   alignItems="center"
                   justifyContent={isEqualToOrLessThan800[0] ? 'center' : 'space-between'}
                 >
@@ -131,44 +132,62 @@ export const ProfilePage = () => {
                     minWidth={isEqualToOrLessThan450[0] ? 0 : '25rem'}
                     padding="1rem 2rem"
                   >
-                    <Text textAlign={isEqualToOrLessThan800[0] ? 'center' : 'start'}>
-                      Email: <span style={{ fontWeight: '500' }}>{currentUser.email}</span>
-                    </Text>
-                    <Text textAlign={isEqualToOrLessThan800[0] ? 'center' : 'start'}>
-                      Integrations:{' '}
-                      {hasIntegrationRecord?.facebookBusinessAccts?.length ? (
-                        <span style={{ fontWeight: '500' }}>Facebook</span>
-                      ) : (
-                        'None'
-                      )}
-                    </Text>
-                    <Link
-                      as={NavLink}
-                      to="/password-reset"
-                      style={{
-                        textDecoration: 'none',
-                        display: 'flex',
-                        justifyContent: `${isEqualToOrLessThan800[0] ? 'center' : 'start'}`,
-                      }}
-                    >
-                      <Button
-                        _hover={{
-                          opacity: '.8',
-                        }}
-                        _focus={{
-                          outline: 0,
-                          boxShadow: 'none',
-                        }}
-                        mt={4}
-                        color="#fff"
-                        backgroundColor="#635bff"
-                        type="submit"
-                        fontSize="16px"
-                        textAlign={isEqualToOrLessThan800[0] ? 'center' : 'start'}
-                      >
-                        Reset Password
-                      </Button>
-                    </Link>
+                    <Card minWidth="50%">
+                      <CardHeader>
+                        <Heading size="md">User Details</Heading>
+                      </CardHeader>
+                      <CardBody>
+                        <Stack divider={<StackDivider />} spacing="4">
+                          <Box>
+                            <Heading size="xs" textTransform="uppercase">
+                              Email
+                            </Heading>
+                            <Text pt="2" fontSize="sm">
+                              <span style={{ fontWeight: '500' }}>{currentUser.email}</span>
+                            </Text>
+                          </Box>
+                          <Box>
+                            <Heading size="xs" textTransform="uppercase">
+                              Integrations
+                            </Heading>
+                            <Text pt="2" fontSize="sm">
+                              <span style={{ fontWeight: '500' }}>
+                                {' '}
+                                {hasIntegrationRecord?.facebookBusinessAccts?.length ? 'Facebook' : 'None'}
+                              </span>
+                            </Text>
+                          </Box>
+                        </Stack>
+                      </CardBody>
+                      <CardFooter>
+                        <Link
+                          as={NavLink}
+                          to="/password-reset"
+                          style={{
+                            textDecoration: 'none',
+                            display: 'flex',
+                            justifyContent: `${isEqualToOrLessThan800[0] ? 'center' : 'start'}`,
+                          }}
+                        >
+                          <Button
+                            _hover={{
+                              opacity: '.8',
+                            }}
+                            _focus={{
+                              outline: 0,
+                              boxShadow: 'none',
+                            }}
+                            color="#fff"
+                            backgroundColor="#635bff"
+                            type="submit"
+                            fontSize="16px"
+                            textAlign={isEqualToOrLessThan800[0] ? 'center' : 'start'}
+                          >
+                            Reset Password
+                          </Button>
+                        </Link>
+                      </CardFooter>
+                    </Card>
                   </Box>
                 </Flex>
               </Flex>

@@ -87,6 +87,20 @@ form.password-reset__form {
   font-size: 16px;
 }
 
+textarea#helpDescription:focus {
+  color: #212529;
+  background-color: #fff;
+  border-color: rgb(99 91 255);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 0.25rem rgb(99 91 255 / 25%);
+}
+
+#helpDescription[aria-invalid=true] {
+  border: 1px solid #ced4da;
+  box-shadow: none;
+}
+
 .login__show-password span {
   font-size: 12px;
 }
