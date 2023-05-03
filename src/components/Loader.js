@@ -1,4 +1,4 @@
-import { Flex, CircularProgress } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 
 export const Loader = ({ isLoading, loadingMessage, minHeight = '100vh' }) => {
   return (
