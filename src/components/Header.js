@@ -10,14 +10,6 @@ export const Header = () => {
   const [hasLogoutEvent, setLogoutEvent] = useState(false);
 
   useEffect(() => {
-    // hide onLoad spinner icon
-    const onLoadSpinner = document.querySelector('[data-on-load-spinner="true"]');
-    onLoadSpinner.style.display = 'none';
-    // set menu styling
-    setMenuListStyles();
-  });
-
-  useEffect(() => {
     const logoutUser = async () => {
       await logout();
       history.push('/login');

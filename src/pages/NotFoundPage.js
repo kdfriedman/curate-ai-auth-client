@@ -8,7 +8,7 @@ export const NotFoundPage = () => {
     // hide onLoad spinner icon
     const onLoadSpinner = document.querySelector('[data-on-load-spinner="true"]');
     onLoadSpinner.style.display = 'none';
-  });
+  }, []);
   return (
     <>
       <Flex padding="1rem" margin="1rem" flexDir="column" alignItems="center" className="password-reset__container">

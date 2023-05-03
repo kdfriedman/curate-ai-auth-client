@@ -45,7 +45,7 @@ export const NewPasswordPage = () => {
     // hide onLoad spinner icon
     const onLoadSpinner = document.querySelector('[data-on-load-spinner="true"]');
     onLoadSpinner.style.display = 'none';
-  });
+  }, []);
 
   useEffect(() => {
     const initResetPassword = async () => {

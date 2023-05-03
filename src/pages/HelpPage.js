@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from '../components/Header';
 import { Flex, Box, useMediaQuery, Button, FormControl, FormLabel, FormErrorMessage, Textarea } from '@chakra-ui/react';
 import { Formik, Form, Field } from 'formik';
@@ -20,21 +20,9 @@ export const HelpPage = () => {
   // form validation schema
   const LoginSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Providing an email is required.'),
-    name: Yup.string()
-      .min(2)
-      .max(120)
-      .matches(/^[a-zA-Z0-9\s]+$/i, 'Invalid characters')
-      .required('Providing a description is required.'),
-    subject: Yup.string()
-      .min(2)
-      .max(40)
-      .matches(/^[a-zA-Z0-9\s,.()\-_]+$/i, 'Invalid characters')
-      .required('Providing a subject is required.'),
-    description: Yup.string()
-      .min(2)
-      .max(120)
-      .matches(/^[a-zA-Z0-9\s,.()\-_]+$/i, 'Invalid characters')
-      .required('Providing a description is required.'),
+    name: Yup.string().min(2).max(120).required('Providing a description is required.'),
+    subject: Yup.string().min(2).max(40).required('Providing a subject is required.'),
+    description: Yup.string().min(2).max(120).required('Providing a description is required.'),
   });
 
   const handleFormSubmit = async (values) => {
@@ -54,6 +42,7 @@ export const HelpPage = () => {
       headers: { [process.env.REACT_APP_FIREBASE_APP_CHECK_CUSTOM_HEADER]: appCheckToken },
     });
     if (submittedFormErr) {
+      setFormSubmissionLoading(false);
       return console.error(submittedFormErr);
     }
     // keep track of forms that have been submitted
