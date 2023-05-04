@@ -232,7 +232,7 @@ export const Header = () => {
   };
 
   return (
-    <header height="100%">
+    <header style={{ height: '100%' }}>
       <Flex height="100%">
         <nav
           style={{
