@@ -3,7 +3,7 @@ import { Grid, GridItem, useMediaQuery } from '@chakra-ui/react';
 import { Header } from '../components/Header';
 
 export const FormatPage = ({ children }) => {
-  const isEqualToOrGreaterThan800 = useMediaQuery('(min-width: 801px)');
+  const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
 
   useEffect(() => {
@@ -15,8 +15,8 @@ export const FormatPage = ({ children }) => {
   return (
     <>
       <Grid
-        templateColumns={isEqualToOrGreaterThan800[0] ? '225px 1fr' : '1fr'}
-        templateRows={isEqualToOrGreaterThan800[0] ? '1fr' : '1fr 1fr'}
+        templateColumns={isEqualToOrLessThan800[0] ? '1fr' : '225px 1fr'}
+        templateRows={isEqualToOrLessThan800[0] ? '1fr 1fr' : '1fr'}
         gap={4}
         height="100%"
       >

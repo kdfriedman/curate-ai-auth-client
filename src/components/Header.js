@@ -22,7 +22,7 @@ export const Header = () => {
   const history = useHistory();
   const [hasLogoutEvent, setLogoutEvent] = useState(false);
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
-  console.log(history);
+
   useEffect(() => {
     const logoutUser = async () => {
       await logout();
@@ -232,17 +232,19 @@ export const Header = () => {
   };
 
   return (
-    <header>
+    <header height="100%">
       <Flex height="100%">
         <nav
           style={{
+            ...(isEqualToOrLessThan800[0] ? { width: '100%' } : {}),
+            ...(isEqualToOrLessThan800[0] ? { alignItems: 'center' } : {}),
             display: 'flex',
-            flexDirection: 'column',
+            flexDirection: `${isEqualToOrLessThan800[0] ? 'row' : 'column'}`,
             gap: '2rem',
             margin: '1.5rem 0 0 2rem',
           }}
         >
-          <Flex className="header__nav-logo-container">
+          <Flex className="header__nav-logo-container" flexGrow={isEqualToOrLessThan800[0] ? 1 : 0}>
             <Link as={NavLink} to="/integrations" style={{ textDecoration: 'none' }}>
               <svg
                 viewBox="0 0 320 185.34639618779255"
@@ -287,9 +289,11 @@ export const Header = () => {
             )}
           </Flex>
         </nav>
-        <Center height="100%" marginLeft="3rem">
-          <Divider className="v-divider-left-justified" orientation="vertical" />
-        </Center>
+        {!isEqualToOrLessThan800[0] ? (
+          <Center height="100%" marginLeft="3rem">
+            <Divider className="v-divider-left-justified" orientation="vertical" />
+          </Center>
+        ) : null}
       </Flex>
     </header>
   );
