@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Header } from '../components/Header';
 import { Loader } from '../components/Loader';
 import { ModelCreationModal } from '../components/dashboard/ModelCreationModal';
 import { ModelCreationForm } from '../components/dashboard/ModelCreationForm';
@@ -17,7 +16,7 @@ import { useUpdateStateWithFirestoreRecord } from '../hooks/useUpdateStateWithFi
 
 export const DashboardPage = () => {
   const [hasError, setError] = useState(false);
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(true);
   const [modelId, setModelId] = useState(null);
   const [isSorted, setIsSorted] = useState(false);
   const [integrationId, setIntegrationId] = useState(null);
@@ -87,7 +86,6 @@ export const DashboardPage = () => {
 
   return (
     <>
-      <Header />
       {isLoading ? (
         <Loader isLoading={isLoading} loadingMessage="Loading..." />
       ) : (

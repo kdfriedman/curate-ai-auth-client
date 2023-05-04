@@ -1,5 +1,18 @@
 import { useHistory, NavLink } from 'react-router-dom';
-import { Flex, Link, Box, Divider, Center } from '@chakra-ui/react';
+import {
+  Flex,
+  Link,
+  Box,
+  Divider,
+  Center,
+  Menu,
+  MenuItem,
+  MenuButton,
+  MenuList,
+  IconButton,
+  useMediaQuery,
+} from '@chakra-ui/react';
+import { HamburgerIcon } from '@chakra-ui/icons';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import React from 'react';
@@ -8,7 +21,8 @@ export const Header = () => {
   const { logout } = useAuth();
   const history = useHistory();
   const [hasLogoutEvent, setLogoutEvent] = useState(false);
-
+  const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
+  console.log(history);
   useEffect(() => {
     const logoutUser = async () => {
       await logout();
@@ -19,11 +33,17 @@ export const Header = () => {
     }
   }, [logout, hasLogoutEvent, history]);
 
+  const ROUTES = {
+    integrations: 'integrations',
+    profile: 'profile',
+    dashboard: 'dashboard',
+    support: 'support',
+  };
   const MenuListItem = ({ children, ...props }) => {
     return <li {...props}>{children}</li>;
   };
 
-  const menuItems = [
+  const menuItemsLG = [
     {
       id: 0,
       parent: Link,
@@ -32,7 +52,14 @@ export const Header = () => {
       parentProps: {
         as: NavLink,
         to: '/profile',
-        style: { textDecoration: 'none' },
+        style: {
+          textDecoration: 'none',
+          color: `${
+            history.location.pathname.slice(1, history.location.pathname.length) === ROUTES.profile
+              ? '#635bff'
+              : '#1a202c'
+          }`,
+        },
         className: 'header__nav-menu-item',
       },
       label: 'My Profile',
@@ -45,7 +72,14 @@ export const Header = () => {
       parentProps: {
         as: NavLink,
         to: '/integrations',
-        style: { textDecoration: 'none' },
+        style: {
+          textDecoration: 'none',
+          color: `${
+            history.location.pathname.slice(1, history.location.pathname.length) === ROUTES.integrations
+              ? '#635bff'
+              : '#1a202c'
+          }`,
+        },
         className: 'header__nav-menu-item',
       },
       label: 'Integrations',
@@ -58,18 +92,100 @@ export const Header = () => {
       parentProps: {
         as: NavLink,
         to: '/dashboard',
+        style: {
+          textDecoration: 'none',
+          color: `${
+            history.location.pathname.slice(1, history.location.pathname.length) === ROUTES.dashboard
+              ? '#635bff'
+              : '#1a202c'
+          }`,
+        },
+        className: 'header__nav-menu-item',
+      },
+      label: 'Dashboard',
+    },
+    {
+      id: 3,
+      parent: Link,
+      child: MenuListItem,
+      parentProps: {
+        as: NavLink,
+        to: '/support',
+        style: {
+          textDecoration: 'none',
+          color: `${
+            history.location.pathname.slice(1, history.location.pathname.length) === ROUTES.support
+              ? '#635bff'
+              : '#1a202c'
+          }`,
+        },
+        className: 'header__nav-menu-item',
+      },
+      props: {
+        style: { fontSize: '1.25rem', fontWeight: 500, cursor: 'pointer' },
+      },
+      label: 'Help & Support',
+    },
+    {
+      id: 4,
+      parent: Box,
+      child: MenuListItem,
+      props: {
+        onClick: () => setLogoutEvent(true),
+        style: { fontSize: '1.25rem', fontWeight: 500, cursor: 'pointer' },
+      },
+      parentProps: { style: { textDecoration: 'none' }, className: 'header__nav-menu-item' },
+      label: 'Logout',
+    },
+  ];
+
+  const menuItemsSM = [
+    {
+      id: 0,
+      parent: Link,
+      child: MenuItem,
+      props: { style: { fontSize: '1.25rem', fontWeight: 500 } },
+      parentProps: {
+        as: NavLink,
+        to: '/profile',
+        style: { textDecoration: 'none' },
+        className: 'header__nav-menu-item',
+      },
+      label: 'My Profile',
+    },
+    {
+      id: 1,
+      parent: Link,
+      child: MenuItem,
+      props: { style: { fontSize: '1.25rem', fontWeight: 500 } },
+      parentProps: {
+        as: NavLink,
+        to: '/integrations',
+        style: { textDecoration: 'none' },
+        className: 'header__nav-menu-item',
+      },
+      label: 'Integrations',
+    },
+    {
+      id: 2,
+      parent: Link,
+      child: MenuItem,
+      props: { style: { fontSize: '1.25rem', fontWeight: 500 } },
+      parentProps: {
+        as: NavLink,
+        to: '/dashboard',
         style: { textDecoration: 'none' },
         className: 'header__nav-menu-item',
       },
       label: 'Dashboard',
     },
     {
-      id: 4,
+      id: 3,
       parent: Link,
-      child: MenuListItem,
+      child: MenuItem,
       parentProps: {
         as: NavLink,
-        to: '/help-and-support',
+        to: '/support',
         style: { textDecoration: 'none' },
         className: 'header__nav-menu-item',
       },
@@ -79,9 +195,9 @@ export const Header = () => {
       label: 'Help & Support',
     },
     {
-      id: 3,
+      id: 4,
       parent: Box,
-      child: MenuListItem,
+      child: MenuItem,
       props: {
         onClick: () => setLogoutEvent(true),
         style: { fontSize: '1.25rem', fontWeight: 500, cursor: 'pointer' },
@@ -104,8 +220,8 @@ export const Header = () => {
     });
   };
 
-  const setMenuListStyles = () => {
-    const menuItemList = document.querySelector('[data-id="menuListItems"]');
+  const setMenuListStyles = (id) => {
+    const menuItemList = document.getElementById(id);
     const menuItems = [...menuItemList.children];
     menuItems.forEach((menuItem) => {
       if (menuItem.classList.contains('active')) {
@@ -156,12 +272,19 @@ export const Header = () => {
             </Link>
           </Flex>
           <Flex className="header__nav-avatar-container">
-            <ul
-              data-id="menuListItems"
-              style={{ listStyleType: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}
-            >
-              {generateMenuItems(menuItems)}
-            </ul>
+            {isEqualToOrLessThan800[0] ? (
+              <Menu id="sm" onOpen={() => setMenuListStyles('menu-list-sm')}>
+                <MenuButton as={IconButton} aria-label="Options" icon={<HamburgerIcon />} variant="outline" />
+                <MenuList>{generateMenuItems(menuItemsSM)}</MenuList>
+              </Menu>
+            ) : (
+              <ul
+                data-id="menu-list-lg"
+                style={{ listStyleType: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}
+              >
+                {generateMenuItems(menuItemsLG)}
+              </ul>
+            )}
           </Flex>
         </nav>
         <Center height="100%" marginLeft="3rem">

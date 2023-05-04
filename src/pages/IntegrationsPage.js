@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Flex, Button, Box, CircularProgress, useMediaQuery, useDisclosure } from '@chakra-ui/react';
 import { FacebookAppIntegration } from '../components/integrations/FacebookIntegration';
-import { Header } from '../components/Header';
 import { Loader } from '../components/Loader';
 import { IntegrationDashboard } from '../components/integrations/IntegrationDashboard';
 import { IntegrationVendor } from '../components/integrations/IntegrationVendor';
@@ -24,7 +23,7 @@ import { FIREBASE } from '../services/firebase/constants';
 export const IntegrationsPage = () => {
   const isEqualToOrLessThan950 = useMediaQuery('(max-width: 950px)');
   const [hasError, setError] = useState(false);
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(true);
   const [isIntegrationActiveStatus, setIntegrationActiveStatus] = useState(false);
   const [settingsModalId, updateSettingsModalId] = useState(null);
   const { handleDeleteFacebookSystemUser } = useDeleteFacebookSystemUser();
@@ -32,6 +31,7 @@ export const IntegrationsPage = () => {
   const { handleRemoveAccount } = useRemoveAccount();
   const { facebookAuthChange, loginToFacebook } = useFacebookAuth();
   const { setIntegrationsStore, integrationsStore, setModelsStore, modelsStore } = useFirestoreStore();
+
   useUpdateStateWithFirestoreRecord(
     FIREBASE.FIRESTORE.FACEBOOK.COLLECTIONS,
     FIREBASE.FIRESTORE.FACEBOOK.DOCS[0],
@@ -57,7 +57,6 @@ export const IntegrationsPage = () => {
 
   return (
     <>
-      <Header />
       {isLoading ? (
         <Loader isLoading={isLoading} loadingMessage="Loading..." />
       ) : (

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Header } from '../components/Header';
 import { Flex, Box, useMediaQuery, Button, FormControl, FormLabel, FormErrorMessage, Textarea } from '@chakra-ui/react';
 import { Formik, Form, Field } from 'formik';
 import fetchData from '../services/fetch/fetch';
@@ -52,7 +51,6 @@ export const HelpPage = () => {
 
   return (
     <>
-      <Header />
       {isLoading ? (
         <Loader isLoading={isLoading} loadingMessage="Loading..." />
       ) : (

@@ -26,7 +26,7 @@ const AppRouter = () => (
             {/* Private Dashboard route*/}
             <PrivateRoute exact path="/dashboard" component={DashboardPage} />
             {/* Private Help & Support route*/}
-            <PrivateRoute exact path="/help-and-support" component={HelpPage} />
+            <PrivateRoute exact path="/support" component={HelpPage} />
             {/* Login route*/}
             <Route path="/login" component={LoginPage} />
             {/* password reset route*/}

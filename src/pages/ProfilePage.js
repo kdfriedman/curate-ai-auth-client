@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Header } from '../components/Header';
 import { Loader } from '../components/Loader';
 import { NavLink } from 'react-router-dom';
 import {
@@ -24,9 +23,8 @@ import { FIREBASE } from '../services/firebase/constants';
 import { ERROR } from '../constants/error';
 
 export const ProfilePage = () => {
-  let record;
   const [hasError, setError] = useState(false);
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(true);
   const [hasIntegrationRecord, setIntegrationRecord] = useState(null);
   const isEqualToOrLessThan450 = useMediaQuery('(max-width: 450px)');
   const isEqualToOrLessThan800 = useMediaQuery('(max-width: 800px)');
@@ -36,9 +34,6 @@ export const ProfilePage = () => {
   // read data from firebase to set integration state
   useEffect(() => {
     const readrecord = async () => {
-      // set loading state
-      setLoading(true);
-
       // ****** FACEBOOK record ******
       // read facebook record from firestore to validate if integration exists
       const [record, error] = await readUserRecordFromFirestore([
@@ -76,7 +71,6 @@ export const ProfilePage = () => {
 
   return (
     <>
-      <Header />
       {isLoading ? (
         <Loader isLoading={isLoading} loadingMessage="Loading..." />
       ) : (
